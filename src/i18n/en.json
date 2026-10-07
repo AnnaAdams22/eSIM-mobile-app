@@ -1,0 +1,130 @@
+{
+  "common": {
+    "appName": "ESIM Global",
+    "back": "Go back",
+    "retry": "Try again",
+    "loading": "Loading",
+    "close": "Close",
+    "cancel": "Cancel",
+    "continue": "Continue",
+    "search": "Search"
+  },
+  "tabs": {
+    "home": "Home",
+    "esims": "My eSIMs",
+    "explore": "Explore",
+    "profile": "Profile"
+  },
+  "home": {
+    "greeting": "Hi, {{name}}",
+    "subtitle": "Where are you going today?",
+    "searchPlaceholder": "Search destination or country",
+    "bannerTitle": "Stay connected in 190+ countries",
+    "popularTitle": "Popular destinations",
+    "seeAll": "See all"
+  },
+  "destinations": {
+    "title": "Choose your destination",
+    "searchPlaceholder": "Search country or region",
+    "filters": {
+      "all": "All",
+      "europe": "Europe",
+      "asia": "Asia",
+      "americas": "Americas"
+    },
+    "from": "From {{price}}"
+  },
+  "productDetail": {
+    "availablePlans": "Available plans",
+    "buyNow": "Buy now",
+    "fastInternet": "Fast internet",
+    "noRoaming": "No roaming fees",
+    "easySetup": "Easy setup"
+  },
+  "checkout": {
+    "title": "Checkout",
+    "emailLabel": "Email address",
+    "emailPlaceholder": "you@example.com",
+    "paymentMethod": "Payment method",
+    "payNow": "Pay now · {{price}}",
+    "terms": "By continuing, you agree to our Terms & Conditions and Privacy Policy."
+  },
+  "orderSuccess": {
+    "title": "You're all set",
+    "subtitle": "Your eSIM is ready to install."
+  },
+  "esims": {
+    "title": "My eSIMs",
+    "segments": {
+      "active": "Active",
+      "past": "Past"
+    },
+    "statusActive": "Active",
+    "activeUntil": "Active until {{date}}",
+    "viewDetails": "View details",
+    "topUp": "Top up",
+    "quickActions": "Quick actions",
+    "addEsim": "Add eSIM",
+    "support": "Support"
+  },
+  "esimDetail": {
+    "title": "eSIM details",
+    "usage": "Usage",
+    "dataLeft": "{{amount}} left",
+    "installGuide": "Install guide"
+  },
+  "installGuide": {
+    "title": "How to install eSIM on iPhone",
+    "needHelpTitle": "Need help?",
+    "needHelpBody": "Our support team is here for you 24/7."
+  },
+  "explore": {
+    "title": "Explore",
+    "destinationCount": "{{count}}+ destinations"
+  },
+  "profile": {
+    "title": "Profile",
+    "myEsims": "My eSIMs",
+    "paymentMethods": "Payment methods",
+    "notifications": "Notifications",
+    "helpSupport": "Help & Support",
+    "about": "About ESIM Global",
+    "deleteAccount": "Delete account",
+    "signOut": "Sign out"
+  },
+  "support": {
+    "title": "Support",
+    "faqs": "FAQs",
+    "faqsSubtitle": "Find answers to common questions",
+    "whatsapp": "WhatsApp",
+    "whatsappSubtitle": "Chat with us",
+    "instagram": "Instagram",
+    "instagramSubtitle": "Send us a message",
+    "email": "Email",
+    "hereToHelp": "We're here to help 24/7"
+  },
+  "settings": {
+    "title": "Settings"
+  },
+  "auth": {
+    "signInTitle": "Sign in",
+    "signUpTitle": "Create account",
+    "emailLabel": "Email address",
+    "passwordLabel": "Password",
+    "signIn": "Sign in",
+    "signUp": "Sign up",
+    "continueWithApple": "Continue with Apple",
+    "noAccount": "Don't have an account?",
+    "haveAccount": "Already have an account?"
+  },
+  "states": {
+    "emptyTitle": "Nothing here yet",
+    "emptyBody": "When you have something, it'll show up here.",
+    "errorTitle": "Something went wrong",
+    "errorBody": "We couldn't load this. Check your connection and try again.",
+    "noEsimsTitle": "No eSIMs yet",
+    "noEsimsBody": "Buy your first data plan and it'll appear here.",
+    "configTitle": "Configuration needed",
+    "configBody": "The app is missing required settings. Add these to your .env file:"
+  }
+}
