@@ -17,9 +17,12 @@
   },
   "home": {
     "greeting": "Hi, {{name}}",
+    "greetingGuest": "Hi there",
     "subtitle": "Where are you going today?",
     "searchPlaceholder": "Search destination or country",
-    "bannerTitle": "Stay connected in 190+ countries",
+    "searchHint": "Opens the destinations list",
+    "heroTitle": "Stay connected in {{count}}+ countries",
+    "heroHint": "Browse all destinations",
     "popularTitle": "Popular destinations",
     "seeAll": "See all"
   },
@@ -30,16 +33,53 @@
       "all": "All",
       "europe": "Europe",
       "asia": "Asia",
-      "americas": "Americas"
+      "americas": "Americas",
+      "africa": "Africa",
+      "middleEast": "Middle East",
+      "oceania": "Oceania",
+      "regions": "Regions"
     },
-    "from": "From {{price}}"
+    "from": "From {{price}}",
+    "rowHint": "View available plans",
+    "emptyTitle": "No matches",
+    "emptyBody": "We couldn't find a destination for “{{query}}”. Try another name.",
+    "noneTitle": "No destinations yet",
+    "noneBody": "The catalog is empty right now. Please check back soon."
   },
   "productDetail": {
     "availablePlans": "Available plans",
     "buyNow": "Buy now",
     "fastInternet": "Fast internet",
     "noRoaming": "No roaming fees",
-    "easySetup": "Easy setup"
+    "easySetup": "Easy setup",
+    "from": "From {{price}}",
+    "includedCountries": "Included countries",
+    "selectPlanHint": "Select this plan",
+    "buyNowHint": "Continue to checkout",
+    "notFoundTitle": "Destination not found",
+    "notFoundBody": "We couldn't find plans for this destination. It may no longer be available.",
+    "noPlansTitle": "No plans available",
+    "noPlansBody": "There are no plans for this destination right now."
+  },
+  "catalog": {
+    "unlimited": "Unlimited",
+    "dataUnknown": "Data",
+    "daysUnknown": "Flexible",
+    "dayWithCount_one": "{{count}} day",
+    "dayWithCount_other": "{{count}} days",
+    "planCount_one": "{{count}} plan",
+    "planCount_other": "{{count}} plans",
+    "countriesCount_one": "{{count}} country",
+    "countriesCount_other": "{{count}} countries"
+  },
+  "continents": {
+    "Europe": "Europe",
+    "Asia": "Asia",
+    "Americas": "Americas",
+    "Africa": "Africa",
+    "Middle East": "Middle East",
+    "Oceania": "Oceania",
+    "Other": "Other"
   },
   "checkout": {
     "title": "Checkout",
@@ -80,7 +120,9 @@
   },
   "explore": {
     "title": "Explore",
-    "destinationCount": "{{count}}+ destinations"
+    "subtitle": "Browse by region",
+    "destinationCount": "{{count}}+ destinations",
+    "cardHint": "View destinations in this region"
   },
   "profile": {
     "title": "Profile",

@@ -96,6 +96,28 @@ The symbol also drives the splash + app icon on the ivory background.
 > aspect ratios change, update the `ASPECT` map in `Logo.tsx`). Do **not**
 > recolour the logo.
 
+## Hero images — TODO (need real licensed photos)
+The Home hero, destination hero and Explore cards currently render tasteful warm
+**brand-gradient placeholders** (no stock photos are shipped — see the copyright
+rule in the shopping task). `src/components/HeroImage.tsx` reads a slot registry
+at `src/features/catalog/images.ts`; every slot is `null` today. To drop in a
+licensed photo with **no other code change**: add the file to `assets/images/`
+and set the slot to its `require(...)`. Slots that need real photography:
+
+| Slot key                    | Where it appears                     | Suggested asset         |
+| --------------------------- | ------------------------------------ | ----------------------- |
+| `home`                      | Home hero card                       | `hero-home.jpg`         |
+| `destinationDefault`        | Destination detail hero (all)        | `hero-destination.jpg`  |
+| `continent:Europe`          | Explore — Europe card                | `hero-europe.jpg`       |
+| `continent:Asia`            | Explore — Asia card                  | `hero-asia.jpg`         |
+| `continent:Americas`        | Explore — Americas card              | `hero-americas.jpg`     |
+| `continent:Africa`          | Explore — Africa card                | `hero-africa.jpg`       |
+| `continent:Middle East`     | Explore — Middle East card           | `hero-middle-east.jpg`  |
+| `continent:Oceania`         | Explore — Oceania card               | `hero-oceania.jpg`      |
+
+> Use warm, calm travel photography consistent with the brand. A dark scrim is
+> applied automatically so white overlay text stays legible.
+
 ## Configuration
 - Public config is read from `EXPO_PUBLIC_*` env vars in `.env` (see
   `.env.example`). `src/config.ts` validates them and the app shows a clear
@@ -120,5 +142,19 @@ approved dependencies installed, branding assets generated, full design system
 (`src/theme`) and accessible UI kit (`src/components/ui`), navigation skeleton
 (tabs + stack placeholders), typed API client + Supabase + React Query + i18n
 wired, config with fail-fast validation, and a dev-only design preview.
-`tsc --noEmit` and `expo lint` pass; the app bundles for iOS. No real feature
-screens yet — those come in later tasks.
+
+**Task 2 complete** — the shopping screens (public catalog, no login):
+- Data layer: `usePlans()` (React Query, 10-min stale time) + a pure,
+  unit-tested catalog module at `src/features/catalog/` (grouping into
+  destinations/regions, sorting, lowest-price, display formatting, a static
+  ISO2→continent map with an "Other" fallback, and accent-insensitive search
+  with aliases). Prices are always the backend's `*_display`/`*_cents` verbatim.
+- Screens: Home, Destinations list (optimised `FlatList`), Destination detail
+  (selectable plans + sticky Buy now → checkout placeholder), Explore. Each has
+  loading / error / empty states, i18n keys only, theme tokens only, and a11y
+  labels.
+- Tests: `jest-expo` wired (`npm test`); unit tests cover grouping, sorting,
+  lowest price, formatting, continent fallback and search.
+
+`tsc --noEmit`, `expo lint` and `npm test` all pass; the app bundles for iOS.
+Checkout, My eSIMs, auth and install flows are still later tasks.
