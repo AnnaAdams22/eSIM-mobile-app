@@ -7,6 +7,7 @@ import { useCallback, useState } from 'react';
 import { StatusBar } from 'expo-status-bar';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
+import { NavigationBar } from 'expo-navigation-bar';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import {
@@ -68,6 +69,10 @@ export default function RootLayout() {
     <SafeAreaProvider onLayout={onLayoutReady}>
       <QueryClientProvider client={queryClient}>
         <StatusBar style="dark" />
+        {/* Android edge-to-edge: the tab bar's light surface shows behind the
+            system nav bar, so use dark nav-bar buttons (style="light" = light bar,
+            dark content). No-op on iOS. */}
+        <NavigationBar style="light" />
         {content}
       </QueryClientProvider>
     </SafeAreaProvider>

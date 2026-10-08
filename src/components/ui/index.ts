@@ -30,6 +30,9 @@ export type { ListRowProps } from './ListRow';
 export { Logo } from './Logo';
 export type { LogoProps, LogoVariant } from './Logo';
 
+export { PressableScale } from './PressableScale';
+export type { PressableScaleProps } from './PressableScale';
+
 export { Screen } from './Screen';
 export type { ScreenProps } from './Screen';
 

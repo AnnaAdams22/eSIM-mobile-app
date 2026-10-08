@@ -1,19 +1,22 @@
 /**
- * Destination detail — hero, country/region name + flag, lowest price, the three
- * feature pills, a selectable list of available plans, and a sticky "Buy now"
- * button. Regional plans reuse this screen and additionally list their included
- * countries.
+ * Destination detail — a full-bleed hero photo (extending under the status bar)
+ * with a translucent back button, a white sheet overlapping the photo that carries
+ * the flag, name and lowest price, three feature pills on one line, a card of
+ * selectable plans (soft-grey fill on the chosen row), and a sticky "Buy now · €X"
+ * bar above the bottom safe area. Regional plans reuse this screen and additionally
+ * list their included countries.
  *
  * "Buy now" navigates to the checkout placeholder with the selected plan id;
- * checkout itself is a later task. No prices are computed here — all display
- * prices come straight from the backend.
+ * checkout itself is a later task. No prices are computed here — all display prices
+ * come straight from the backend.
  */
 
 import { useMemo, useState } from 'react';
 import { Pressable, ScrollView, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
-import { Check, Globe, Smartphone, Zap } from 'lucide-react-native';
+import { ChevronLeft, Globe, Smartphone, Zap } from 'lucide-react-native';
 
 import {
   Button,
@@ -30,16 +33,22 @@ import { usePlans } from '@/hooks/usePlans';
 import {
   buildDestinations,
   buildRegions,
+  destinationImage,
   formatPlanLabel,
   plansForDestination,
   plansForRegion,
 } from '@/features/catalog';
+import { lightTap, selectionTap } from '@/lib/haptics';
 import type { Plan } from '@/lib/api-types';
-import { useTheme } from '@/theme';
+import { useTheme, type Theme } from '@/theme';
+
+const HERO_HEIGHT = 300;
+const SHEET_OVERLAP = 24;
 
 export default function DestinationDetailScreen() {
   const theme = useTheme();
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const { t } = useTranslation();
   const { id, type } = useLocalSearchParams<{ id: string; type?: string }>();
   const isRegion = type === 'region';
@@ -71,6 +80,7 @@ export default function DestinationDetailScreen() {
     chosenId && detailPlans.some((p) => p.id === chosenId)
       ? chosenId
       : (detailPlans[0]?.id ?? null);
+  const selectedPlan = detailPlans.find((p) => p.id === selectedId) ?? null;
 
   if (isError) {
     return (
@@ -110,133 +120,181 @@ export default function DestinationDetailScreen() {
   }
 
   const features = [
-    { icon: <Zap size={16} color={theme.colors.text} />, label: t('productDetail.fastInternet') },
-    { icon: <Globe size={16} color={theme.colors.text} />, label: t('productDetail.noRoaming') },
-    { icon: <Smartphone size={16} color={theme.colors.text} />, label: t('productDetail.easySetup') },
+    { icon: <Zap size={15} color={theme.colors.text} />, label: t('productDetail.fastInternet') },
+    { icon: <Globe size={15} color={theme.colors.text} />, label: t('productDetail.noRoaming') },
+    { icon: <Smartphone size={15} color={theme.colors.text} />, label: t('productDetail.easySetup') },
   ];
 
   const buyNow = () => {
+    lightTap();
     if (selectedId) router.push({ pathname: '/checkout', params: { planId: selectedId } });
   };
 
   return (
-    <Screen scroll={false} contentStyle={{ paddingBottom: 0 }}>
-      <Header />
-
+    <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
       <ScrollView
         style={{ flex: 1 }}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: theme.spacing.xl }}
         keyboardShouldPersistTaps="handled"
       >
+        {/* Full-bleed hero, extending under the status bar. */}
         <HeroImage
+          source={destinationImage(isRegion ? undefined : id)}
           slot="destinationDefault"
           seed={meta.seed}
-          height={160}
+          height={HERO_HEIGHT}
+          radius={0}
+          scrim={0.4}
           accessibilityLabel={meta.name}
         />
 
-        {/* Name + flag + lowest price */}
+        {/* White sheet overlapping the photo. */}
         <View
           style={{
-            flexDirection: 'row',
-            alignItems: 'center',
-            gap: theme.spacing.md,
-            marginTop: theme.spacing.lg,
+            marginTop: -SHEET_OVERLAP,
+            backgroundColor: theme.colors.surface,
+            borderTopLeftRadius: theme.radii.lg,
+            borderTopRightRadius: theme.radii.lg,
+            paddingHorizontal: theme.layout.screenPadding,
+            paddingTop: theme.spacing.xl,
           }}
         >
-          <Flag uri={meta.flag} size={40} />
-          <View style={{ flex: 1 }}>
-            <Text variant="h1" numberOfLines={2} accessibilityRole="header">
-              {meta.name}
-            </Text>
-            <Text variant="bodySmall" color="textSecondary">
-              {t('productDetail.from', { price: meta.price })}
-            </Text>
-          </View>
-        </View>
-
-        {/* Feature pills */}
-        <View
-          style={{
-            flexDirection: 'row',
-            flexWrap: 'wrap',
-            gap: theme.spacing.sm,
-            marginTop: theme.spacing.lg,
-          }}
-        >
-          {features.map((f) => (
-            <View
-              key={f.label}
-              accessible
-              accessibilityLabel={f.label}
-              style={{
-                flexDirection: 'row',
-                alignItems: 'center',
-                gap: theme.spacing.xs,
-                backgroundColor: theme.colors.surfaceMuted,
-                borderRadius: theme.radii.pill,
-                paddingHorizontal: theme.spacing.md,
-                paddingVertical: theme.spacing.sm,
-              }}
-            >
-              <View accessible={false}>{f.icon}</View>
-              <Text variant="caption">{f.label}</Text>
+          {/* Name + flag + lowest price */}
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: theme.spacing.md }}>
+            <Flag uri={meta.flag} size={44} />
+            <View style={{ flex: 1 }}>
+              <Text variant="h1" numberOfLines={2} accessibilityRole="header" style={{ fontSize: 22, lineHeight: 28 }}>
+                {meta.name}
+              </Text>
+              <Text variant="bodySmall" color="textSecondary" style={{ fontFamily: theme.fontFamily.medium }}>
+                {t('productDetail.from', { price: meta.price })}
+              </Text>
             </View>
-          ))}
-        </View>
-
-        {/* Included countries (regions only) */}
-        {isRegion && meta.countries.length > 0 ? (
-          <View style={{ marginTop: theme.spacing.xl }}>
-            <Text variant="h3" accessibilityRole="header" style={{ marginBottom: theme.spacing.sm }}>
-              {t('productDetail.includedCountries')}
-            </Text>
-            <Text variant="body" color="textSecondary">
-              {meta.countries.join(' · ')}
-            </Text>
           </View>
-        ) : null}
 
-        {/* Available plans */}
-        <Text
-          variant="h3"
-          accessibilityRole="header"
-          style={{ marginTop: theme.spacing.xl, marginBottom: theme.spacing.md }}
-        >
-          {t('productDetail.availablePlans')}
-        </Text>
+          {/* Feature pills — one line */}
+          <View style={{ flexDirection: 'row', gap: theme.spacing.sm, marginTop: theme.spacing.lg }}>
+            {features.map((f) => (
+              <View
+                key={f.label}
+                accessible
+                accessibilityLabel={f.label}
+                style={{
+                  flex: 1,
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: theme.spacing.xs,
+                  backgroundColor: theme.colors.surfaceMuted,
+                  borderRadius: theme.radii.pill,
+                  paddingHorizontal: theme.spacing.sm,
+                  paddingVertical: theme.spacing.sm,
+                }}
+              >
+                <View accessible={false}>{f.icon}</View>
+                <Text variant="caption" dense numberOfLines={1} style={{ flexShrink: 1 }}>
+                  {f.label}
+                </Text>
+              </View>
+            ))}
+          </View>
 
-        <View style={{ gap: theme.spacing.sm }}>
-          {detailPlans.map((plan) => (
-            <PlanRow
-              key={plan.id}
-              plan={plan}
-              selected={plan.id === selectedId}
-              onSelect={() => setChosenId(plan.id)}
-            />
-          ))}
+          {/* Included countries (regions only) */}
+          {isRegion && meta.countries.length > 0 ? (
+            <View style={{ marginTop: theme.spacing.xl }}>
+              <Text variant="h2" accessibilityRole="header" style={{ marginBottom: theme.spacing.sm }}>
+                {t('productDetail.includedCountries')}
+              </Text>
+              <Text variant="bodySmall" color="textSecondary">
+                {meta.countries.join(' · ')}
+              </Text>
+            </View>
+          ) : null}
+
+          {/* Available plans */}
+          <Text
+            variant="h2"
+            accessibilityRole="header"
+            style={{ marginTop: theme.spacing.xl, marginBottom: theme.spacing.md }}
+          >
+            {t('productDetail.availablePlans')}
+          </Text>
+
+          <View
+            style={{
+              backgroundColor: theme.colors.surface,
+              borderRadius: theme.radii.lg,
+              borderWidth: 1,
+              borderColor: theme.colors.border,
+              padding: theme.spacing.xs,
+              gap: theme.spacing.xs,
+            }}
+          >
+            {detailPlans.map((plan) => (
+              <PlanRow
+                key={plan.id}
+                plan={plan}
+                selected={plan.id === selectedId}
+                onSelect={() => {
+                  selectionTap();
+                  setChosenId(plan.id);
+                }}
+              />
+            ))}
+          </View>
         </View>
       </ScrollView>
 
-      {/* Sticky Buy now */}
+      {/* Translucent back button over the hero (fixed, always reachable). */}
+      <Pressable
+        onPress={() => router.back()}
+        accessibilityRole="button"
+        accessibilityLabel={t('common.back')}
+        hitSlop={8}
+        style={({ pressed }) => [
+          roundGlassButton(theme),
+          { position: 'absolute', left: theme.layout.screenPadding, top: insets.top + theme.spacing.sm, opacity: pressed ? 0.7 : 1 },
+        ]}
+      >
+        <ChevronLeft size={24} color={theme.colors.text} />
+      </Pressable>
+
+      {/* Sticky Buy now bar above the bottom safe area. */}
       <View
         style={{
           paddingTop: theme.spacing.md,
-          paddingBottom: theme.spacing.md,
+          paddingHorizontal: theme.layout.screenPadding,
+          paddingBottom: insets.bottom + theme.spacing.md,
           borderTopWidth: 1,
           borderTopColor: theme.colors.border,
           backgroundColor: theme.colors.background,
         }}
       >
         <Button
-          label={t('productDetail.buyNow')}
+          label={
+            selectedPlan
+              ? t('productDetail.buyNowPrice', { price: selectedPlan.price_display })
+              : t('productDetail.buyNow')
+          }
           onPress={buyNow}
           accessibilityHint={t('productDetail.buyNowHint')}
         />
       </View>
-    </Screen>
+    </View>
   );
+}
+
+function roundGlassButton(theme: Theme) {
+  return {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: 'rgba(255, 255, 255, 0.92)',
+    alignItems: 'center' as const,
+    justifyContent: 'center' as const,
+    ...theme.shadows.sm,
+  };
 }
 
 function PlanRow({
@@ -258,22 +316,21 @@ function PlanRow({
       accessibilityRole="radio"
       accessibilityState={{ selected }}
       accessibilityLabel={`${label}, ${plan.price_display}`}
-      style={{
+      style={({ pressed }) => ({
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
-        minHeight: theme.layout.minTouchTarget + 10,
-        paddingHorizontal: theme.spacing.lg,
+        minHeight: theme.layout.minTouchTarget + 8,
+        paddingHorizontal: theme.spacing.md,
         paddingVertical: theme.spacing.md,
         borderRadius: theme.radii.md,
-        borderWidth: 1.5,
-        borderColor: selected ? theme.colors.primary : theme.colors.border,
-        backgroundColor: selected ? theme.colors.surface : theme.colors.background,
+        backgroundColor: selected ? theme.colors.surfaceMuted : 'transparent',
+        opacity: pressed ? 0.85 : 1,
         gap: theme.spacing.md,
-        ...(selected ? theme.shadows.sm : null),
-      }}
+      })}
     >
-      <View style={{ flexDirection: 'row', alignItems: 'center', gap: theme.spacing.sm, flex: 1 }}>
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: theme.spacing.md, flex: 1 }}>
+        {/* Radio */}
         <View
           accessible={false}
           style={{
@@ -282,16 +339,28 @@ function PlanRow({
             borderRadius: 10,
             alignItems: 'center',
             justifyContent: 'center',
-            borderWidth: selected ? 0 : 1.5,
-            borderColor: theme.colors.border,
-            backgroundColor: selected ? theme.colors.primary : 'transparent',
+            borderWidth: 2,
+            borderColor: selected ? theme.colors.primary : theme.colors.border,
           }}
         >
-          {selected ? <Check size={13} color={theme.colors.onPrimary} /> : null}
+          {selected ? (
+            <View
+              style={{
+                width: 10,
+                height: 10,
+                borderRadius: 5,
+                backgroundColor: theme.colors.primary,
+              }}
+            />
+          ) : null}
         </View>
-        <Text variant="h3">{label}</Text>
+        <Text variant="h3" dense>
+          {label}
+        </Text>
       </View>
-      <Text variant="h3">{plan.price_display}</Text>
+      <Text variant="h3" dense style={{ fontFamily: theme.fontFamily.semibold }}>
+        {plan.price_display}
+      </Text>
     </Pressable>
   );
 }

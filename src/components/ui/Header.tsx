@@ -65,7 +65,7 @@ export function Header({ title, showBack = true, onBack, right, style }: HeaderP
 
       <View style={{ flex: 1, alignItems: 'center' }}>
         {title ? (
-          <Text variant="h3" numberOfLines={1} accessibilityRole="header">
+          <Text variant="h1" numberOfLines={1} accessibilityRole="header">
             {title}
           </Text>
         ) : null}

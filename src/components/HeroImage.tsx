@@ -11,7 +11,13 @@
  */
 
 import type { ReactNode } from 'react';
-import { View, type DimensionValue, type StyleProp, type ViewStyle } from 'react-native';
+import {
+  View,
+  type DimensionValue,
+  type ImageSourcePropType,
+  type StyleProp,
+  type ViewStyle,
+} from 'react-native';
 import { Image } from 'expo-image';
 import Svg, { Defs, LinearGradient, Rect, Stop } from 'react-native-svg';
 
@@ -38,11 +44,16 @@ function gradientFor(seed: string): [string, string] {
 export interface HeroImageProps {
   /** Registry slot to look up a real photo; falls back to a gradient if none. */
   slot?: HeroSlot | string;
+  /** A resolved photo source that wins over `slot` (e.g. a per-country photo). */
+  source?: ImageSourcePropType | null;
   /** Seed for the placeholder gradient (e.g. a continent or country name). */
   seed?: string;
   height?: number;
   width?: DimensionValue;
-  radius?: RadiusToken;
+  /** Corner radius — a theme token or an explicit number (0 for full-bleed). */
+  radius?: RadiusToken | number;
+  /** Strength of the bottom scrim (0–1). Higher = darker for better contrast. */
+  scrim?: number;
   /** Overlay content (title, icon, flag …). Rendered above the scrim. */
   children?: ReactNode;
   /** Padding inside the hero around the overlay content. */
@@ -53,19 +64,22 @@ export interface HeroImageProps {
 
 export function HeroImage({
   slot,
+  source,
   seed = slot ?? 'hero',
   height = 160,
   width = '100%',
   radius = 'lg',
+  scrim = 0.55,
   children,
   contentPadding = 'lg',
   style,
   accessibilityLabel,
 }: HeroImageProps) {
   const theme = useTheme();
-  const photo = slot ? heroImage(slot) : null;
+  const photo = source ?? (slot ? heroImage(slot) : null);
   const [from, to] = gradientFor(seed);
   const gradientId = `hero-${seed.replace(/[^a-zA-Z0-9]/g, '')}`;
+  const borderRadius = typeof radius === 'number' ? radius : theme.radii[radius];
 
   return (
     <View
@@ -75,7 +89,7 @@ export function HeroImage({
         {
           height,
           width,
-          borderRadius: theme.radii[radius],
+          borderRadius,
           overflow: 'hidden',
           backgroundColor: theme.colors.surfaceMuted,
           justifyContent: 'flex-end',
@@ -117,8 +131,9 @@ export function HeroImage({
       >
         <Defs>
           <LinearGradient id={`${gradientId}-scrim`} x1="0" y1="0" x2="0" y2="1">
-            <Stop offset="0" stopColor="#1C2430" stopOpacity="0" />
-            <Stop offset="1" stopColor="#1C2430" stopOpacity="0.55" />
+            <Stop offset="0" stopColor="#1C2430" stopOpacity={String(scrim * 0.35)} />
+            <Stop offset="0.5" stopColor="#1C2430" stopOpacity="0" />
+            <Stop offset="1" stopColor="#1C2430" stopOpacity={String(scrim)} />
           </LinearGradient>
         </Defs>
         <Rect x="0" y="0" width="100%" height="100%" fill={`url(#${gradientId}-scrim)`} />

@@ -39,5 +39,5 @@ export {
 
 export { POPULAR_DESTINATIONS, POPULAR_DESTINATIONS_LIMIT } from './config';
 
-export { heroImage } from './images';
+export { heroImage, destinationImage, countryPhoto } from './images';
 export type { HeroSlot } from './images';

@@ -27,17 +27,19 @@ export function Chip({ label, selected = false, onPress, style }: ChipProps) {
       hitSlop={8}
       style={({ pressed }) => [
         {
-          minHeight: 36,
+          height: 34,
           justifyContent: 'center',
-          paddingHorizontal: theme.spacing.lg,
+          paddingHorizontal: theme.spacing.md,
           borderRadius: theme.radii.pill,
-          backgroundColor: selected ? theme.colors.primary : theme.colors.surfaceMuted,
-          opacity: pressed ? 0.85 : 1,
+          borderWidth: 1,
+          borderColor: selected ? theme.colors.primary : theme.colors.border,
+          backgroundColor: selected ? theme.colors.primary : theme.colors.surface,
+          transform: [{ scale: pressed ? 0.96 : 1 }],
         },
         style,
       ]}
     >
-      <Text variant="caption" color={selected ? 'onPrimary' : 'textSecondary'}>
+      <Text variant="caption" dense color={selected ? 'onPrimary' : 'textSecondary'}>
         {label}
       </Text>
     </Pressable>

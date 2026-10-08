@@ -46,7 +46,7 @@ export function useTheme(): Theme {
 export { lightColors, palette } from './colors';
 export { spacing, radii, layout } from './spacing';
 export { shadows } from './shadows';
-export { typography, fontFamily } from './typography';
+export { typography, fontFamily, DENSE_MAX_FONT_SCALE } from './typography';
 export type { ColorTokens, ColorName } from './colors';
 export type { TextVariant, TypeStyle } from './typography';
 export type { SpacingToken, RadiusToken } from './spacing';

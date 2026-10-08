@@ -8,12 +8,18 @@
 
 import { Text as RNText, type TextProps as RNTextProps } from 'react-native';
 
-import { useTheme, type ColorName, type TextVariant } from '@/theme';
+import { useTheme, type ColorName, type TextVariant, DENSE_MAX_FONT_SCALE } from '@/theme';
 
 export interface TextProps extends RNTextProps {
   variant?: TextVariant;
   color?: ColorName;
   center?: boolean;
+  /**
+   * Dense UI (chips, pills, tab labels, list rows, prices): caps dynamic-type
+   * scaling at DENSE_MAX_FONT_SCALE so a large system font can't overflow a tight
+   * layout. Body/greeting text leaves this off to scale fully.
+   */
+  dense?: boolean;
   children?: React.ReactNode;
 }
 
@@ -21,6 +27,8 @@ export function Text({
   variant = 'body',
   color = 'text',
   center,
+  dense,
+  maxFontSizeMultiplier,
   style,
   children,
   ...rest
@@ -30,6 +38,9 @@ export function Text({
 
   return (
     <RNText
+      maxFontSizeMultiplier={
+        maxFontSizeMultiplier ?? (dense ? DENSE_MAX_FONT_SCALE : undefined)
+      }
       style={[
         {
           fontFamily: t.fontFamily,

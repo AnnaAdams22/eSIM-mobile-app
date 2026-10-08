@@ -26,6 +26,9 @@ export function Flag({ uri, size = 36 }: FlagProps) {
     borderRadius: size / 2,
     backgroundColor: theme.colors.surfaceMuted,
     overflow: 'hidden' as const,
+    // Hairline ring so white/pale flags don't vanish against light surfaces.
+    borderWidth: 1,
+    borderColor: theme.colors.border,
   };
 
   if (!uri) {

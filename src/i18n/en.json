@@ -24,7 +24,17 @@
     "heroTitle": "Stay connected in {{count}}+ countries",
     "heroHint": "Browse all destinations",
     "popularTitle": "Popular destinations",
-    "seeAll": "See all"
+    "seeAll": "See all",
+    "exploreRegionsTitle": "Explore regions",
+    "howItWorks": {
+      "title": "How it works",
+      "step1Title": "Choose a plan",
+      "step1Body": "Pick data for where you're headed.",
+      "step2Title": "Install the eSIM",
+      "step2Body": "A few taps — no SIM to swap.",
+      "step3Title": "Connect on arrival",
+      "step3Body": "Land and you're already online."
+    }
   },
   "destinations": {
     "title": "Choose your destination",
@@ -49,6 +59,7 @@
   "productDetail": {
     "availablePlans": "Available plans",
     "buyNow": "Buy now",
+    "buyNowPrice": "Buy now · {{price}}",
     "fastInternet": "Fast internet",
     "noRoaming": "No roaming fees",
     "easySetup": "Easy setup",

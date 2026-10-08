@@ -56,7 +56,17 @@ export function ListRow({
           </Text>
         ) : null}
       </View>
-      {trailing ?? (value ? <Text variant="bodySmall" color="textSecondary">{value}</Text> : null)}
+      {trailing ??
+        (value ? (
+          <Text
+            variant="bodySmall"
+            color="textSecondary"
+            dense
+            style={{ fontFamily: theme.fontFamily.medium }}
+          >
+            {value}
+          </Text>
+        ) : null)}
       {showChevron ? <ChevronRight size={20} color={theme.colors.textSecondary} /> : null}
     </>
   );
