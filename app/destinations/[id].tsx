@@ -38,6 +38,7 @@ import {
   plansForDestination,
   plansForRegion,
 } from '@/features/catalog';
+import { useAuth } from '@/features/auth';
 import { lightTap, selectionTap } from '@/lib/haptics';
 import type { Plan } from '@/lib/api-types';
 import { useTheme, type Theme } from '@/theme';
@@ -54,6 +55,7 @@ export default function DestinationDetailScreen() {
   const isRegion = type === 'region';
 
   const { data: plans, isLoading, isError, refetch } = usePlans();
+  const { status } = useAuth();
 
   const detailPlans = useMemo(
     () => (isRegion ? plansForRegion(plans ?? [], id) : plansForDestination(plans ?? [], id)),
@@ -127,7 +129,15 @@ export default function DestinationDetailScreen() {
 
   const buyNow = () => {
     lightTap();
-    if (selectedId) router.push({ pathname: '/checkout', params: { planId: selectedId } });
+    if (!selectedId) return;
+    // Buying requires an account. If signed out, send them through sign-in and
+    // bring them back to this exact plan's checkout afterwards.
+    if (status !== 'signedIn') {
+      const redirect = `/checkout?planId=${encodeURIComponent(selectedId)}`;
+      router.push({ pathname: '/(auth)/sign-in', params: { redirect } });
+      return;
+    }
+    router.push({ pathname: '/checkout', params: { planId: selectedId } });
   };
 
   return (

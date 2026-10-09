@@ -58,6 +58,19 @@ export const config = {
 };
 
 /**
+ * Legal document URLs, shown on the Create-account screen (opened in an in-app
+ * browser). Not secrets and not required for startup; overridable via optional
+ * EXPO_PUBLIC_* vars, otherwise the production placeholders are used.
+ */
+export const legal = {
+  termsUrl:
+    process.env.EXPO_PUBLIC_TERMS_URL?.trim() ||
+    'https://esim-global.net/terms-and-conditions',
+  privacyUrl:
+    process.env.EXPO_PUBLIC_PRIVACY_URL?.trim() || 'https://esim-global.net/privacy-policy',
+} as const;
+
+/**
  * Lazily-validated getter wrapped in a thunk so that merely importing `config`
  * does not throw; each property is a getter that validates on first read.
  */

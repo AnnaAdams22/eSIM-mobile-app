@@ -12,6 +12,9 @@ export type { CardProps } from './Card';
 export { Chip, ChipGroup } from './Chip';
 export type { ChipProps, ChipGroupProps } from './Chip';
 
+export { CodeInput } from './CodeInput';
+export type { CodeInputProps } from './CodeInput';
+
 export { Divider } from './Divider';
 export type { DividerProps } from './Divider';
 
@@ -47,3 +50,6 @@ export type { SkeletonProps } from './Skeleton';
 
 export { Text } from './Text';
 export type { TextProps } from './Text';
+
+export { TextField } from './TextField';
+export type { TextFieldProps } from './TextField';

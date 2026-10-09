@@ -23,6 +23,7 @@ import {
 } from '@/components/ui';
 import { DestinationThumb } from '@/components/DestinationThumb';
 import { HeroImage } from '@/components/HeroImage';
+import { useAuth } from '@/features/auth';
 import { usePlans } from '@/hooks/usePlans';
 import {
   buildDestinations,
@@ -40,6 +41,13 @@ export default function HomeScreen() {
   const router = useRouter();
   const { t } = useTranslation();
   const { data: plans, isLoading, isError, refetch } = usePlans();
+  const { status, displayName } = useAuth();
+
+  const firstName = displayName?.trim().split(/\s+/)[0];
+  const greeting =
+    status === 'signedIn' && firstName
+      ? t('home.greeting', { name: firstName })
+      : t('home.greetingGuest');
 
   const destinations = useMemo(() => buildDestinations(plans ?? []), [plans]);
 
@@ -72,7 +80,7 @@ export default function HomeScreen() {
 
       {/* Greeting */}
       <View style={{ gap: theme.spacing.xxs }}>
-        <Text variant="display">{t('home.greetingGuest')}</Text>
+        <Text variant="display">{greeting}</Text>
         <Text variant="body" color="textSecondary">
           {t('home.subtitle')}
         </Text>

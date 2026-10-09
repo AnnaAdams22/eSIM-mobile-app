@@ -21,6 +21,7 @@ import {
 
 import '@/i18n';
 import { ConfigError } from '@/components/ConfigError';
+import { AuthProvider } from '@/features/auth';
 import { queryClient } from '@/lib/queryClient';
 import { missingConfigKeys } from '@/config';
 import { lightTheme } from '@/theme';
@@ -51,18 +52,20 @@ export default function RootLayout() {
     missing.length > 0 && !bypassConfig ? (
       <ConfigError missing={missing} onBypass={() => setBypassConfig(true)} />
     ) : (
-      <Stack
-        screenOptions={{
-          headerShown: false,
-          contentStyle: { backgroundColor: lightTheme.colors.background },
-          animation: 'slide_from_right',
-        }}
-      >
-        <Stack.Screen name="(tabs)" />
-        <Stack.Screen name="checkout" options={{ presentation: 'modal' }} />
-        <Stack.Screen name="order-success" options={{ presentation: 'modal' }} />
-        <Stack.Screen name="(auth)" options={{ presentation: 'modal' }} />
-      </Stack>
+      <AuthProvider>
+        <Stack
+          screenOptions={{
+            headerShown: false,
+            contentStyle: { backgroundColor: lightTheme.colors.background },
+            animation: 'slide_from_right',
+          }}
+        >
+          <Stack.Screen name="(tabs)" />
+          <Stack.Screen name="checkout" options={{ presentation: 'modal' }} />
+          <Stack.Screen name="order-success" options={{ presentation: 'modal' }} />
+          <Stack.Screen name="(auth)" options={{ presentation: 'modal' }} />
+        </Stack>
+      </AuthProvider>
     );
 
   return (

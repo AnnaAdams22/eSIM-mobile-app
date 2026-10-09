@@ -16,3 +16,13 @@ export function lightTap(): void {
 export function selectionTap(): void {
   Haptics.selectionAsync().catch(() => {});
 }
+
+/** A success notification — e.g. a completed sign-in or verification. */
+export function successNotify(): void {
+  Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(() => {});
+}
+
+/** An error notification — e.g. a failed sign-in or an invalid code. */
+export function errorNotify(): void {
+  Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error).catch(() => {});
+}
