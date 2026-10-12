@@ -1,14 +1,508 @@
-import { useLocalSearchParams } from 'expo-router';
-import { useTranslation } from 'react-i18next';
-
-import { PlaceholderScreen } from '@/components/PlaceholderScreen';
-
 /**
- * Checkout (placeholder). The shopping screens navigate here with the selected
- * `planId`; the real checkout flow is a later task.
+ * Checkout — the native Stripe payment flow.
+ *
+ * Reached (auth-gated) from Destination detail → "Buy now" with the selected
+ * `planId`. Shows a plan summary, an optional promo code, a server-computed order
+ * summary, and a navy "Pay now · €X.XX" button that drives Stripe's PaymentSheet.
+ *
+ * Prices are NEVER computed here: list price is the backend's `price_display`;
+ * discount and total come from the promo/validate and payment-sheet responses
+ * (formatted from the integer cents the server returned — see src/lib/money.ts).
  */
+
+import { useMemo, useRef, useState } from 'react';
+import { ScrollView, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useTranslation } from 'react-i18next';
+import { useStripe } from '@stripe/stripe-react-native';
+import { Tag, X } from 'lucide-react-native';
+
+import {
+  Button,
+  Card,
+  ErrorState,
+  Header,
+  Screen,
+  Skeleton,
+  Text,
+  TextField,
+} from '@/components/ui';
+import { Flag } from '@/components/Flag';
+import { usePlans } from '@/hooks/usePlans';
+import { useAuth } from '@/features/auth';
+import {
+  buildDestinations,
+  buildRegions,
+  formatPlanLabel,
+} from '@/features/catalog';
+import {
+  buildPaymentSheetAppearance,
+  makeRequestIdHolder,
+  promoErrorKey,
+} from '@/features/checkout';
+import { api, ApiError } from '@/lib/api';
+import type { Plan, PromoValidation } from '@/lib/api-types';
+import { config } from '@/config';
+import { formatEurCents } from '@/lib/money';
+import { errorNotify, lightTap, successNotify } from '@/lib/haptics';
+import { uuidv4 } from '@/lib/uuid';
+import { useTheme } from '@/theme';
+
+/** Google Pay / Apple Pay run in Stripe's test environment unless we ship a live key. */
+const STRIPE_TEST_ENV = !config.stripePublishableKey.startsWith('pk_live_');
+
+interface AppliedPromo {
+  code: string;
+  discountCents: number;
+  amountCents: number;
+}
+
+/** Resolve the flag + human title for a plan from the catalog groupings. */
+function planSummary(plans: Plan[], plan: Plan): { flag: string | null; title: string } {
+  if (plan.countryIso2) {
+    const dest = buildDestinations(plans).find((d) => d.iso2 === plan.countryIso2!.toUpperCase());
+    if (dest) return { flag: dest.flag, title: dest.name };
+  }
+  if (plan.plan_type) {
+    const region = buildRegions(plans).find((r) => r.key === plan.plan_type);
+    if (region) return { flag: region.flag, title: region.name };
+  }
+  return { flag: plan.image, title: plan.countries_included?.trim() || plan.name };
+}
+
 export default function CheckoutScreen() {
+  const theme = useTheme();
+  const router = useRouter();
+  const insets = useSafeAreaInsets();
   const { t } = useTranslation();
   const { planId } = useLocalSearchParams<{ planId?: string }>();
-  return <PlaceholderScreen title={t('checkout.title')} subtitle={planId} showHeader />;
+
+  const { user } = useAuth();
+  const email = user?.email ?? null;
+  const { initPaymentSheet, presentPaymentSheet } = useStripe();
+
+  const { data: plans, isLoading, isError, refetch } = usePlans();
+  const plan = useMemo(() => plans?.find((p) => p.id === planId) ?? null, [plans, planId]);
+  const summary = useMemo(
+    () => (plan && plans ? planSummary(plans, plan) : null),
+    [plan, plans]
+  );
+
+  // One idempotency id per checkout attempt; reused across retries (same ref
+  // across re-renders), reset only when the promo changes the amount.
+  const requestId = useRef(makeRequestIdHolder(uuidv4)).current;
+
+  const [promoOpen, setPromoOpen] = useState(false);
+  const [promoInput, setPromoInput] = useState('');
+  const [promoChecking, setPromoChecking] = useState(false);
+  const [promoError, setPromoError] = useState<string | null>(null);
+  const [applied, setApplied] = useState<AppliedPromo | null>(null);
+
+  const [paying, setPaying] = useState(false);
+  const [payError, setPayError] = useState<string | null>(null);
+
+  // ─── Loading / error / not-found states ──────────────────────────────────
+  if (isError) {
+    return (
+      <Screen scroll={false}>
+        <Header title={t('checkout.title')} onBack={() => router.back()} />
+        <ErrorState onRetry={() => refetch()} />
+      </Screen>
+    );
+  }
+  if (isLoading) {
+    return (
+      <Screen>
+        <Header title={t('checkout.title')} onBack={() => router.back()} />
+        <Skeleton height={88} radius="lg" />
+        <Skeleton height={48} radius="md" style={{ marginTop: theme.spacing.lg }} />
+        <Skeleton height={120} radius="lg" style={{ marginTop: theme.spacing.lg }} />
+      </Screen>
+    );
+  }
+  if (!plan || !summary) {
+    return (
+      <Screen scroll={false}>
+        <Header title={t('checkout.title')} onBack={() => router.back()} />
+        <ErrorState
+          title={t('checkout.notFoundTitle')}
+          body={t('checkout.notFoundBody')}
+          retryLabel={t('common.back')}
+          onRetry={() => router.back()}
+        />
+      </Screen>
+    );
+  }
+
+  const planLabel = formatPlanLabel(plan, t);
+
+  // All money shown comes from the server: list price verbatim, total/discount
+  // formatted from the promo response's cents (never computed here).
+  const totalDisplay = applied ? formatEurCents(applied.amountCents) : plan.price_display;
+
+  // ─── Promo code ──────────────────────────────────────────────────────────
+  const applyPromo = async () => {
+    const code = promoInput.trim();
+    if (!code || promoChecking) return;
+    lightTap();
+    setPromoChecking(true);
+    setPromoError(null);
+    try {
+      const result: PromoValidation = await api.validatePromo(plan.id, code);
+      if (result.valid) {
+        setApplied({
+          code,
+          discountCents: result.discount_cents,
+          amountCents: result.amount_cents,
+        });
+        requestId.reset(); // amount changed → new idempotency key
+      } else {
+        setApplied(null);
+        setPromoError(t(promoErrorKey(result.error)));
+        errorNotify();
+      }
+    } catch {
+      setPromoError(t('checkout.promoErrors.generic'));
+      errorNotify();
+    } finally {
+      setPromoChecking(false);
+    }
+  };
+
+  const removePromo = () => {
+    lightTap();
+    setApplied(null);
+    setPromoInput('');
+    setPromoError(null);
+    requestId.reset(); // amount changed → new idempotency key
+  };
+
+  // ─── Pay ─────────────────────────────────────────────────────────────────
+  const pay = async () => {
+    if (paying) return; // double-tap guard
+    lightTap();
+    setPaying(true);
+    setPayError(null);
+    try {
+      const sheet = await api.createPaymentSheet({
+        plan_id: plan.id,
+        promo_code: applied?.code,
+        client_request_id: requestId.current(),
+      });
+
+      const init = await initPaymentSheet({
+        merchantDisplayName: 'ESIM Global',
+        paymentIntentClientSecret: sheet.payment_intent_client_secret,
+        customerId: sheet.customer_id,
+        customerSessionClientSecret: sheet.customer_session_client_secret,
+        returnURL: 'esimglobal://stripe-redirect',
+        googlePay: {
+          merchantCountryCode: 'US',
+          currencyCode: 'EUR',
+          testEnv: STRIPE_TEST_ENV,
+        },
+        applePay: { merchantCountryCode: 'US' },
+        defaultBillingDetails: email ? { email } : undefined,
+        appearance: buildPaymentSheetAppearance(theme),
+      });
+      if (init.error) throw init.error;
+
+      const result = await presentPaymentSheet();
+      if (result.error) {
+        // User dismissed the sheet — stay quietly on checkout, keep the id for retry.
+        if (result.didCancel || result.error.code === 'Canceled') {
+          setPaying(false);
+          return;
+        }
+        throw result.error;
+      }
+
+      // Paid. Replace history so "back" can't return to the paid checkout.
+      successNotify();
+      router.replace({
+        pathname: '/order-success',
+        params: {
+          paymentIntentId: sheet.payment_intent_id,
+          flag: summary.flag ?? '',
+          title: summary.title,
+          planLabel,
+        },
+      });
+    } catch (err) {
+      errorNotify();
+      const message =
+        err instanceof ApiError ? err.message : t('checkout.errorGeneric');
+      setPayError(message || t('checkout.errorGeneric'));
+      setPaying(false);
+    }
+  };
+
+  return (
+    <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
+      <ScrollView
+        style={{ flex: 1 }}
+        contentContainerStyle={{
+          paddingHorizontal: theme.layout.screenPadding,
+          paddingBottom: theme.spacing.xl,
+        }}
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+      >
+        <Header title={t('checkout.title')} onBack={() => router.back()} />
+
+        {/* Plan summary */}
+        <Card padding="lg" radius="lg" shadow="sm">
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: theme.spacing.md }}>
+            <Flag uri={summary.flag} size={44} />
+            <View style={{ flex: 1 }}>
+              <Text variant="h3" numberOfLines={1}>
+                {summary.title}
+              </Text>
+              <Text
+                variant="bodySmall"
+                color="textSecondary"
+                style={{ marginTop: 2 }}
+                numberOfLines={1}
+              >
+                {planLabel}
+              </Text>
+            </View>
+            <Text variant="h3" style={{ fontFamily: theme.fontFamily.semibold }}>
+              {plan.price_display}
+            </Text>
+          </View>
+        </Card>
+
+        {/* Receipt line */}
+        {email ? (
+          <Text
+            variant="caption"
+            color="textSecondary"
+            style={{ marginTop: theme.spacing.md }}
+          >
+            {t('checkout.receipt', { email })}
+          </Text>
+        ) : null}
+
+        {/* Promo code */}
+        <PromoSection
+          open={promoOpen}
+          onToggle={() => {
+            lightTap();
+            setPromoOpen((v) => !v);
+          }}
+          input={promoInput}
+          onInput={setPromoInput}
+          checking={promoChecking}
+          error={promoError}
+          applied={applied}
+          onApply={applyPromo}
+          onRemove={removePromo}
+        />
+
+        {/* Order summary */}
+        <Text
+          variant="h2"
+          accessibilityRole="header"
+          style={{ marginTop: theme.spacing.xl, marginBottom: theme.spacing.sm }}
+        >
+          {t('checkout.summaryTitle')}
+        </Text>
+        <Card padding="lg" radius="lg" shadow="sm">
+          <SummaryRow label={t('checkout.priceLabel')} value={plan.price_display} />
+          {applied ? (
+            <SummaryRow
+              label={t('checkout.discountLabel')}
+              value={formatEurCents(-applied.discountCents)}
+              tone="discount"
+            />
+          ) : null}
+          <View
+            style={{
+              height: 1,
+              backgroundColor: theme.colors.border,
+              marginVertical: theme.spacing.md,
+            }}
+          />
+          <SummaryRow label={t('checkout.totalLabel')} value={totalDisplay} emphasize />
+        </Card>
+
+        {payError ? (
+          <View
+            accessibilityLiveRegion="polite"
+            style={{
+              marginTop: theme.spacing.lg,
+              padding: theme.spacing.md,
+              borderRadius: theme.radii.md,
+              backgroundColor: theme.colors.discountSoft,
+            }}
+          >
+            <Text variant="caption" color="discount" style={{ fontFamily: theme.fontFamily.semibold }}>
+              {t('checkout.errorTitle')}
+            </Text>
+            <Text variant="bodySmall" color="text" style={{ marginTop: 2 }}>
+              {payError}
+            </Text>
+          </View>
+        ) : null}
+      </ScrollView>
+
+      {/* Sticky Pay bar above the system navigation bar. */}
+      <View
+        style={{
+          paddingTop: theme.spacing.md,
+          paddingHorizontal: theme.layout.screenPadding,
+          paddingBottom: insets.bottom + theme.spacing.md,
+          borderTopWidth: 1,
+          borderTopColor: theme.colors.border,
+          backgroundColor: theme.colors.background,
+        }}
+      >
+        <Button
+          label={paying ? t('checkout.paying') : t('checkout.payNow', { price: totalDisplay })}
+          onPress={pay}
+          loading={paying}
+          disabled={paying}
+          accessibilityHint={t('checkout.payNow', { price: totalDisplay })}
+        />
+        <Text
+          variant="caption"
+          color="textSecondary"
+          center
+          style={{ marginTop: theme.spacing.sm }}
+        >
+          {t('checkout.terms')}
+        </Text>
+      </View>
+    </View>
+  );
+}
+
+function SummaryRow({
+  label,
+  value,
+  emphasize,
+  tone,
+}: {
+  label: string;
+  value: string;
+  emphasize?: boolean;
+  tone?: 'discount';
+}) {
+  const theme = useTheme();
+  return (
+    <View
+      style={{
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        gap: theme.spacing.md,
+      }}
+    >
+      <Text variant={emphasize ? 'h3' : 'body'} color={emphasize ? 'text' : 'textSecondary'}>
+        {label}
+      </Text>
+      <Text
+        variant={emphasize ? 'h3' : 'body'}
+        color={tone === 'discount' ? 'discount' : 'text'}
+        style={emphasize ? { fontFamily: theme.fontFamily.semibold } : undefined}
+      >
+        {value}
+      </Text>
+    </View>
+  );
+}
+
+function PromoSection({
+  open,
+  onToggle,
+  input,
+  onInput,
+  checking,
+  error,
+  applied,
+  onApply,
+  onRemove,
+}: {
+  open: boolean;
+  onToggle: () => void;
+  input: string;
+  onInput: (v: string) => void;
+  checking: boolean;
+  error: string | null;
+  applied: AppliedPromo | null;
+  onApply: () => void;
+  onRemove: () => void;
+}) {
+  const theme = useTheme();
+  const { t } = useTranslation();
+
+  // Once applied, show a confirmation row with a Remove action instead of the input.
+  if (applied) {
+    return (
+      <Card padding="md" radius="md" style={{ marginTop: theme.spacing.lg }}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: theme.spacing.sm }}>
+          <Tag size={18} color={theme.colors.success} />
+          <Text variant="bodySmall" color="text" style={{ flex: 1 }} numberOfLines={1}>
+            {t('checkout.promoApplied', { code: applied.code })}
+          </Text>
+          <Button
+            label={t('checkout.promoRemove')}
+            variant="ghost"
+            size="md"
+            fullWidth={false}
+            onPress={onRemove}
+            accessibilityHint={t('checkout.promoRemoveHint')}
+            icon={<X size={16} color={theme.colors.primary} />}
+          />
+        </View>
+      </Card>
+    );
+  }
+
+  return (
+    <View style={{ marginTop: theme.spacing.lg }}>
+      <Button
+        label={t('checkout.promoToggle')}
+        variant="ghost"
+        size="md"
+        fullWidth={false}
+        onPress={onToggle}
+        icon={<Tag size={16} color={theme.colors.primary} />}
+        accessibilityHint={t('checkout.promoToggle')}
+        style={{ alignSelf: 'flex-start' }}
+      />
+      {open ? (
+        <View style={{ marginTop: theme.spacing.sm }}>
+          <View style={{ flexDirection: 'row', alignItems: 'flex-end', gap: theme.spacing.sm }}>
+            <View style={{ flex: 1 }}>
+              <TextField
+                label={t('checkout.promoLabel')}
+                placeholder={t('checkout.promoPlaceholder')}
+                value={input}
+                onChangeText={onInput}
+                autoCapitalize="characters"
+                autoCorrect={false}
+                error={error}
+                returnKeyType="done"
+                onSubmitEditing={onApply}
+                editable={!checking}
+              />
+            </View>
+            <Button
+              label={checking ? t('checkout.promoApplying') : t('checkout.promoApply')}
+              variant="secondary"
+              size="md"
+              fullWidth={false}
+              loading={checking}
+              disabled={checking || input.trim().length === 0}
+              onPress={onApply}
+              style={{ marginBottom: error ? 26 : 2 }}
+            />
+          </View>
+        </View>
+      ) : null}
+    </View>
+  );
 }

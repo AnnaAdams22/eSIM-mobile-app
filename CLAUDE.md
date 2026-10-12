@@ -20,8 +20,12 @@ Its rules and API live in `../esim-backend/CLAUDE.md`.
 - **i18next / react-i18next / expo-localization** (English only for now).
 - **expo-image**, **expo-font**, **@expo-google-fonts/inter**.
 - Icons: **lucide-react-native** (the one icon set — use it everywhere).
-- Runs in **Expo Go**. No Stripe / Apple-sign-in / other native payment/auth
-  libraries yet — those come in later tasks.
+- **Payments: `@stripe/stripe-react-native`** (native PaymentSheet) + Apple Pay /
+  Google Pay. **`expo-clipboard`** for copyable activation details.
+- Runs as a **development build** (`expo-dev-client`) built with **EAS**, **not
+  Expo Go** — the Stripe SDK is native. Build once, then use `expo start
+  --dev-client` for fast JS reloads (see "How to run"). Apple-sign-in and other
+  native auth libraries are still later tasks.
 
 ## Folder structure
 ```
@@ -128,13 +132,33 @@ and set the slot to its `require(...)`. Slots that need real photography:
   left blank for the owner to fill in.
 
 ## How to run
+The app needs a **development build** (the Stripe SDK is native — Expo Go can no
+longer run it).
 ```
 npm install
-# fill in the two publishable keys in .env
-npx expo start        # then open in Expo Go (scan the QR), or press i / a
+# fill in the two publishable keys in .env (Supabase + Stripe, both pk_*)
+
+# One-time: log in and link the EAS project.
+npx eas-cli login          # or: npx eas login
+npx eas init               # creates the project + writes extra.eas.projectId
+
+# Build the Android dev client (cloud build; installs as an APK on the phone).
+npx eas build --profile development --platform android
+#   → open the QR / URL it prints on the phone and install the APK.
+# (iOS dev client needs a registered device: npx eas device:create, then
+#  npx eas build --profile development --platform ios.)
+
+# Day-to-day: start the JS dev server and open the installed dev build.
+npx expo start --dev-client   # scan the QR with the dev build (not Expo Go)
 ```
 The dev-only design system preview is at the route `/dev/design` (there's a link
 on the Home screen in dev builds). It is not reachable in production builds.
+
+**EAS build profiles** (`eas.json`): `development` (dev client, internal, Android
+APK), `preview` (internal APK, release JS), `production`. `development`/`preview`
+point `EXPO_PUBLIC_API_URL` at staging; `production` has a placeholder to fill in
+at launch. Cloud builds also need the two publishable keys — add them to each
+profile's `env` (or as EAS env vars) before building, mirroring `.env`.
 
 ## Status
 **Task 1 complete** — project scaffolded (Expo SDK 57 + TS + expo-router),
@@ -156,5 +180,28 @@ wired, config with fail-fast validation, and a dev-only design preview.
 - Tests: `jest-expo` wired (`npm test`); unit tests cover grouping, sorting,
   lowest price, formatting, continent fallback and search.
 
-`tsc --noEmit`, `expo lint` and `npm test` all pass; the app bundles for iOS.
-Checkout, My eSIMs, auth and install flows are still later tasks.
+**Task 3 complete** — native Stripe checkout + order success, and the move to a
+development build:
+- Dev build: `expo-dev-client` + `@stripe/stripe-react-native` (Stripe config
+  plugin in `app.json`, merchant id `merchant.net.esimglobal.app`, Google Pay
+  on), `eas.json` with development/preview/production profiles, and `.npmrc`
+  (`legacy-peer-deps`) for cloud installs. `StripeProvider` wraps the app root
+  (publishable key + `esimglobal://` url scheme).
+- Checkout (`app/checkout.tsx`): plan summary, "Receipt sent to {email}", a
+  collapsible promo code (POST `/api/me/promo/validate`, friendly error mapping,
+  removable), a server-sourced order summary, and a navy "Pay now · €X.XX"
+  button driving `initPaymentSheet`/`presentPaymentSheet` (CustomerSession via
+  `customerId` + `customerSessionClientSecret`, themed appearance, Apple/Google
+  Pay, return URL). One `client_request_id` (UUID) per attempt, reused on retry.
+- Order success (`app/order-success.tsx`): polls
+  `/api/me/orders/by-payment-intent/:id` every 2s (404 = processing); calm
+  processing state, then QR on a white card, iOS one-tap install, manual SM-DP+ /
+  activation details (copy + haptic), 60s timeout and failed/refund states.
+  Reached via `router.replace` so "back" can't re-enter the paid checkout.
+- Pure, unit-tested modules in `src/features/checkout/`: LPA parser, promo error
+  mapping, the polling state machine, and the request-id-reuse holder (plus
+  `src/lib/money.ts` EUR formatter mirroring the backend).
+
+`tsc --noEmit`, `expo lint` and `npm test` (114 tests) all pass; the app bundles
+for iOS (`expo export`). My eSIMs, auth polish and install-guide deep links are
+still later tasks.

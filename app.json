@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "ESIM Global",
-    "slug": "esim-global-mobile",
+    "slug": "esim-global",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -47,7 +47,14 @@
           "backgroundColor": "#F4F1EC"
         }
       ],
-      "expo-web-browser"
+      "expo-web-browser",
+      [
+        "@stripe/stripe-react-native",
+        {
+          "merchantIdentifier": "merchant.net.esimglobal.app",
+          "enableGooglePay": true
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true

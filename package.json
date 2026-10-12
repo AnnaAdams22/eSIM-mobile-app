@@ -13,10 +13,13 @@
   },
   "dependencies": {
     "@expo-google-fonts/inter": "^0.4.2",
+    "@stripe/stripe-react-native": "0.64.0",
     "@supabase/supabase-js": "^2.109.0",
     "@tanstack/react-query": "^5.104.1",
     "expo": "~57.0.27",
+    "expo-clipboard": "~57.0.2",
     "expo-constants": "~57.0.21",
+    "expo-dev-client": "~57.0.19",
     "expo-font": "~57.0.4",
     "expo-haptics": "~57.0.3",
     "expo-image": "~57.0.5",

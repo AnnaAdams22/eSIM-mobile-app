@@ -10,6 +10,7 @@ import * as SplashScreen from 'expo-splash-screen';
 import { NavigationBar } from 'expo-navigation-bar';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { StripeProvider } from '@stripe/stripe-react-native';
 import {
   useFonts,
   Inter_300Light,
@@ -23,7 +24,7 @@ import '@/i18n';
 import { ConfigError } from '@/components/ConfigError';
 import { AuthProvider } from '@/features/auth';
 import { queryClient } from '@/lib/queryClient';
-import { missingConfigKeys } from '@/config';
+import { config, missingConfigKeys } from '@/config';
 import { lightTheme } from '@/theme';
 
 SplashScreen.preventAutoHideAsync().catch(() => {});
@@ -52,20 +53,28 @@ export default function RootLayout() {
     missing.length > 0 && !bypassConfig ? (
       <ConfigError missing={missing} onBypass={() => setBypassConfig(true)} />
     ) : (
-      <AuthProvider>
-        <Stack
-          screenOptions={{
-            headerShown: false,
-            contentStyle: { backgroundColor: lightTheme.colors.background },
-            animation: 'slide_from_right',
-          }}
-        >
-          <Stack.Screen name="(tabs)" />
-          <Stack.Screen name="checkout" options={{ presentation: 'modal' }} />
-          <Stack.Screen name="order-success" options={{ presentation: 'modal' }} />
-          <Stack.Screen name="(auth)" options={{ presentation: 'modal' }} />
-        </Stack>
-      </AuthProvider>
+      // Stripe needs the publishable key and our URL scheme so redirect-based
+      // payment methods (and 3DS) can return to the app via esimglobal://.
+      <StripeProvider
+        publishableKey={config.stripePublishableKey}
+        merchantIdentifier="merchant.net.esimglobal.app"
+        urlScheme="esimglobal"
+      >
+        <AuthProvider>
+          <Stack
+            screenOptions={{
+              headerShown: false,
+              contentStyle: { backgroundColor: lightTheme.colors.background },
+              animation: 'slide_from_right',
+            }}
+          >
+            <Stack.Screen name="(tabs)" />
+            <Stack.Screen name="checkout" options={{ presentation: 'modal' }} />
+            <Stack.Screen name="order-success" options={{ presentation: 'modal' }} />
+            <Stack.Screen name="(auth)" options={{ presentation: 'modal' }} />
+          </Stack>
+        </AuthProvider>
+      </StripeProvider>
     );
 
   return (

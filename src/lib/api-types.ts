@@ -88,6 +88,32 @@ export type PromoValidation =
       currency: Currency;
     };
 
+// ─── Order poll (GET /api/me/orders/by-payment-intent/:id) ──────────────────
+
+/**
+ * Public order status, as returned by `toPublicOrder`
+ * (../esim-backend/src/routes/checkout.js). The endpoint 404s until the order
+ * row exists; `iccid`/`qr_code`/`ios_tap_link` are null until provisioning runs.
+ */
+export interface OrderStatus {
+  session_id: string | null;
+  status: string;
+  plan_id: string;
+  price_eur_cents: number;
+  price_display: string;
+  amount_paid_eur_cents: number;
+  amount_paid_display: string;
+  discount_eur_cents: number;
+  discount_display: string;
+  currency: Currency;
+  iccid: string | null;
+  qr_code: string | null; // base64 data URI
+  ios_tap_link: string | null;
+  failure_reason: string | null;
+  support_state: SupportState;
+  created_at: string;
+}
+
 // ─── Account (GET /api/me) ──────────────────────────────────────────────────
 
 export interface Me {

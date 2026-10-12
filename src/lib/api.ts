@@ -19,6 +19,7 @@ import type {
   EsimsResponse,
   EsimUsage,
   Me,
+  OrderStatus,
   PaymentSheetRequest,
   PaymentSheetResponse,
   PlansResponse,
@@ -169,6 +170,11 @@ export const api = {
     }),
   createPaymentSheet: (payload: PaymentSheetRequest) =>
     request<PaymentSheetResponse>('/api/me/payment-sheet', { method: 'POST', body: payload }),
+  /** Poll for the order a PaymentIntent produced. 404 until the order exists. */
+  getOrderByPaymentIntent: (paymentIntentId: string) =>
+    request<OrderStatus>(
+      `/api/me/orders/by-payment-intent/${encodeURIComponent(paymentIntentId)}`
+    ),
 
   // My eSIMs.
   getEsims: () => request<EsimsResponse>('/api/me/esims'),
