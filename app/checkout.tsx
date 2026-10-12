@@ -11,7 +11,7 @@
  */
 
 import { useMemo, useRef, useState } from 'react';
-import { ScrollView, View } from 'react-native';
+import { Alert, ScrollView, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
@@ -31,18 +31,17 @@ import {
 import { Flag } from '@/components/Flag';
 import { usePlans } from '@/hooks/usePlans';
 import { useAuth } from '@/features/auth';
-import {
-  buildDestinations,
-  buildRegions,
-  formatPlanLabel,
-} from '@/features/catalog';
+import { formatPlanLabel, resolveGeoDisplay } from '@/features/catalog';
 import {
   buildPaymentSheetAppearance,
   makeRequestIdHolder,
   promoErrorKey,
 } from '@/features/checkout';
+import { requestTopupSheet, type ReplaceInfo } from '@/features/esims';
+import { formatDataSize } from '@/features/esims';
 import { api, ApiError } from '@/lib/api';
-import type { Plan, PromoValidation } from '@/lib/api-types';
+import type { Plan, PaymentSheetResponse, PromoValidation } from '@/lib/api-types';
+import { formatShortDate } from '@/lib/date';
 import { config } from '@/config';
 import { formatEurCents } from '@/lib/money';
 import { errorNotify, lightTap, successNotify } from '@/lib/haptics';
@@ -60,15 +59,12 @@ interface AppliedPromo {
 
 /** Resolve the flag + human title for a plan from the catalog groupings. */
 function planSummary(plans: Plan[], plan: Plan): { flag: string | null; title: string } {
-  if (plan.countryIso2) {
-    const dest = buildDestinations(plans).find((d) => d.iso2 === plan.countryIso2!.toUpperCase());
-    if (dest) return { flag: dest.flag, title: dest.name };
-  }
-  if (plan.plan_type) {
-    const region = buildRegions(plans).find((r) => r.key === plan.plan_type);
-    if (region) return { flag: region.flag, title: region.name };
-  }
-  return { flag: plan.image, title: plan.countries_included?.trim() || plan.name };
+  return resolveGeoDisplay(plans, {
+    countryIso2: plan.countryIso2,
+    planType: plan.plan_type,
+    fallbackFlag: plan.image,
+    fallbackTitle: plan.countries_included?.trim() || plan.name,
+  });
 }
 
 export default function CheckoutScreen() {
@@ -76,7 +72,15 @@ export default function CheckoutScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { t } = useTranslation();
-  const { planId } = useLocalSearchParams<{ planId?: string }>();
+  const { planId, iccid, acceptReplace } = useLocalSearchParams<{
+    planId?: string;
+    /** Present ⇒ this is a top-up of the given eSIM. */
+    iccid?: string;
+    /** "true" when the user already accepted a plan replacement on the options screen. */
+    acceptReplace?: string;
+  }>();
+  const isTopup = !!iccid;
+  const acceptReplaceParam = acceptReplace === 'true';
 
   const { user } = useAuth();
   const email = user?.email ?? null;
@@ -106,7 +110,7 @@ export default function CheckoutScreen() {
   if (isError) {
     return (
       <Screen scroll={false}>
-        <Header title={t('checkout.title')} onBack={() => router.back()} />
+        <Header title={t(isTopup ? 'topup.title' : 'checkout.title')} onBack={() => router.back()} />
         <ErrorState onRetry={() => refetch()} />
       </Screen>
     );
@@ -114,7 +118,7 @@ export default function CheckoutScreen() {
   if (isLoading) {
     return (
       <Screen>
-        <Header title={t('checkout.title')} onBack={() => router.back()} />
+        <Header title={t(isTopup ? 'topup.title' : 'checkout.title')} onBack={() => router.back()} />
         <Skeleton height={88} radius="lg" />
         <Skeleton height={48} radius="md" style={{ marginTop: theme.spacing.lg }} />
         <Skeleton height={120} radius="lg" style={{ marginTop: theme.spacing.lg }} />
@@ -124,7 +128,7 @@ export default function CheckoutScreen() {
   if (!plan || !summary) {
     return (
       <Screen scroll={false}>
-        <Header title={t('checkout.title')} onBack={() => router.back()} />
+        <Header title={t(isTopup ? 'topup.title' : 'checkout.title')} onBack={() => router.back()} />
         <ErrorState
           title={t('checkout.notFoundTitle')}
           body={t('checkout.notFoundBody')}
@@ -178,6 +182,30 @@ export default function CheckoutScreen() {
     requestId.reset(); // amount changed → new idempotency key
   };
 
+  // A native confirm for a plan-replacing top-up, resolving true to proceed.
+  const confirmReplace = (info: ReplaceInfo) =>
+    new Promise<boolean>((resolve) => {
+      const amount = formatDataSize(info.dataLeftMb);
+      const date = formatShortDate(info.expiresAt);
+      const body =
+        amount && date
+          ? t('topup.confirmBody', { amount, date })
+          : t('topup.confirmBodyNoDate');
+      Alert.alert(
+        t('topup.confirmTitle'),
+        body,
+        [
+          { text: t('common.cancel'), style: 'cancel', onPress: () => resolve(false) },
+          {
+            text: t('topup.confirmReplace'),
+            style: 'destructive',
+            onPress: () => resolve(true),
+          },
+        ],
+        { cancelable: true, onDismiss: () => resolve(false) }
+      );
+    });
+
   // ─── Pay ─────────────────────────────────────────────────────────────────
   const pay = async () => {
     if (paying) return; // double-tap guard
@@ -185,11 +213,39 @@ export default function CheckoutScreen() {
     setPaying(true);
     setPayError(null);
     try {
-      const sheet = await api.createPaymentSheet({
-        plan_id: plan.id,
-        promo_code: applied?.code,
-        client_request_id: requestId.current(),
-      });
+      let sheet: PaymentSheetResponse;
+      if (isTopup && iccid) {
+        // Top-up: handle the backend's replace-confirmation 409 (confirm → retry
+        // with accept_replace and a fresh idempotency id) before presenting Stripe.
+        const outcome = await requestTopupSheet(
+          {
+            planId: plan.id,
+            promoCode: applied?.code,
+            clientRequestId: requestId.current(),
+            acceptReplace: acceptReplaceParam,
+          },
+          {
+            createSheet: (payload) => api.createTopupPaymentSheet(iccid, payload),
+            confirmReplace,
+            newRequestId: () => {
+              requestId.reset();
+              return requestId.current();
+            },
+          }
+        );
+        if (!outcome.ok) {
+          // User cancelled the replacement — stay quietly on checkout.
+          setPaying(false);
+          return;
+        }
+        sheet = outcome.sheet;
+      } else {
+        sheet = await api.createPaymentSheet({
+          plan_id: plan.id,
+          promo_code: applied?.code,
+          client_request_id: requestId.current(),
+        });
+      }
 
       const init = await initPaymentSheet({
         merchantDisplayName: 'ESIM Global',
@@ -227,6 +283,7 @@ export default function CheckoutScreen() {
           flag: summary.flag ?? '',
           title: summary.title,
           planLabel,
+          ...(isTopup && iccid ? { mode: 'topup', iccid } : {}),
         },
       });
     } catch (err) {
@@ -249,7 +306,7 @@ export default function CheckoutScreen() {
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
       >
-        <Header title={t('checkout.title')} onBack={() => router.back()} />
+        <Header title={t(isTopup ? 'topup.title' : 'checkout.title')} onBack={() => router.back()} />
 
         {/* Plan summary */}
         <Card padding="lg" radius="lg" shadow="sm">

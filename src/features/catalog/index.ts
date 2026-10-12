@@ -41,3 +41,6 @@ export { POPULAR_DESTINATIONS, POPULAR_DESTINATIONS_LIMIT } from './config';
 
 export { heroImage, destinationImage, countryPhoto } from './images';
 export type { HeroSlot } from './images';
+
+export { resolveGeoDisplay } from './geo';
+export type { GeoDisplay, GeoInput } from './geo';

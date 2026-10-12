@@ -160,6 +160,22 @@ point `EXPO_PUBLIC_API_URL` at staging; `production` has a placeholder to fill i
 at launch. Cloud builds also need the two publishable keys — add them to each
 profile's `env` (or as EAS env vars) before building, mirroring `.env`.
 
+## Git & SSH
+- Remote: `origin = git@github.com:AnnaAdams22/eSIM-mobile-app.git`. Day-to-day
+  work is on `main`; feature work on `feat/*` branches.
+- Git identity for this repo MUST be **`nomiich <naumanch456@gmail.com>`**. Check
+  with `git config user.name` / `git config user.email` before committing; if
+  either differs, set them **repo-locally** (`git config user.name "nomiich"`,
+  `git config user.email "naumanch456@gmail.com"`). Never use another identity,
+  and never change the global git config.
+- For ANY git network command (push/pull/fetch), run it as ONE chained command
+  so the right key is loaded:
+  ```
+  eval "$(ssh-agent -s)" && ssh-add ~/.ssh/id_ed25519_nomiich && git push ...
+  ```
+  If `ssh-add` asks for a passphrase or fails, STOP and ask the owner. Never
+  change SSH config or remotes, and never switch to HTTPS.
+
 ## Status
 **Task 1 complete** — project scaffolded (Expo SDK 57 + TS + expo-router),
 approved dependencies installed, branding assets generated, full design system
@@ -202,6 +218,32 @@ development build:
   mapping, the polling state machine, and the request-id-reuse holder (plus
   `src/lib/money.ts` EUR formatter mirroring the backend).
 
-`tsc --noEmit`, `expo lint` and `npm test` (114 tests) all pass; the app bundles
-for iOS (`expo export`). My eSIMs, auth polish and install-guide deep links are
-still later tasks.
+**Task 4 complete** — My eSIMs tab, eSIM detail with live usage, and in-app
+top-up (branch `feat/my-esims`):
+- My eSIMs tab (`app/(tabs)/esims.tsx`): Active/Past segmented list, one
+  `EsimCard` per eSIM (flag, destination, plan, status badge, signal icon,
+  shortened copyable ICCID, active-until/activation line), quick actions (Add
+  eSIM / Top up / Support), empty + error + loading states, pull-to-refresh.
+  Active vs Past is decided from LIVE usage, fetched per-ICCID (60s stale to
+  match the backend cache); an eSIM is Past only when expired/failed/refunded,
+  and stays Active (with a date skeleton) until its usage loads.
+- eSIM detail (`app/esim/[iccid]/index.tsx`): usage card with an accessible
+  `UsageMeter`, "{x} left of {y}", activated/expires dates and a relative "last
+  updated" + refresh; the shared install section before activation; order
+  history; a sticky Top up.
+- Top-up (`app/esim/[iccid]/topup.tsx`): options with the same-plan
+  "accumulates" option first, replace-confirmation before paying; reuses
+  `app/checkout.tsx` in a **topup mode** (`iccid` + `acceptReplace`) which handles
+  the backend's 409 `replace_confirmation_required` (confirm → retry with a NEW
+  `client_request_id`); `app/order-success.tsx` reused for a no-QR "Top-up added"
+  state that refetches usage and invalidates the eSIM queries.
+- Shared/pure: install UI extracted to `src/components/esim/InstallSection.tsx`
+  (QR, iOS one-tap, manual SM-DP+/activation copy) so checkout-success and detail
+  share it; `resolveGeoDisplay` in `src/features/catalog`; pure, unit-tested
+  `src/features/esims/` (Active/Past classification, MB/GB formatting, the
+  replace-confirm decision, and the 409→confirm→retry flow). `ApiError` split to
+  `src/lib/api-error.ts` so pure code imports it without Supabase.
+
+`tsc --noEmit`, `expo lint` and `npm test` (146 tests) all pass; the app bundles
+for iOS (`expo export`). Auth polish and install-guide deep links are still later
+tasks.

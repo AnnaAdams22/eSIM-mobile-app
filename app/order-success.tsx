@@ -1,44 +1,40 @@
 /**
- * Order success — the post-payment screen.
+ * Order success — the post-payment screen, shared by new purchases and top-ups.
  *
  * Polls `GET /api/me/orders/by-payment-intent/:id` every 2s while the backend
- * provisions the eSIM (a 404 means "not created yet" → still processing). The
- * visible state is decided by the pure `pollPhase` machine:
+ * provisions (a 404 means "not created yet" → still processing). The visible
+ * state is decided by the pure `pollPhase` machine:
  *
- *   processing → a calm "Setting up your eSIM…" state
- *   success    → QR + one-tap iOS install + manual (SM-DP+ / activation) details
+ *   processing → a calm "Setting up…" state
+ *   success    → purchase: QR + install details; top-up: updated balance, no QR
  *   timeout    → "Still processing, we'll email you" (after 60s)
  *   failed     → reassuring auto-refund message + support
  *
- * The user arrives here via `router.replace`, so "back" can't return to the paid
- * checkout.
+ * In `topup` mode there is no QR (the eSIM is already installed): we show the
+ * refreshed usage and offer "View eSIM" / "Done". On success we invalidate the
+ * eSIMs list (and, for a top-up, that eSIM's detail/usage/options) so every
+ * screen reflects the new state. The user arrives via `router.replace`, so "back"
+ * can't return to the paid checkout.
  */
 
 import { useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, Animated, Easing, Linking, Platform, View } from 'react-native';
-import { Image } from 'expo-image';
-import * as Clipboard from 'expo-clipboard';
+import { ActivityIndicator, Animated, Easing, View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
-import { useQuery } from '@tanstack/react-query';
-import {
-  CheckCircle2,
-  ChevronDown,
-  ChevronUp,
-  Copy,
-  LifeBuoy,
-  Smartphone,
-} from 'lucide-react-native';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { CheckCircle2, LifeBuoy, Smartphone } from 'lucide-react-native';
 
 import { Button, Card, Screen, Text } from '@/components/ui';
 import { Flag } from '@/components/Flag';
+import { InstallSection, UsageMeter } from '@/components/esim';
 import {
   POLL_INTERVAL_MS,
   isTerminal,
-  parseActivationFromTapLink,
   pollPhase,
   type PollPhase,
 } from '@/features/checkout';
+import { formatDataSize, usedFraction } from '@/features/esims';
+import { esimsKeys, invalidateEsim, useEsimUsage } from '@/hooks/useEsims';
 import { api, ApiError } from '@/lib/api';
 import type { OrderStatus } from '@/lib/api-types';
 import { lightTap, successNotify } from '@/lib/haptics';
@@ -48,22 +44,23 @@ import { useTheme } from '@/theme';
 export default function OrderSuccessScreen() {
   const theme = useTheme();
   const router = useRouter();
-  const { paymentIntentId, flag, title, planLabel } = useLocalSearchParams<{
+  const queryClient = useQueryClient();
+  const { paymentIntentId, flag, title, planLabel, mode, iccid } = useLocalSearchParams<{
     paymentIntentId?: string;
     flag?: string;
     title?: string;
     planLabel?: string;
+    mode?: string;
+    iccid?: string;
   }>();
+  const isTopup = mode === 'topup';
 
-  // The clock: `startedAt` is fixed at mount (lazy init); the ticking `now` state
-  // drives re-renders so the 60s timeout transition fires on its own.
   const [startedAt] = useState(() => Date.now());
   const [now, setNow] = useState(() => Date.now());
 
   const { data: order } = useQuery({
     queryKey: ['order-by-pi', paymentIntentId],
     enabled: !!paymentIntentId,
-    // A 404 means the order row isn't there yet — model it as "still processing".
     queryFn: async (): Promise<OrderStatus | null> => {
       try {
         return await api.getOrderByPaymentIntent(paymentIntentId!);
@@ -80,7 +77,6 @@ export default function OrderSuccessScreen() {
       );
       return isTerminal(phase) ? false : POLL_INTERVAL_MS;
     },
-    // Each poll is a fresh snapshot; never serve stale across mounts.
     staleTime: 0,
     gcTime: 0,
   });
@@ -91,36 +87,52 @@ export default function OrderSuccessScreen() {
   );
   const terminal = isTerminal(phase);
 
-  // Tick once a second while processing so the 60s timeout transition fires even
-  // if the poll result doesn't change. Stops as soon as we reach a terminal phase.
   useEffect(() => {
     if (terminal) return;
     const id = setInterval(() => setNow(Date.now()), 1000);
     return () => clearInterval(id);
   }, [terminal]);
 
-  // A single success haptic when the eSIM lands.
+  // Single success haptic, and refresh every screen that shows this eSIM / the list.
   const celebrated = useRef(false);
   useEffect(() => {
-    if (phase === 'success' && !celebrated.current) {
-      celebrated.current = true;
-      successNotify();
+    if (phase !== 'success' || celebrated.current) return;
+    celebrated.current = true;
+    successNotify();
+    if (isTopup && iccid) {
+      void invalidateEsim(queryClient, iccid);
+    } else {
+      void queryClient.invalidateQueries({ queryKey: esimsKeys.list });
     }
-  }, [phase]);
+  }, [phase, isTopup, iccid, queryClient]);
 
   const goToEsims = () => {
     lightTap();
     router.replace('/(tabs)/esims');
   };
+  const goToEsim = () => {
+    lightTap();
+    if (iccid) router.replace({ pathname: '/esim/[iccid]', params: { iccid } });
+    else router.replace('/(tabs)/esims');
+  };
 
   return (
     <Screen scroll edges={['top', 'bottom']} contentStyle={{ paddingBottom: theme.spacing.xl }}>
       {phase === 'processing' ? (
-        <ProcessingState />
+        <ProcessingState isTopup={isTopup} />
       ) : phase === 'timeout' ? (
-        <TimeoutState onGoToEsims={goToEsims} />
+        <TimeoutState isTopup={isTopup} onGoToEsims={isTopup ? goToEsim : goToEsims} />
       ) : phase === 'failed' ? (
-        <FailedState onGoToEsims={goToEsims} />
+        <FailedState isTopup={isTopup} onGoToEsims={goToEsims} />
+      ) : isTopup ? (
+        <TopupSuccessState
+          iccid={iccid || null}
+          flag={flag || null}
+          title={title || ''}
+          planLabel={planLabel || ''}
+          onViewEsim={goToEsim}
+          onDone={goToEsims}
+        />
       ) : (
         <SuccessState
           order={order!}
@@ -134,9 +146,41 @@ export default function OrderSuccessScreen() {
   );
 }
 
-// ─── Processing ─────────────────────────────────────────────────────────────
+// ─── Plan summary card (shared) ───────────────────────────────────────────────
 
-function ProcessingState() {
+function PlanSummaryCard({
+  flag,
+  title,
+  planLabel,
+}: {
+  flag: string | null;
+  title: string;
+  planLabel: string;
+}) {
+  const theme = useTheme();
+  if (!title) return null;
+  return (
+    <Card padding="lg" radius="lg" shadow="sm">
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: theme.spacing.md }}>
+        <Flag uri={flag} size={40} />
+        <View style={{ flex: 1 }}>
+          <Text variant="h3" numberOfLines={1}>
+            {title}
+          </Text>
+          {planLabel ? (
+            <Text variant="bodySmall" color="textSecondary" numberOfLines={1}>
+              {planLabel}
+            </Text>
+          ) : null}
+        </View>
+      </View>
+    </Card>
+  );
+}
+
+// ─── Processing ───────────────────────────────────────────────────────────────
+
+function ProcessingState({ isTopup }: { isTopup: boolean }) {
   const theme = useTheme();
   const { t } = useTranslation();
   const reduced = useReducedMotion();
@@ -190,17 +234,17 @@ function ProcessingState() {
       </Animated.View>
       <View style={{ gap: theme.spacing.xs, alignItems: 'center' }}>
         <Text variant="h2" center accessibilityRole="header">
-          {t('orderSuccess.processingTitle')}
+          {t(isTopup ? 'orderSuccess.topupProcessingTitle' : 'orderSuccess.processingTitle')}
         </Text>
         <Text variant="body" color="textSecondary" center style={{ maxWidth: 300 }}>
-          {t('orderSuccess.processingBody')}
+          {t(isTopup ? 'orderSuccess.topupProcessingBody' : 'orderSuccess.processingBody')}
         </Text>
       </View>
     </View>
   );
 }
 
-// ─── Success ────────────────────────────────────────────────────────────────
+// ─── Success (new purchase) ───────────────────────────────────────────────────
 
 function SuccessState({
   order,
@@ -219,23 +263,8 @@ function SuccessState({
   const router = useRouter();
   const { t } = useTranslation();
 
-  const qrUri = order.qr_code
-    ? order.qr_code.startsWith('data:')
-      ? order.qr_code
-      : `data:image/png;base64,${order.qr_code}`
-    : null;
-  const manual = parseActivationFromTapLink(order.ios_tap_link);
-  const canTapInstall = Platform.OS === 'ios' && !!order.ios_tap_link;
-
-  const openTapLink = () => {
-    if (!order.ios_tap_link) return;
-    lightTap();
-    Linking.openURL(order.ios_tap_link).catch(() => {});
-  };
-
   return (
     <View style={{ gap: theme.spacing.lg }}>
-      {/* Success header */}
       <View style={{ alignItems: 'center', gap: theme.spacing.sm, marginTop: theme.spacing.md }}>
         <CheckCircle2 size={56} color={theme.colors.success} />
         <Text variant="display" center accessibilityRole="header">
@@ -246,79 +275,19 @@ function SuccessState({
         </Text>
       </View>
 
-      {/* Plan summary */}
-      {title ? (
-        <Card padding="lg" radius="lg" shadow="sm">
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: theme.spacing.md }}>
-            <Flag uri={flag} size={40} />
-            <View style={{ flex: 1 }}>
-              <Text variant="h3" numberOfLines={1}>
-                {title}
-              </Text>
-              {planLabel ? (
-                <Text variant="bodySmall" color="textSecondary" numberOfLines={1}>
-                  {planLabel}
-                </Text>
-              ) : null}
-            </View>
-          </View>
-        </Card>
-      ) : null}
+      <PlanSummaryCard flag={flag} title={title} planLabel={planLabel} />
 
-      {/* QR code on a white card, large enough to scan from another device */}
-      {qrUri ? (
-        <Card padding="lg" radius="lg" shadow="sm" style={{ alignItems: 'center' }}>
-          <Text variant="h3" center>
-            {t('orderSuccess.scanTitle')}
-          </Text>
-          <Text
-            variant="bodySmall"
-            color="textSecondary"
-            center
-            style={{ marginTop: theme.spacing.xs, marginBottom: theme.spacing.md, maxWidth: 280 }}
-          >
-            {t('orderSuccess.scanBody')}
-          </Text>
-          <View
-            style={{
-              backgroundColor: '#FFFFFF',
-              padding: theme.spacing.md,
-              borderRadius: theme.radii.md,
-              borderWidth: 1,
-              borderColor: theme.colors.border,
-            }}
-          >
-            <Image
-              source={{ uri: qrUri }}
-              style={{ width: 220, height: 220 }}
-              contentFit="contain"
-              accessibilityLabel={t('orderSuccess.scanTitle')}
-            />
-          </View>
-        </Card>
-      ) : null}
+      <InstallSection qrCode={order.qr_code} iosTapLink={order.ios_tap_link} />
 
-      {/* iOS one-tap install */}
-      {canTapInstall ? (
-        <Button
-          label={t('orderSuccess.installIphone')}
-          onPress={openTapLink}
-          accessibilityHint={t('orderSuccess.installIphoneHint')}
-          icon={<Smartphone size={18} color={theme.colors.onPrimary} />}
-        />
-      ) : null}
-
-      {/* Manual setup (Android + anyone who prefers it) */}
-      {manual ? (
-        <ManualSetup smdpAddress={manual.smdpAddress} activationCode={manual.activationCode} />
-      ) : null}
-
-      {/* Activation note */}
-      <Text variant="bodySmall" color="textSecondary" center style={{ paddingHorizontal: theme.spacing.md }}>
+      <Text
+        variant="bodySmall"
+        color="textSecondary"
+        center
+        style={{ paddingHorizontal: theme.spacing.md }}
+      >
         {t('orderSuccess.activationNote')}
       </Text>
 
-      {/* Actions */}
       <View style={{ gap: theme.spacing.sm, marginTop: theme.spacing.sm }}>
         <Button label={t('orderSuccess.viewEsims')} onPress={onGoToEsims} />
         <Button
@@ -334,136 +303,97 @@ function SuccessState({
   );
 }
 
-function ManualSetup({
-  smdpAddress,
-  activationCode,
+// ─── Success (top-up) ─────────────────────────────────────────────────────────
+
+function TopupSuccessState({
+  iccid,
+  flag,
+  title,
+  planLabel,
+  onViewEsim,
+  onDone,
 }: {
-  smdpAddress: string;
-  activationCode: string;
+  iccid: string | null;
+  flag: string | null;
+  title: string;
+  planLabel: string;
+  onViewEsim: () => void;
+  onDone: () => void;
 }) {
   const theme = useTheme();
   const { t } = useTranslation();
-  const [open, setOpen] = useState(Platform.OS === 'android');
+  // Usage was invalidated on success, so this reads the fresh post-top-up balance.
+  const { data: usage } = useEsimUsage(iccid, !!iccid);
+
+  const left = formatDataSize(usage?.data_left_mb);
+  const total = formatDataSize(usage?.data_total_mb);
+  const fraction = usage ? usedFraction(usage) : null;
 
   return (
-    <Card padding="lg" radius="lg" shadow="sm">
-      <Button
-        label={t('orderSuccess.installManualTitle')}
-        variant="ghost"
-        size="md"
-        fullWidth={false}
-        onPress={() => {
-          lightTap();
-          setOpen((v) => !v);
-        }}
-        icon={
-          open ? (
-            <ChevronUp size={18} color={theme.colors.primary} />
-          ) : (
-            <ChevronDown size={18} color={theme.colors.primary} />
-          )
-        }
-        style={{ alignSelf: 'flex-start' }}
-      />
-      {open ? (
-        <View style={{ marginTop: theme.spacing.sm, gap: theme.spacing.md }}>
-          <Text variant="bodySmall" color="textSecondary">
-            {t('orderSuccess.installManualHint')}
-          </Text>
-          <CopyField label={t('orderSuccess.smdpLabel')} value={smdpAddress} />
-          <CopyField label={t('orderSuccess.activationLabel')} value={activationCode} />
-        </View>
-      ) : null}
-    </Card>
-  );
-}
-
-function CopyField({ label, value }: { label: string; value: string }) {
-  const theme = useTheme();
-  const { t } = useTranslation();
-  const [copied, setCopied] = useState(false);
-  const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  useEffect(() => () => {
-    if (timer.current) clearTimeout(timer.current);
-  }, []);
-
-  const copy = async () => {
-    await Clipboard.setStringAsync(value);
-    lightTap();
-    setCopied(true);
-    if (timer.current) clearTimeout(timer.current);
-    timer.current = setTimeout(() => setCopied(false), 1600);
-  };
-
-  return (
-    <View style={{ gap: theme.spacing.xs }}>
-      <Text variant="caption" color="textSecondary">
-        {label}
-      </Text>
-      <View
-        style={{
-          flexDirection: 'row',
-          alignItems: 'center',
-          gap: theme.spacing.sm,
-          backgroundColor: theme.colors.surfaceMuted,
-          borderRadius: theme.radii.md,
-          paddingLeft: theme.spacing.md,
-          paddingRight: theme.spacing.xs,
-          paddingVertical: theme.spacing.xs,
-          minHeight: theme.layout.minTouchTarget,
-        }}
-      >
-        <Text variant="body" style={{ flex: 1, fontFamily: theme.fontFamily.medium }} numberOfLines={1}>
-          {value}
+    <View style={{ gap: theme.spacing.lg }}>
+      <View style={{ alignItems: 'center', gap: theme.spacing.sm, marginTop: theme.spacing.md }}>
+        <CheckCircle2 size={56} color={theme.colors.success} />
+        <Text variant="display" center accessibilityRole="header">
+          {t('orderSuccess.topupSuccessTitle')}
         </Text>
-        <Button
-          label={copied ? t('orderSuccess.copied') : t('orderSuccess.copy')}
-          variant="ghost"
-          size="md"
-          fullWidth={false}
-          onPress={copy}
-          accessibilityHint={t('orderSuccess.copyHint')}
-          icon={
-            copied ? (
-              <CheckCircle2 size={16} color={theme.colors.success} />
-            ) : (
-              <Copy size={16} color={theme.colors.primary} />
-            )
-          }
-        />
+        <Text variant="body" color="textSecondary" center>
+          {t('orderSuccess.topupSuccessBody')}
+        </Text>
+      </View>
+
+      <PlanSummaryCard flag={flag} title={title} planLabel={planLabel} />
+
+      {left && total ? (
+        <Card padding="lg" radius="lg" shadow="sm" style={{ gap: theme.spacing.sm }}>
+          <Text variant="h3">{t('esimDetail.usageTitle')}</Text>
+          <Text variant="bodySmall" color="textSecondary">
+            {t('esimDetail.dataUsedOf', { used: left, total })}
+          </Text>
+          <UsageMeter
+            fraction={fraction}
+            accessibilityLabel={t('esimDetail.dataUsedOf', { used: left, total })}
+          />
+        </Card>
+      ) : null}
+
+      <View style={{ gap: theme.spacing.sm, marginTop: theme.spacing.sm }}>
+        <Button label={t('orderSuccess.viewEsim')} onPress={onViewEsim} />
+        <Button label={t('orderSuccess.done')} variant="secondary" onPress={onDone} />
       </View>
     </View>
   );
 }
 
-// ─── Timeout ────────────────────────────────────────────────────────────────
+// ─── Timeout ──────────────────────────────────────────────────────────────────
 
-function TimeoutState({ onGoToEsims }: { onGoToEsims: () => void }) {
+function TimeoutState({ isTopup, onGoToEsims }: { isTopup: boolean; onGoToEsims: () => void }) {
   const theme = useTheme();
   const { t } = useTranslation();
   return (
     <CenteredNotice
       icon={<Smartphone size={48} color={theme.colors.accent} />}
-      title={t('orderSuccess.timeoutTitle')}
-      body={t('orderSuccess.timeoutBody')}
+      title={t(isTopup ? 'orderSuccess.topupTimeoutTitle' : 'orderSuccess.timeoutTitle')}
+      body={t(isTopup ? 'orderSuccess.topupTimeoutBody' : 'orderSuccess.timeoutBody')}
     >
-      <Button label={t('orderSuccess.viewEsims')} onPress={onGoToEsims} />
+      <Button
+        label={t(isTopup ? 'orderSuccess.viewEsim' : 'orderSuccess.viewEsims')}
+        onPress={onGoToEsims}
+      />
     </CenteredNotice>
   );
 }
 
-// ─── Failed / refunded ──────────────────────────────────────────────────────
+// ─── Failed / refunded ────────────────────────────────────────────────────────
 
-function FailedState({ onGoToEsims }: { onGoToEsims: () => void }) {
+function FailedState({ isTopup, onGoToEsims }: { isTopup: boolean; onGoToEsims: () => void }) {
   const theme = useTheme();
   const router = useRouter();
   const { t } = useTranslation();
   return (
     <CenteredNotice
       icon={<LifeBuoy size={48} color={theme.colors.discount} />}
-      title={t('orderSuccess.failedTitle')}
-      body={t('orderSuccess.failedBody')}
+      title={t(isTopup ? 'orderSuccess.topupFailedTitle' : 'orderSuccess.failedTitle')}
+      body={t(isTopup ? 'orderSuccess.topupFailedBody' : 'orderSuccess.failedBody')}
     >
       <Button
         label={t('orderSuccess.contactSupport')}
@@ -492,7 +422,12 @@ function CenteredNotice({
   return (
     <View
       accessibilityLiveRegion="polite"
-      style={{ flex: 1, justifyContent: 'center', paddingVertical: theme.spacing.huge, gap: theme.spacing.lg }}
+      style={{
+        flex: 1,
+        justifyContent: 'center',
+        paddingVertical: theme.spacing.huge,
+        gap: theme.spacing.lg,
+      }}
     >
       <View style={{ alignItems: 'center', gap: theme.spacing.sm }}>
         {icon}

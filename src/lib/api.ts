@@ -13,6 +13,7 @@
 
 import { config } from '@/config';
 import { supabase } from './supabase';
+import { ApiError, TimeoutError } from './api-error';
 import type {
   ApiErrorBody,
   EsimDetail,
@@ -31,27 +32,9 @@ import type {
 
 const DEFAULT_TIMEOUT_MS = 15000;
 
-/** A structured error carrying the backend's `{ error, code }` plus HTTP status. */
-export class ApiError extends Error {
-  readonly status: number;
-  readonly code?: string;
-  readonly body?: ApiErrorBody;
-
-  constructor(status: number, body?: ApiErrorBody, message?: string) {
-    super(message ?? body?.error ?? `Request failed (${status})`);
-    this.name = 'ApiError';
-    this.status = status;
-    this.code = body?.code ?? body?.error;
-    this.body = body;
-  }
-}
-
-export class TimeoutError extends Error {
-  constructor() {
-    super('The request timed out.');
-    this.name = 'TimeoutError';
-  }
-}
+// Re-exported so existing importers keep using `@/lib/api`; the classes live in
+// api-error.ts (Supabase-free) so pure code can import them without this module.
+export { ApiError, TimeoutError } from './api-error';
 
 interface RequestOptions {
   method?: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
