@@ -246,9 +246,38 @@
     "emptyBody": "There are no top-ups available for this eSIM right now."
   },
   "installGuide": {
-    "title": "How to install eSIM on iPhone",
+    "title": "How to install an eSIM",
+    "segments": {
+      "iphone": "iPhone",
+      "android": "Android"
+    },
+    "iphoneTitle": "How to install eSIM on iPhone",
+    "androidTitle": "How to install eSIM on Android",
+    "stepA11y": "Step {{number}}",
+    "iphoneSteps": [
+      "After purchase, tap “Install eSIM” — or scan the QR code from another device.",
+      "Open Settings.",
+      "Tap Cellular → Add eSIM.",
+      "Wait for the eSIM to install.",
+      "Done!",
+      "When you arrive, turn on Data Roaming for the eSIM line and enjoy the internet."
+    ],
+    "androidSteps": [
+      "Open Settings → Network & internet (or Connections).",
+      "Tap SIMs → Add eSIM (or “Download a SIM instead”).",
+      "Scan the QR code, or enter the SM-DP+ address and activation code manually.",
+      "When you arrive, turn on mobile data and roaming for the eSIM line."
+    ],
+    "androidNote": "Menu names vary by manufacturer (Samsung, Pixel and others), but the steps are the same.",
+    "tipsTitle": "Tips",
+    "tips": [
+      "Install while you're on Wi-Fi, before you travel.",
+      "Don't delete the eSIM after installing it.",
+      "Your plan starts on your first connection in the destination."
+    ],
     "needHelpTitle": "Need help?",
-    "needHelpBody": "Our support team is here for you 24/7."
+    "needHelpBody": "Our support team is here for you 24/7.",
+    "needHelpAction": "Contact support"
   },
   "explore": {
     "title": "Explore",
@@ -258,27 +287,171 @@
   },
   "profile": {
     "title": "Profile",
-    "myEsims": "My eSIMs",
-    "paymentMethods": "Payment methods",
-    "notifications": "Notifications",
-    "helpSupport": "Help & Support",
-    "about": "About ESIM Global",
-    "deleteAccount": "Delete account",
+    "editHint": "Edit your profile",
+    "menu": {
+      "myEsims": "My eSIMs",
+      "myEsimsHint": "View and manage your eSIMs",
+      "notifications": "Notifications",
+      "notificationsHint": "Manage notification settings",
+      "language": "Language",
+      "languageHint": "Change the app language",
+      "help": "Help & Support",
+      "helpHint": "FAQs and ways to contact us",
+      "install": "How to install an eSIM",
+      "installHint": "Step-by-step install guide",
+      "about": "About ESIM Global",
+      "aboutHint": "App version and legal information"
+    },
     "signOut": "Sign out",
+    "signOutHint": "Sign out of your account",
     "signOutConfirmTitle": "Sign out?",
     "signOutConfirmMessage": "You'll need to sign in again to manage your eSIMs.",
-    "signOutConfirm": "Sign out"
+    "signOutConfirm": "Sign out",
+    "deleteAccount": "Delete account",
+    "deleteAccountHint": "Permanently delete your account"
+  },
+  "editProfile": {
+    "title": "Edit profile",
+    "nameLabel": "Full name",
+    "namePlaceholder": "Your name",
+    "emailLabel": "Email address",
+    "emailReadonlyNote": "Contact support to change your email.",
+    "changePasswordRow": "Change password",
+    "changePasswordHint": "Update your account password",
+    "save": "Save changes",
+    "saved": "Profile updated",
+    "validation": {
+      "nameRequired": "Please enter your name.",
+      "nameTooLong": "That name is too long."
+    },
+    "errorGeneric": "Couldn't save your changes. Please try again."
+  },
+  "changePassword": {
+    "title": "Change password",
+    "currentLabel": "Current password",
+    "currentPlaceholder": "Your current password",
+    "newLabel": "New password",
+    "confirmLabel": "Confirm new password",
+    "hint": "At least {{count}} characters",
+    "submit": "Update password",
+    "changed": "Password changed",
+    "validation": {
+      "currentRequired": "Enter your current password.",
+      "tooShort": "New password must be at least {{count}} characters.",
+      "mismatch": "New passwords don't match.",
+      "sameAsCurrent": "Your new password must be different from the current one."
+    },
+    "errors": {
+      "incorrectCurrent": "Your current password is incorrect.",
+      "sameAsCurrent": "Your new password must be different from the current one.",
+      "weakPassword": "Please choose a stronger password (at least {{count}} characters).",
+      "rateLimited": "Too many attempts, please wait a moment.",
+      "network": "We couldn't reach the server. Check your connection and try again.",
+      "generic": "Something went wrong. Please try again."
+    }
+  },
+  "language": {
+    "title": "Language",
+    "useDevice": "Use device language",
+    "useDeviceSubtitle": "Match your phone's language",
+    "comingSoonNote": "More languages are coming soon.",
+    "selectHint": "Use {{language}}"
+  },
+  "notifications": {
+    "title": "Notifications",
+    "comingSoonTitle": "Notification settings are coming soon",
+    "comingSoonBody": "You'll be able to manage push notifications here in a future update."
   },
   "support": {
     "title": "Support",
-    "faqs": "FAQs",
-    "faqsSubtitle": "Find answers to common questions",
+    "faqTitle": "FAQs",
+    "faqSubtitle": "Find answers to common questions",
+    "contactTitle": "Get in touch",
     "whatsapp": "WhatsApp",
     "whatsappSubtitle": "Chat with us",
     "instagram": "Instagram",
     "instagramSubtitle": "Send us a message",
     "email": "Email",
-    "hereToHelp": "We're here to help 24/7"
+    "emailSubject": "ESIM Global support — v{{version}}",
+    "bannerTitle": "We're here to help",
+    "bannerSubtitle": "Our support team is available 24/7.",
+    "openHint": "Opens {{channel}}",
+    "expandHint": "Show the answer",
+    "collapseHint": "Hide the answer",
+    "faqItems": [
+      {
+        "q": "What is an eSIM?",
+        "a": "An eSIM is a digital SIM built into your phone. Instead of inserting a plastic SIM card, you install a data plan over the air — so you can get online abroad without swapping or losing your usual SIM."
+      },
+      {
+        "q": "Which phones support eSIM, and how do I check?",
+        "a": "Most recent iPhones (XR/XS and later), Google Pixel (3 and later) and many Samsung Galaxy models support eSIM. To check: on iPhone open Settings → General → About and look for an EID; on Android dial *#06# and look for an EID number. If your phone has an EID, it supports eSIM."
+      },
+      {
+        "q": "When does my plan activate?",
+        "a": "Your plan activates when you first connect to a network in your destination — not when you install the eSIM. You can install it any time before you travel; the validity period only starts counting on first connection."
+      },
+      {
+        "q": "How do I install the eSIM on iPhone?",
+        "a": "After your purchase, tap “Install eSIM” (or scan the QR code from another device), then go to Settings → Cellular → Add eSIM and follow the prompts. When you arrive, turn on Data Roaming for the eSIM line. See “How to install an eSIM” for the full steps."
+      },
+      {
+        "q": "How do I install the eSIM on Android?",
+        "a": "Go to Settings → Network & internet (or Connections) → SIMs → Add eSIM / Download a SIM, then scan the QR code or enter the SM-DP+ address and activation code manually. Menu names vary by manufacturer. When you arrive, turn on mobile data and roaming for the eSIM line."
+      },
+      {
+        "q": "Do I need to turn on data roaming?",
+        "a": "Yes — turn on Data Roaming for the eSIM line only. Your eSIM connects to local networks as a roaming line, so roaming must be on for it to work. Keeping data on the eSIM line avoids roaming charges on your normal number."
+      },
+      {
+        "q": "Will my normal phone number keep working?",
+        "a": "Yes. The eSIM is a second line, so your regular SIM and number stay active for calls and texts (dual SIM). Keep mobile data on the eSIM line to avoid roaming charges on your home plan."
+      },
+      {
+        "q": "What happens when my data runs out?",
+        "a": "You can top up any time in the app — open My eSIMs, choose the eSIM and tap “Top up”. Some top-ups add to your current plan; others replace it, and you'll always see which before you pay."
+      },
+      {
+        "q": "Can I get a refund?",
+        "a": "If we can't issue your eSIM, you're refunded automatically — no action needed. For any other refund question, contact our support team and we'll help."
+      },
+      {
+        "q": "Can I use one eSIM on two phones?",
+        "a": "No. Each eSIM can be installed and active on a single device only. If you need data on another phone, buy a separate eSIM for it."
+      }
+    ]
+  },
+  "about": {
+    "title": "About",
+    "tagline": "Your eSIM for a bigger world.",
+    "versionLabel": "Version {{version}}",
+    "company": "eSIM.Global LLC",
+    "legalTitle": "Legal",
+    "terms": "Terms & Conditions",
+    "privacy": "Privacy Policy",
+    "refund": "Refund Policy",
+    "openHint": "Opens in your browser"
+  },
+  "deleteAccount": {
+    "title": "Delete account",
+    "heading": "Permanently delete your account",
+    "intro": "Before you continue, please understand what happens:",
+    "bullets": [
+      "Your account and login will be permanently deleted.",
+      "eSIMs already installed on your phone keep working until their plan ends, but you won't see them in the app any more.",
+      "Your purchase records are kept for legal and accounting reasons.",
+      "This can't be undone."
+    ],
+    "confirmLabel": "Type DELETE to confirm",
+    "confirmPlaceholder": "DELETE",
+    "button": "Delete my account",
+    "deleting": "Deleting…",
+    "success": "Your account has been deleted",
+    "errors": {
+      "ordersInProgress": "You have an order being processed. Please try again in a minute.",
+      "network": "We couldn't reach the server. Check your connection and try again.",
+      "generic": "Something went wrong. Please try again."
+    }
   },
   "settings": {
     "title": "Settings"

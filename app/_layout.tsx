@@ -3,7 +3,7 @@
  * context, controls the splash screen, and gates startup on required config.
  */
 
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { StatusBar } from 'expo-status-bar';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
@@ -20,8 +20,9 @@ import {
   Inter_700Bold,
 } from '@expo-google-fonts/inter';
 
-import '@/i18n';
+import { applyStoredLanguage } from '@/i18n';
 import { ConfigError } from '@/components/ConfigError';
+import { ToastProvider } from '@/components/ui';
 import { AuthProvider } from '@/features/auth';
 import { queryClient } from '@/lib/queryClient';
 import { config, missingConfigKeys } from '@/config';
@@ -40,6 +41,12 @@ export default function RootLayout() {
 
   const [bypassConfig, setBypassConfig] = useState(false);
   const missing = missingConfigKeys();
+
+  // Apply the stored language preference once at startup (it can override the
+  // device language the i18n instance initialised with).
+  useEffect(() => {
+    applyStoredLanguage().catch(() => {});
+  }, []);
 
   const onLayoutReady = useCallback(() => {
     if (fontsLoaded || fontError) SplashScreen.hideAsync().catch(() => {});
@@ -61,18 +68,20 @@ export default function RootLayout() {
         urlScheme="esimglobal"
       >
         <AuthProvider>
-          <Stack
-            screenOptions={{
-              headerShown: false,
-              contentStyle: { backgroundColor: lightTheme.colors.background },
-              animation: 'slide_from_right',
-            }}
-          >
-            <Stack.Screen name="(tabs)" />
-            <Stack.Screen name="checkout" options={{ presentation: 'modal' }} />
-            <Stack.Screen name="order-success" options={{ presentation: 'modal' }} />
-            <Stack.Screen name="(auth)" options={{ presentation: 'modal' }} />
-          </Stack>
+          <ToastProvider>
+            <Stack
+              screenOptions={{
+                headerShown: false,
+                contentStyle: { backgroundColor: lightTheme.colors.background },
+                animation: 'slide_from_right',
+              }}
+            >
+              <Stack.Screen name="(tabs)" />
+              <Stack.Screen name="checkout" options={{ presentation: 'modal' }} />
+              <Stack.Screen name="order-success" options={{ presentation: 'modal' }} />
+              <Stack.Screen name="(auth)" options={{ presentation: 'modal' }} />
+            </Stack>
+          </ToastProvider>
         </AuthProvider>
       </StripeProvider>
     );

@@ -28,6 +28,7 @@ import type { Session, User } from '@supabase/supabase-js';
 
 import { supabase } from '@/lib/supabase';
 import { api, ApiError } from '@/lib/api';
+import { queryClient } from '@/lib/queryClient';
 
 export type AuthStatus = 'loading' | 'signedIn' | 'signedOut';
 
@@ -48,6 +49,14 @@ export interface ResetPasswordParams {
   password: string;
 }
 
+export interface ChangePasswordParams {
+  currentPassword: string;
+  newPassword: string;
+}
+
+/** Which call failed during a password change, for friendly error mapping. */
+export type PasswordChangeStage = 'reauth' | 'update';
+
 export interface AuthContextValue {
   user: User | null;
   session: Session | null;
@@ -60,6 +69,14 @@ export interface AuthContextValue {
   resendCode: (email: string) => Promise<void>;
   sendPasswordReset: (email: string) => Promise<void>;
   resetPassword: (params: ResetPasswordParams) => Promise<void>;
+  /** Update the display name (user_metadata.full_name). Display only. */
+  updateDisplayName: (fullName: string) => Promise<void>;
+  /**
+   * Change the password. Re-authenticates with the current password first; a
+   * thrown error carries a `stage` ('reauth' | 'update') so the screen can map
+   * it to the right message.
+   */
+  changePassword: (params: ChangePasswordParams) => Promise<void>;
   signOut: () => Promise<void>;
 }
 
@@ -69,6 +86,14 @@ const AuthContext = createContext<AuthContextValue | null>(null);
 function codedError(code: string, message: string): Error {
   const err = new Error(message);
   (err as Error & { code?: string }).code = code;
+  return err;
+}
+
+/** Tag an error with the password-change stage it came from, preserving its code/message. */
+function staged(stage: PasswordChangeStage, err: unknown): unknown {
+  if (err && typeof err === 'object') {
+    (err as { stage?: PasswordChangeStage }).stage = stage;
+  }
   return err;
 }
 
@@ -187,8 +212,38 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     await supabase.auth.signOut();
   };
 
+  const updateDisplayName = async (fullName: string): Promise<void> => {
+    const { error } = await supabase.auth.updateUser({ data: { full_name: fullName.trim() } });
+    if (error) throw error;
+    // The USER_UPDATED event refreshes `session` (and thus `displayName`), so the
+    // Home greeting and profile update immediately — no manual refetch needed.
+  };
+
+  const changePassword = async ({
+    currentPassword,
+    newPassword,
+  }: ChangePasswordParams): Promise<void> => {
+    const email = session?.user?.email;
+    if (!email) {
+      throw staged('update', new Error('No active session.'));
+    }
+    // Prove the current password by re-authenticating. A failure here means the
+    // current password is wrong (or a network/rate-limit issue).
+    const { error: reauthError } = await supabase.auth.signInWithPassword({
+      email,
+      password: currentPassword,
+    });
+    if (reauthError) throw staged('reauth', reauthError);
+
+    const { error: updateError } = await supabase.auth.updateUser({ password: newPassword });
+    if (updateError) throw staged('update', updateError);
+  };
+
   const signOut = async (): Promise<void> => {
     await supabase.auth.signOut();
+    // Drop every cached per-user query (eSIMs, usage, orders …) so a different
+    // account can't briefly see the previous user's data.
+    queryClient.clear();
   };
 
   const user = session?.user ?? null;
@@ -208,6 +263,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       resendCode,
       sendPasswordReset,
       resetPassword,
+      updateDisplayName,
+      changePassword,
       signOut,
     }),
     // signIn/… are stable closures over module-level `supabase`; re-create only

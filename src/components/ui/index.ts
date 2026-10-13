@@ -53,3 +53,6 @@ export type { TextProps } from './Text';
 
 export { TextField } from './TextField';
 export type { TextFieldProps } from './TextField';
+
+export { ToastProvider, useToast } from './Toast';
+export type { ToastTone } from './Toast';

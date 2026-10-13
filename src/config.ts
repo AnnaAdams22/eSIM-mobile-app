@@ -58,9 +58,9 @@ export const config = {
 };
 
 /**
- * Legal document URLs, shown on the Create-account screen (opened in an in-app
- * browser). Not secrets and not required for startup; overridable via optional
- * EXPO_PUBLIC_* vars, otherwise the production placeholders are used.
+ * Legal document URLs, shown on the Create-account and About screens (opened in
+ * an in-app browser). Not secrets and not required for startup; overridable via
+ * optional EXPO_PUBLIC_* vars, otherwise the production placeholders are used.
  */
 export const legal = {
   termsUrl:
@@ -68,6 +68,8 @@ export const legal = {
     'https://esim-global.net/terms-and-conditions',
   privacyUrl:
     process.env.EXPO_PUBLIC_PRIVACY_URL?.trim() || 'https://esim-global.net/privacy-policy',
+  refundUrl:
+    process.env.EXPO_PUBLIC_REFUND_URL?.trim() || 'https://esim-global.net/refund-policy',
 } as const;
 
 /**

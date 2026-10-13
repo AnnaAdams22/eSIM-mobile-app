@@ -7,6 +7,8 @@ export type {
   SignUpParams,
   SignUpResult,
   ResetPasswordParams,
+  ChangePasswordParams,
+  PasswordChangeStage,
 } from './AuthProvider';
 
 export {

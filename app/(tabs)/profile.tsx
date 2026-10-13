@@ -1,17 +1,28 @@
 /**
- * Profile tab.
+ * Profile tab — the account hub.
  *  - Signed out: a card inviting the user to sign in or create an account.
- *  - Signed in:  avatar initials, name and email, plus a Sign out button (with a
- *    confirmation dialog). The full profile menu is a later task.
+ *  - Signed in:  a profile card (avatar initials, name, email → Edit profile),
+ *    a menu of account links, then Sign out (with a confirmation dialog) and a
+ *    danger-coloured Delete account.
  *  - Loading:    lightweight skeletons while the session is read from storage.
  */
 
-import { Alert, View } from 'react-native';
-import { useRouter } from 'expo-router';
+import { Alert, Pressable, View } from 'react-native';
+import { useRouter, type Href } from 'expo-router';
 import { useTranslation } from 'react-i18next';
+import {
+  Bell,
+  ChevronRight,
+  Globe,
+  Info,
+  LifeBuoy,
+  Smartphone,
+  SmartphoneNfc,
+} from 'lucide-react-native';
 
-import { Button, Card, Screen, Skeleton, Text } from '@/components/ui';
+import { Button, Card, Divider, ListRow, Screen, Skeleton, Text } from '@/components/ui';
 import { useAuth } from '@/features/auth';
+import { lightTap } from '@/lib/haptics';
 import { useTheme, type Theme } from '@/theme';
 
 export default function ProfileScreen() {
@@ -27,6 +38,7 @@ export default function ProfileScreen() {
           {t('profile.title')}
         </Text>
         <Skeleton height={88} radius="lg" />
+        <Skeleton height={260} radius="lg" style={{ marginTop: theme.spacing.lg }} />
       </Screen>
     );
   }
@@ -60,6 +72,12 @@ export default function ProfileScreen() {
   // Signed in.
   const name = displayName ?? '';
   const email = user?.email ?? '';
+  const iconColor = theme.colors.textSecondary;
+
+  const go = (pathname: Href) => () => {
+    lightTap();
+    router.push(pathname);
+  };
 
   const confirmSignOut = () => {
     Alert.alert(t('profile.signOutConfirmTitle'), t('profile.signOutConfirmMessage'), [
@@ -74,9 +92,10 @@ export default function ProfileScreen() {
         {t('profile.title')}
       </Text>
 
-      <Card>
+      {/* Profile card → Edit profile. */}
+      <Card onPress={go('/account/edit')} accessibilityHint={t('profile.editHint')}>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: theme.spacing.md }}>
-          <View style={avatar(theme)} accessible accessibilityLabel={name || email}>
+          <View style={avatar(theme)} accessible={false}>
             <Text variant="h2" color="onPrimary">
               {initials(name, email)}
             </Text>
@@ -93,15 +112,82 @@ export default function ProfileScreen() {
               </Text>
             ) : null}
           </View>
+          <ChevronRight size={20} color={iconColor} />
         </View>
       </Card>
 
-      <Button
-        label={t('profile.signOut')}
-        variant="secondary"
-        onPress={confirmSignOut}
-        style={{ marginTop: theme.spacing.xl }}
-      />
+      {/* Account menu. */}
+      <Card padding="xs" style={{ marginTop: theme.spacing.lg }}>
+        <ListRow
+          title={t('profile.menu.myEsims')}
+          leading={<Smartphone size={22} color={iconColor} />}
+          accessibilityHint={t('profile.menu.myEsimsHint')}
+          onPress={go('/(tabs)/esims')}
+          style={menuRowStyle(theme)}
+        />
+        <Divider inset={38} />
+        <ListRow
+          title={t('profile.menu.notifications')}
+          leading={<Bell size={22} color={iconColor} />}
+          accessibilityHint={t('profile.menu.notificationsHint')}
+          onPress={go('/account/notifications')}
+          style={menuRowStyle(theme)}
+        />
+        <Divider inset={38} />
+        <ListRow
+          title={t('profile.menu.language')}
+          leading={<Globe size={22} color={iconColor} />}
+          accessibilityHint={t('profile.menu.languageHint')}
+          onPress={go('/account/language')}
+          style={menuRowStyle(theme)}
+        />
+        <Divider inset={38} />
+        <ListRow
+          title={t('profile.menu.help')}
+          leading={<LifeBuoy size={22} color={iconColor} />}
+          accessibilityHint={t('profile.menu.helpHint')}
+          onPress={go('/support')}
+          style={menuRowStyle(theme)}
+        />
+        <Divider inset={38} />
+        <ListRow
+          title={t('profile.menu.install')}
+          leading={<SmartphoneNfc size={22} color={iconColor} />}
+          accessibilityHint={t('profile.menu.installHint')}
+          onPress={go('/install-guide')}
+          style={menuRowStyle(theme)}
+        />
+        <Divider inset={38} />
+        <ListRow
+          title={t('profile.menu.about')}
+          leading={<Info size={22} color={iconColor} />}
+          accessibilityHint={t('profile.menu.aboutHint')}
+          onPress={go('/account/about')}
+          style={menuRowStyle(theme)}
+        />
+      </Card>
+
+      {/* Sign out + delete, visually separated at the bottom. */}
+      <View style={{ marginTop: theme.spacing.xl, gap: theme.spacing.lg }}>
+        <Button label={t('profile.signOut')} variant="secondary" onPress={confirmSignOut} />
+        <Pressable
+          onPress={go('/account/delete-account')}
+          accessibilityRole="button"
+          accessibilityLabel={t('profile.deleteAccount')}
+          accessibilityHint={t('profile.deleteAccountHint')}
+          hitSlop={8}
+          style={({ pressed }) => ({
+            minHeight: theme.layout.minTouchTarget,
+            alignItems: 'center',
+            justifyContent: 'center',
+            opacity: pressed ? 0.6 : 1,
+          })}
+        >
+          <Text variant="button" color="danger">
+            {t('profile.deleteAccount')}
+          </Text>
+        </Pressable>
+      </View>
     </Screen>
   );
 }
@@ -127,4 +213,9 @@ function avatar(theme: Theme) {
     alignItems: 'center' as const,
     justifyContent: 'center' as const,
   };
+}
+
+/** Horizontal padding so menu rows breathe inside the tight-padded card. */
+function menuRowStyle(theme: Theme) {
+  return { paddingHorizontal: theme.spacing.md };
 }

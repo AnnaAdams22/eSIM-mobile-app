@@ -21,7 +21,8 @@ export type HeroSlot =
   | 'continent:Americas'
   | 'continent:Africa'
   | 'continent:Middle East'
-  | 'continent:Oceania';
+  | 'continent:Oceania'
+  | 'support:banner';
 
 /** Slot → photo. Keys are stable so each swap is a one-line edit. */
 const HERO_IMAGES: Record<HeroSlot, ImageSourcePropType | null> = {
@@ -33,6 +34,9 @@ const HERO_IMAGES: Record<HeroSlot, ImageSourcePropType | null> = {
   'continent:Africa': require('../../../assets/images/hero-africa.jpg'),
   'continent:Middle East': require('../../../assets/images/hero-middle-east.jpg'),
   'continent:Oceania': require('../../../assets/images/hero-oceania.jpg'),
+  // No licensed photo yet → renders the brand gradient. Drop in a warm
+  // support/travel photo (hero-support.jpg) here when available; no other change.
+  'support:banner': null,
 };
 
 /**
