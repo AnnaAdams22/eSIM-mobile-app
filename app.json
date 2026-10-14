@@ -58,6 +58,13 @@
     ],
     "experiments": {
       "typedRoutes": true
-    }
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "11469694-a814-4382-a15d-0fd4024abe91"
+      }
+    },
+    "owner": "nomiich"
   }
 }
