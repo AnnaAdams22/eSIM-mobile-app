@@ -24,3 +24,6 @@ export { makeRequestIdHolder } from './requestId';
 export type { RequestIdHolder } from './requestId';
 
 export { buildPaymentSheetAppearance } from './stripeAppearance';
+
+export { summarizeCheckoutError } from './devDiagnostics';
+export type { CheckoutStep } from './devDiagnostics';

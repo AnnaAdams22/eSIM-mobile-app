@@ -36,6 +36,8 @@ import {
   buildPaymentSheetAppearance,
   makeRequestIdHolder,
   promoErrorKey,
+  summarizeCheckoutError,
+  type CheckoutStep,
 } from '@/features/checkout';
 import { requestTopupSheet, type ReplaceInfo } from '@/features/esims';
 import { formatDataSize } from '@/features/esims';
@@ -105,6 +107,9 @@ export default function CheckoutScreen() {
 
   const [paying, setPaying] = useState(false);
   const [payError, setPayError] = useState<string | null>(null);
+  // __DEV__ only: a compact "step · code · message" hint shown under the friendly
+  // error and logged to the console. Never populated or rendered in production.
+  const [devDetail, setDevDetail] = useState<string | null>(null);
 
   // ─── Loading / error / not-found states ──────────────────────────────────
   if (isError) {
@@ -212,6 +217,9 @@ export default function CheckoutScreen() {
     lightTap();
     setPaying(true);
     setPayError(null);
+    if (__DEV__) setDevDetail(null);
+    // Which step we're on, so a failure can be attributed precisely in __DEV__.
+    let step: CheckoutStep = 'create-sheet';
     try {
       let sheet: PaymentSheetResponse;
       if (isTopup && iccid) {
@@ -247,6 +255,7 @@ export default function CheckoutScreen() {
         });
       }
 
+      step = 'init';
       const init = await initPaymentSheet({
         merchantDisplayName: 'ESIM Global',
         paymentIntentClientSecret: sheet.payment_intent_client_secret,
@@ -264,6 +273,7 @@ export default function CheckoutScreen() {
       });
       if (init.error) throw init.error;
 
+      step = 'present';
       const result = await presentPaymentSheet();
       if (result.error) {
         // User dismissed the sheet — stay quietly on checkout, keep the id for retry.
@@ -288,6 +298,13 @@ export default function CheckoutScreen() {
       });
     } catch (err) {
       errorNotify();
+      // __DEV__ only: surface the real failure (step + status/code/message) in the
+      // console and under the friendly message. Secret-free — see summarizeCheckoutError.
+      if (__DEV__) {
+        const detail = summarizeCheckoutError(step, err);
+        console.warn(`[checkout] ${detail}`);
+        setDevDetail(detail);
+      }
       const message =
         err instanceof ApiError ? err.message : t('checkout.errorGeneric');
       setPayError(message || t('checkout.errorGeneric'));
@@ -401,6 +418,15 @@ export default function CheckoutScreen() {
             <Text variant="bodySmall" color="text" style={{ marginTop: 2 }}>
               {payError}
             </Text>
+            {__DEV__ && devDetail ? (
+              <Text
+                variant="caption"
+                color="textSecondary"
+                style={{ marginTop: theme.spacing.xs, fontFamily: theme.fontFamily.regular }}
+              >
+                {devDetail}
+              </Text>
+            ) : null}
           </View>
         ) : null}
       </ScrollView>
