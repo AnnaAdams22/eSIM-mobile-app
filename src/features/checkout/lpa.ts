@@ -61,3 +61,22 @@ export function parseActivationFromTapLink(
 ): LpaActivation | null {
   return parseLpa(activationStringFromTapLink(tapLink));
 }
+
+/**
+ * Build the canonical LPA activation string from its parts, for rendering a QR
+ * code the eSIM installer can scan: `LPA:1$<SM-DP+ address>$<activation code>`.
+ * (The optional 4th confirmation-code segment is intentionally omitted — it's
+ * not used for eSIM download here.)
+ */
+export function buildLpaString({ smdpAddress, activationCode }: LpaActivation): string {
+  return `LPA:1$${smdpAddress}$${activationCode}`;
+}
+
+/**
+ * The value to encode in a scannable QR from an iOS tap link, or null when the
+ * link has no parseable LPA (caller should fall back to the backend QR image).
+ */
+export function lpaQrValueFromTapLink(tapLink: string | null | undefined): string | null {
+  const activation = parseActivationFromTapLink(tapLink);
+  return activation ? buildLpaString(activation) : null;
+}

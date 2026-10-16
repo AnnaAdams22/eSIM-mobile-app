@@ -10,14 +10,18 @@
 import { useEffect, useRef, useState } from 'react';
 import { Linking, Platform, View } from 'react-native';
 import { Image } from 'expo-image';
+import QRCode from 'react-native-qrcode-svg';
 import * as Clipboard from 'expo-clipboard';
 import { useTranslation } from 'react-i18next';
 import { CheckCircle2, ChevronDown, ChevronUp, Copy, Smartphone } from 'lucide-react-native';
 
 import { Button, Card, Text } from '@/components/ui';
-import { parseActivationFromTapLink } from '@/features/checkout';
+import { lpaQrValueFromTapLink, parseActivationFromTapLink } from '@/features/checkout';
 import { lightTap } from '@/lib/haptics';
 import { useTheme } from '@/theme';
+
+/** Side length (px) of the rendered QR — large enough to scan from another phone. */
+const QR_SIZE = 220;
 
 /** Normalise a stored QR (raw base64 or an already-complete data URI) to a URI. */
 export function qrDataUri(qr: string | null | undefined): string | null {
@@ -35,7 +39,12 @@ export function InstallSection({ qrCode, iosTapLink, style }: InstallSectionProp
   const theme = useTheme();
   const { t } = useTranslation();
 
+  // Prefer a QR we render ourselves from the parsed LPA activation string, so it
+  // works offline and doesn't depend on the backend's image. Fall back to the
+  // backend's qr_code image only when the LPA can't be parsed.
+  const lpaValue = lpaQrValueFromTapLink(iosTapLink);
   const qrUri = qrDataUri(qrCode);
+  const hasQr = !!lpaValue || !!qrUri;
   const manual = parseActivationFromTapLink(iosTapLink);
   const canTapInstall = Platform.OS === 'ios' && !!iosTapLink;
 
@@ -47,7 +56,7 @@ export function InstallSection({ qrCode, iosTapLink, style }: InstallSectionProp
 
   return (
     <View style={[{ gap: theme.spacing.lg }, style]}>
-      {qrUri ? (
+      {hasQr ? (
         <Card padding="lg" radius="lg" shadow="sm" style={{ alignItems: 'center' }}>
           <Text variant="h3" center>
             {t('install.scanTitle')}
@@ -61,6 +70,9 @@ export function InstallSection({ qrCode, iosTapLink, style }: InstallSectionProp
             {t('install.scanBody')}
           </Text>
           <View
+            accessible
+            accessibilityRole="image"
+            accessibilityLabel={t('install.scanTitle')}
             style={{
               backgroundColor: '#FFFFFF',
               padding: theme.spacing.md,
@@ -69,12 +81,25 @@ export function InstallSection({ qrCode, iosTapLink, style }: InstallSectionProp
               borderColor: theme.colors.border,
             }}
           >
-            <Image
-              source={{ uri: qrUri }}
-              style={{ width: 220, height: 220 }}
-              contentFit="contain"
-              accessibilityLabel={t('install.scanTitle')}
-            />
+            {lpaValue ? (
+              // Rendered from the LPA string — black on white with a quiet-zone
+              // margin, high error correction for a reliable scan.
+              <QRCode
+                value={lpaValue}
+                size={QR_SIZE}
+                color="#000000"
+                backgroundColor="#FFFFFF"
+                quietZone={12}
+                ecl="M"
+              />
+            ) : (
+              <Image
+                source={{ uri: qrUri as string }}
+                style={{ width: QR_SIZE, height: QR_SIZE }}
+                contentFit="contain"
+                accessibilityLabel={t('install.scanTitle')}
+              />
+            )}
           </View>
         </Card>
       ) : null}
@@ -129,7 +154,11 @@ export function ManualSetup({
       {open ? (
         <View style={{ marginTop: theme.spacing.sm, gap: theme.spacing.md }}>
           <Text variant="bodySmall" color="textSecondary">
-            {t('install.installManualHint')}
+            {t(
+              Platform.OS === 'android'
+                ? 'install.installManualHintAndroid'
+                : 'install.installManualHintIos'
+            )}
           </Text>
           <CopyField label={t('install.smdpLabel')} value={smdpAddress} />
           <CopyField label={t('install.activationLabel')} value={activationCode} />

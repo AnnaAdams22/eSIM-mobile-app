@@ -14,7 +14,7 @@ import { ScrollView, View } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
-import { RefreshCw } from 'lucide-react-native';
+import { RefreshCw, RotateCw } from 'lucide-react-native';
 
 import {
   Badge,
@@ -52,7 +52,12 @@ export default function EsimDetailScreen() {
   const { iccid } = useLocalSearchParams<{ iccid: string }>();
 
   const { data: detail, isLoading, isError, refetch } = useEsim(iccid);
-  const { data: usage, isFetching: usageFetching, refetch: refetchUsage } = useEsimUsage(iccid);
+  const {
+    data: usage,
+    isFetching: usageFetching,
+    isError: usageIsError,
+    refetch: refetchUsage,
+  } = useEsimUsage(iccid);
   const { data: plans } = usePlans();
 
   if (isLoading) {
@@ -121,6 +126,7 @@ export default function EsimDetailScreen() {
         <UsageCard
           status={status}
           usage={usage ?? null}
+          error={usageIsError && !usage}
           onRefresh={() => {
             lightTap();
             refetchUsage();
@@ -183,11 +189,14 @@ export default function EsimDetailScreen() {
 function UsageCard({
   status,
   usage,
+  error,
   onRefresh,
   refreshing,
 }: {
   status: ReturnType<typeof esimDisplayStatus>;
   usage: EsimUsage | null;
+  /** The usage request failed and there's no cached usage to show. */
+  error: boolean;
   onRefresh: () => void;
   refreshing: boolean;
 }) {
@@ -229,6 +238,22 @@ function UsageCard({
           <Text variant="bodySmall" color="textSecondary">
             {t('esimDetail.notActivatedBody')}
           </Text>
+        </View>
+      ) : error && !usage ? (
+        // Usage failed to load (e.g. 503 usage_unavailable) → calm inline state
+        // with a small Retry. The eSIM stays Active; the balance updates on retry.
+        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: theme.spacing.md }}>
+          <Text variant="bodySmall" color="textSecondary" style={{ flex: 1 }}>
+            {t('esimDetail.usageUnavailable')}
+          </Text>
+          <Button
+            label={t('esimDetail.usageRetry')}
+            variant="ghost"
+            size="md"
+            fullWidth={false}
+            onPress={onRefresh}
+            icon={<RotateCw size={16} color={theme.colors.primary} />}
+          />
         </View>
       ) : left && total ? (
         <View style={{ gap: theme.spacing.sm }}>

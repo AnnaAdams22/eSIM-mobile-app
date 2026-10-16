@@ -155,7 +155,8 @@
     "installIphone": "Install on iPhone",
     "installIphoneHint": "Opens Apple's one-tap eSIM setup",
     "installManualTitle": "Install manually",
-    "installManualHint": "On your device: Settings → Cellular → Add eSIM → Enter details manually.",
+    "installManualHintIos": "Settings → Cellular (or Mobile Data) → Add eSIM → Enter details manually.",
+    "installManualHintAndroid": "Settings → Network & internet (or Connections) → SIMs → Add eSIM / Download a SIM → Enter details manually. Menu names vary by phone maker.",
     "smdpLabel": "SM-DP+ address",
     "activationLabel": "Activation code",
     "copy": "Copy",
@@ -196,7 +197,9 @@
     "emptyPastTitle": "Nothing here yet",
     "emptyPastBody": "Expired and past eSIMs will appear here.",
     "errorTitle": "Couldn't load your eSIMs",
-    "errorBody": "Please check your connection and try again."
+    "errorBody": "Please check your connection and try again.",
+    "usageUnavailable": "Usage unavailable",
+    "usageRetry": "Retry"
   },
   "esimDetail": {
     "title": "eSIM details",
@@ -224,7 +227,9 @@
     "orderTopup": "Top-up",
     "topUp": "Top up",
     "errorTitle": "Couldn't load this eSIM",
-    "installGuide": "Install guide"
+    "installGuide": "Install guide",
+    "usageUnavailable": "Usage unavailable",
+    "usageRetry": "Retry"
   },
   "topup": {
     "title": "Top up",

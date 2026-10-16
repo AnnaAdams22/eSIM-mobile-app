@@ -81,10 +81,12 @@ function MyEsimsList() {
   const [segment, setSegment] = useState<'active' | 'past'>('active');
   const [refreshing, setRefreshing] = useState(false);
 
-  // A simple signature that changes whenever any usage result updates, so the
-  // view-model recomputes when balances arrive (exhaustive-deps wants a plain
-  // expression, not a .map() in the dep array).
-  const usageSig = usageQueries.map((q) => q?.dataUpdatedAt ?? 0).join(',');
+  // A simple signature that changes whenever any usage result updates — data
+  // arriving, an error landing, or a fetch starting/stopping — so the view-model
+  // recomputes (exhaustive-deps wants a plain expression, not a .map() in deps).
+  const usageSig = usageQueries
+    .map((q) => `${q?.dataUpdatedAt ?? 0}:${q?.errorUpdatedAt ?? 0}:${q?.fetchStatus ?? ''}`)
+    .join(',');
 
   // Build a view-model per eSIM: resolved flag/title, live usage, and bucket.
   const rows = useMemo(
@@ -92,6 +94,7 @@ function MyEsimsList() {
       list.map((item, i) => {
         const q = usageQueries[i];
         const usage = q?.data ?? null;
+        const hasIccid = Boolean(item.iccid);
         const geo = resolveGeoDisplay(plans ?? [], {
           countryIso2: item.plan?.countryIso2,
           planType: item.plan?.plan_type,
@@ -101,7 +104,10 @@ function MyEsimsList() {
           key: rowKey(item, i),
           item,
           usage,
-          usageLoading: Boolean(item.iccid) && (q?.isLoading ?? false),
+          // In flight = first load or a retry; error = failed with no cached usage.
+          usageLoading: hasIccid && (q?.isFetching ?? false) && !usage,
+          usageError: hasIccid && (q?.isError ?? false) && !usage,
+          onRetryUsage: () => void q?.refetch?.(),
           flag: geo.flag,
           title: geo.title,
           bucket: classifyEsim({ orderStatus: item.status, usage }),
@@ -217,6 +223,8 @@ function MyEsimsList() {
               item={r.item}
               usage={r.usage}
               usageLoading={r.usageLoading}
+              usageError={r.usageError}
+              onRetryUsage={r.onRetryUsage}
               flag={r.flag}
               title={r.title}
               onViewDetails={() => r.item.iccid && goDetails(r.item.iccid)}

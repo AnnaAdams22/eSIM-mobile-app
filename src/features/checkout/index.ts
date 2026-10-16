@@ -4,6 +4,8 @@ export {
   activationStringFromTapLink,
   parseLpa,
   parseActivationFromTapLink,
+  buildLpaString,
+  lpaQrValueFromTapLink,
 } from './lpa';
 export type { LpaActivation } from './lpa';
 

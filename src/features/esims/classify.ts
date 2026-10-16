@@ -68,6 +68,48 @@ export function classifyEsim(input: ClassifyInput): EsimBucket {
   return esimBucket(esimDisplayStatus(input));
 }
 
+/**
+ * What the usage-dependent line (the "Active until …" date on a card, or the
+ * usage body on the detail screen) should render.
+ *
+ *   'loading' → a skeleton, shown ONLY while a usage request is actually in
+ *               flight for an eSIM that has no usage yet;
+ *   'error'   → a calm "Usage unavailable" + Retry, after a usage request failed
+ *               with no usage to fall back on;
+ *   'loaded'  → render the normal content (a date, a status note, or nothing).
+ *
+ * The uncertainty only exists for an (optimistically) 'active' eSIM whose usage
+ * hasn't arrived: order-derived statuses (processing/refunded/failed) and
+ * 'notActivated'/'expired' already have their own text, so they're always
+ * 'loaded'. A failed usage load never moves the eSIM to Past — the status stays
+ * 'active' (null usage), so it remains under Active with this inline state.
+ */
+export type UsageLineState = 'loading' | 'loaded' | 'error';
+
+export interface UsageLineInput {
+  status: EsimDisplayStatus;
+  /** Whether live usage has been loaded. */
+  hasUsage: boolean;
+  /** A usage request is currently in flight (first load or a retry). */
+  inFlight: boolean;
+  /** The last usage request errored (and there's no cached usage). */
+  isError: boolean;
+}
+
+export function usageLineState({
+  status,
+  hasUsage,
+  inFlight,
+  isError,
+}: UsageLineInput): UsageLineState {
+  if (status === 'active' && !hasUsage) {
+    // In-flight wins over error, so a retry shows the skeleton (not a stale error).
+    if (inFlight) return 'loading';
+    if (isError) return 'error';
+  }
+  return 'loaded';
+}
+
 /** The Badge tone for a display status (matches the UI kit's BadgeTone). */
 export function statusTone(status: EsimDisplayStatus): 'success' | 'discount' | 'neutral' {
   switch (status) {

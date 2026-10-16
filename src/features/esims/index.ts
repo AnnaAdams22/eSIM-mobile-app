@@ -5,10 +5,17 @@ export {
   esimBucket,
   classifyEsim,
   statusTone,
+  usageLineState,
   READY_STATUSES,
   PAST_STATUSES,
 } from './classify';
-export type { EsimDisplayStatus, EsimBucket, ClassifyInput } from './classify';
+export type {
+  EsimDisplayStatus,
+  EsimBucket,
+  ClassifyInput,
+  UsageLineState,
+  UsageLineInput,
+} from './classify';
 
 export { formatDataSize, usedFraction } from './format';
 

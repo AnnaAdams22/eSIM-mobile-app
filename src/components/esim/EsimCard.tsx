@@ -11,12 +11,17 @@
 import { Pressable, View } from 'react-native';
 import * as Clipboard from 'expo-clipboard';
 import { useTranslation } from 'react-i18next';
-import { Copy, SignalHigh, SignalLow } from 'lucide-react-native';
+import { Copy, RotateCw, SignalHigh, SignalLow } from 'lucide-react-native';
 
 import { Badge, Button, Card, Skeleton, Text } from '@/components/ui';
 import { Flag } from '@/components/Flag';
 import { formatPlanLabel } from '@/features/catalog';
-import { esimDisplayStatus, statusTone, type EsimDisplayStatus } from '@/features/esims';
+import {
+  esimDisplayStatus,
+  statusTone,
+  usageLineState,
+  type EsimDisplayStatus,
+} from '@/features/esims';
 import type { EsimListItem, EsimUsage } from '@/lib/api-types';
 import { formatShortDate } from '@/lib/date';
 import { lightTap } from '@/lib/haptics';
@@ -25,7 +30,12 @@ import { useTheme } from '@/theme';
 export interface EsimCardProps {
   item: EsimListItem;
   usage: EsimUsage | null;
+  /** A usage request is in flight (first load or a retry). */
   usageLoading: boolean;
+  /** The last usage request failed (and there's no cached usage). */
+  usageError?: boolean;
+  /** Retry the usage request (shown with the "Usage unavailable" state). */
+  onRetryUsage?: () => void;
   flag: string | null;
   title: string;
   onViewDetails: () => void;
@@ -42,6 +52,8 @@ export function EsimCard({
   item,
   usage,
   usageLoading,
+  usageError = false,
+  onRetryUsage,
   flag,
   title,
   onViewDetails,
@@ -53,7 +65,6 @@ export function EsimCard({
   const status = esimDisplayStatus({ orderStatus: item.status, usage });
   const planLabel = item.plan ? formatPlanLabel(item.plan, t) : '';
   const iccid = item.iccid;
-  const ready = status !== 'processing';
 
   const copyIccid = async () => {
     if (!iccid) return;
@@ -111,8 +122,15 @@ export function EsimCard({
         </Pressable>
       ) : null}
 
-      {/* The active-until / activation line (skeleton while usage loads) */}
-      <DateLine status={status} usage={usage} loading={ready && usageLoading} />
+      {/* The active-until / activation line (skeleton while usage loads, or a
+          calm "Usage unavailable" + Retry if it failed). */}
+      <DateLine
+        status={status}
+        usage={usage}
+        loading={usageLoading}
+        error={usageError}
+        onRetry={onRetryUsage}
+      />
 
       {/* Actions — only meaningful once there's an eSIM to act on */}
       {iccid ? (
@@ -148,15 +166,64 @@ function DateLine({
   status,
   usage,
   loading,
+  error,
+  onRetry,
 }: {
   status: EsimDisplayStatus;
   usage: EsimUsage | null;
   loading: boolean;
+  error: boolean;
+  onRetry?: () => void;
 }) {
+  const theme = useTheme();
   const { t } = useTranslation();
 
-  if (loading) {
+  const lineState = usageLineState({
+    status,
+    hasUsage: !!usage,
+    inFlight: loading,
+    isError: error,
+  });
+
+  // Skeleton only while a request is actually in flight.
+  if (lineState === 'loading') {
     return <Skeleton width={160} height={14} radius="sm" />;
+  }
+
+  // Failed usage load → a calm inline state with a small Retry (stays Active).
+  if (lineState === 'error') {
+    return (
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: theme.spacing.sm }}>
+        <Text variant="bodySmall" color="textSecondary" dense>
+          {t('esims.usageUnavailable')}
+        </Text>
+        {onRetry ? (
+          <Pressable
+            onPress={onRetry}
+            accessibilityRole="button"
+            accessibilityLabel={t('esims.usageRetry')}
+            hitSlop={8}
+            style={({ pressed }) => ({
+              flexDirection: 'row',
+              alignItems: 'center',
+              gap: theme.spacing.xxs,
+              minHeight: theme.layout.minTouchTarget,
+              opacity: pressed ? 0.6 : 1,
+            })}
+          >
+            <RotateCw size={13} color={theme.colors.primary} />
+            <Text
+              variant="caption"
+              color="primary"
+              dense
+              style={{ fontFamily: theme.fontFamily.semibold }}
+            >
+              {t('esims.usageRetry')}
+            </Text>
+          </Pressable>
+        ) : null}
+      </View>
+    );
   }
 
   let text: string | null = null;

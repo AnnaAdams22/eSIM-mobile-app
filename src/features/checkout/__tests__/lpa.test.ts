@@ -1,5 +1,7 @@
 import {
   activationStringFromTapLink,
+  buildLpaString,
+  lpaQrValueFromTapLink,
   parseActivationFromTapLink,
   parseLpa,
 } from '../lpa';
@@ -68,5 +70,36 @@ describe('parseActivationFromTapLink', () => {
   it('returns null for a tap link without usable carddata', () => {
     expect(parseActivationFromTapLink('https://apple.com/p')).toBeNull();
     expect(parseActivationFromTapLink(null)).toBeNull();
+  });
+});
+
+describe('buildLpaString', () => {
+  it('builds the canonical LPA activation string from its parts', () => {
+    expect(
+      buildLpaString({ smdpAddress: 'smdp.io', activationCode: 'K2-2U0001-1SJIOUX' })
+    ).toBe('LPA:1$smdp.io$K2-2U0001-1SJIOUX');
+  });
+
+  it('round-trips through parseLpa', () => {
+    const parsed = parseLpa('LPA:1$smdp.example.com$CODE123');
+    expect(parsed).not.toBeNull();
+    expect(buildLpaString(parsed!)).toBe('LPA:1$smdp.example.com$CODE123');
+  });
+});
+
+describe('lpaQrValueFromTapLink', () => {
+  it('derives the exact QR value from a tap link', () => {
+    expect(lpaQrValueFromTapLink(TAP_LINK)).toBe('LPA:1$smdp.io$K2-2U0001-1SJIOUX');
+  });
+
+  it('drops a trailing confirmation-code segment from the QR value', () => {
+    const link =
+      'https://x.apple.com/p?carddata=' + encodeURIComponent('LPA:1$smdp.io$CODE$1');
+    expect(lpaQrValueFromTapLink(link)).toBe('LPA:1$smdp.io$CODE');
+  });
+
+  it('returns null when the tap link has no parseable LPA (caller falls back to the image)', () => {
+    expect(lpaQrValueFromTapLink('https://apple.com/p')).toBeNull();
+    expect(lpaQrValueFromTapLink(null)).toBeNull();
   });
 });
