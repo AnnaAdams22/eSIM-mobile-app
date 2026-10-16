@@ -3,9 +3,9 @@
  * context, controls the splash screen, and gates startup on required config.
  */
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { StatusBar } from 'expo-status-bar';
-import { Stack } from 'expo-router';
+import { Stack, useRouter, useSegments } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { NavigationBar } from 'expo-navigation-bar';
 import { QueryClientProvider } from '@tanstack/react-query';
@@ -23,12 +23,55 @@ import {
 import { applyStoredLanguage } from '@/i18n';
 import { ConfigError } from '@/components/ConfigError';
 import { ToastProvider } from '@/components/ui';
-import { AuthProvider } from '@/features/auth';
+import { AuthProvider, guardDecision, useAuth } from '@/features/auth';
 import { queryClient } from '@/lib/queryClient';
-import { config, missingConfigKeys } from '@/config';
+import { config, missingConfigKeys, REQUIRE_SIGN_IN_TO_BROWSE } from '@/config';
 import { lightTheme } from '@/theme';
 
 SplashScreen.preventAutoHideAsync().catch(() => {});
+
+/**
+ * The central, app-wide half of the auth guard (the protected route group guards
+ * its own screens). Two jobs:
+ *  1. Enforce REQUIRE_SIGN_IN_TO_BROWSE for PUBLIC routes — when on, a signed-out
+ *     user on any non-auth route is redirected to sign-in.
+ *  2. On sign-out, reset the stack to Home so "back" can't return to a signed-in
+ *     screen and no protected screen stays mounted behind the tabs.
+ * Renders no UI (returns a <Redirect> or null); it's a sibling of the Stack.
+ */
+function AuthGate() {
+  const { status } = useAuth();
+  const router = useRouter();
+  const segments = useSegments() as string[];
+
+  const isAuthRoute = segments[0] === '(auth)';
+  const isProtected = segments.includes('(protected)');
+  const prevStatus = useRef(status);
+
+  useEffect(() => {
+    // Reset to Home the moment we go signed-in → signed-out, so "back" can't
+    // return to a signed-in screen and nothing stays mounted behind the tabs.
+    if (prevStatus.current === 'signedIn' && status === 'signedOut') {
+      router.dismissAll?.();
+    }
+    prevStatus.current = status;
+
+    // Protected routes redirect themselves (with a return path) in their layout;
+    // here we only enforce the global "require sign-in to browse" flag, which
+    // also gates the PUBLIC routes.
+    const decision = guardDecision({
+      status,
+      isProtected,
+      isAuthRoute,
+      requireSignIn: REQUIRE_SIGN_IN_TO_BROWSE,
+    });
+    if (!isProtected && decision === 'redirect') {
+      router.replace('/(auth)/sign-in');
+    }
+  }, [status, isProtected, isAuthRoute, router]);
+
+  return null;
+}
 
 export default function RootLayout() {
   const [fontsLoaded, fontError] = useFonts({
@@ -69,6 +112,10 @@ export default function RootLayout() {
       >
         <AuthProvider>
           <ToastProvider>
+            {/* Central guard: enforces REQUIRE_SIGN_IN_TO_BROWSE for public
+                routes and resets the stack to Home on sign-out. Protected routes
+                are guarded by app/(protected)/_layout.tsx. */}
+            <AuthGate />
             <Stack
               screenOptions={{
                 headerShown: false,
@@ -77,8 +124,7 @@ export default function RootLayout() {
               }}
             >
               <Stack.Screen name="(tabs)" />
-              <Stack.Screen name="checkout" options={{ presentation: 'modal' }} />
-              <Stack.Screen name="order-success" options={{ presentation: 'modal' }} />
+              <Stack.Screen name="(protected)" />
               <Stack.Screen name="(auth)" options={{ presentation: 'modal' }} />
             </Stack>
           </ToastProvider>

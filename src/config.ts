@@ -40,6 +40,17 @@ export function missingConfigKeys(): ConfigKey[] {
 export const isConfigValid = missingConfigKeys().length === 0;
 
 /**
+ * When true, the whole app is behind sign-in: signed-out users see the Sign-in
+ * screen (with Create account) before anything else, and nothing is reachable
+ * until they sign in. When false (the default), guests can browse the public
+ * catalog and only the signed-in areas are protected (see the central auth guard
+ * in app/(protected)/_layout.tsx and the root AuthGate). See CLAUDE.md § "Auth
+ * routing". Overridable via EXPO_PUBLIC_REQUIRE_SIGN_IN=true.
+ */
+export const REQUIRE_SIGN_IN_TO_BROWSE =
+  process.env.EXPO_PUBLIC_REQUIRE_SIGN_IN?.trim() === 'true';
+
+/**
  * Typed, validated config. Accessing a value that is missing throws a clear
  * error — call `missingConfigKeys()` first (the app root does) to fail cleanly
  * at startup instead of deep inside a network call.

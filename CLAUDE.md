@@ -131,6 +131,40 @@ and set the slot to its `require(...)`. Slots that need real photography:
 - `.env` currently has staging API + Supabase URL; the two publishable keys are
   left blank for the owner to fill in.
 
+## Auth routing (guard)
+Auth state lives in `AuthProvider` (`useAuth()`): `user`/`displayName` are derived
+live from the Supabase session (display only), so signing out drops them
+everywhere with no reload. `signOut()` flips to signed-out and clears the React
+Query cache **immediately** (it does not wait on Supabase's network revoke), and
+the cache is also cleared on every `SIGNED_OUT` event (covers forced sign-outs
+and account deletion).
+
+Access is enforced by ONE central, layout-level guard — never per-screen checks.
+The decision is the pure `guardDecision()` in `src/features/auth/guard.ts`
+(`allow` / `redirect` / `wait`), applied in two places:
+- **`app/(protected)/_layout.tsx`** — every route in the `(protected)` group
+  requires sign-in. Signed-out → redirect to `/(auth)/sign-in` with a validated
+  internal `redirect` back to the attempted screen; `loading` → a neutral spinner
+  (no flash of protected content, no premature redirect).
+- **`AuthGate` in `app/_layout.tsx`** — enforces `REQUIRE_SIGN_IN_TO_BROWSE` for
+  public routes, and resets the stack to Home (`dismissAll`) on sign-out.
+
+**Protected** (in `app/(protected)/`): `checkout`, `order-success`, eSIM detail
+(`esim/[iccid]`), top-up, and the account screens `account/{edit,password,
+language,notifications,delete-account}`. To protect a new screen, put it in the
+`(protected)` group — the URL is unchanged (route groups are invisible).
+
+**Public** (guests, no sign-in): Home, destinations list + detail, Explore,
+Support, Install guide, **About** (`account/about`), the `(auth)` screens, and the
+tabs (My eSIMs / Profile show their own signed-out prompts). Tabs never render
+cached user content because the cache is cleared on sign-out.
+
+**`REQUIRE_SIGN_IN_TO_BROWSE`** (`src/config.ts`, default `false`; override with
+`EXPO_PUBLIC_REQUIRE_SIGN_IN=true`): when `true`, `guardDecision` returns
+`redirect` for every non-auth route while signed out, so the Sign-in screen (with
+Create account) is shown before anything else and nothing is reachable until the
+user signs in. When `false`, the guest browsing above applies.
+
 ## How to run
 The app needs a **development build** (the Stripe SDK is native — Expo Go can no
 longer run it).

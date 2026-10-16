@@ -29,6 +29,7 @@ import type { Session, User } from '@supabase/supabase-js';
 import { supabase } from '@/lib/supabase';
 import { api, ApiError } from '@/lib/api';
 import { queryClient } from '@/lib/queryClient';
+import { deriveAuthState } from './authState';
 
 export type AuthStatus = 'loading' | 'signedIn' | 'signedOut';
 
@@ -110,9 +111,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setStatus(data.session ? 'signedIn' : 'signedOut');
     });
 
-    const { data: sub } = supabase.auth.onAuthStateChange((_event, nextSession) => {
+    const { data: sub } = supabase.auth.onAuthStateChange((event, nextSession) => {
       setSession(nextSession);
       setStatus(nextSession ? 'signedIn' : 'signedOut');
+      // Every sign-out path funnels through here — manual, a forced sign-out
+      // (401 that couldn't be refreshed), account_deleted, or account deletion —
+      // so clear the cached per-user queries (/api/me, eSIMs, usage, orders) in
+      // one place, no matter who triggered it.
+      if (event === 'SIGNED_OUT') {
+        queryClient.clear();
+      }
     });
 
     return () => {
@@ -240,16 +248,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const signOut = async (): Promise<void> => {
-    await supabase.auth.signOut();
-    // Drop every cached per-user query (eSIMs, usage, orders …) so a different
-    // account can't briefly see the previous user's data.
+    // Flip to signed-out and drop cached user data IMMEDIATELY — don't wait on
+    // Supabase's network token-revoke round-trip (which on a flaky connection
+    // can take seconds), or the UI would keep showing the old user until it
+    // returns. The listener's SIGNED_OUT also fires later; both are idempotent.
+    setSession(null);
+    setStatus('signedOut');
     queryClient.clear();
+    try {
+      await supabase.auth.signOut();
+    } catch {
+      // Best effort: the local session is already gone and will be cleared from
+      // storage on the next launch; a failed server revoke must not block sign-out.
+    }
   };
 
-  const user = session?.user ?? null;
-  const displayName =
-    (typeof user?.user_metadata?.full_name === 'string' && user.user_metadata.full_name.trim()) ||
-    null;
+  const { user, displayName } = deriveAuthState(session);
 
   const value = useMemo<AuthContextValue>(
     () => ({

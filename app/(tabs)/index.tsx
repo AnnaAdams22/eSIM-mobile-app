@@ -23,7 +23,7 @@ import {
 } from '@/components/ui';
 import { DestinationThumb } from '@/components/DestinationThumb';
 import { HeroImage } from '@/components/HeroImage';
-import { useAuth } from '@/features/auth';
+import { pickGreeting, useAuth } from '@/features/auth';
 import { usePlans } from '@/hooks/usePlans';
 import {
   buildDestinations,
@@ -43,11 +43,9 @@ export default function HomeScreen() {
   const { data: plans, isLoading, isError, refetch } = usePlans();
   const { status, displayName } = useAuth();
 
-  const firstName = displayName?.trim().split(/\s+/)[0];
-  const greeting =
-    status === 'signedIn' && firstName
-      ? t('home.greeting', { name: firstName })
-      : t('home.greetingGuest');
+  // Derived live from auth state — signing out immediately drops the name.
+  const g = pickGreeting({ status, displayName });
+  const greeting = g.name ? t(g.key, { name: g.name }) : t(g.key);
 
   const destinations = useMemo(() => buildDestinations(plans ?? []), [plans]);
 

@@ -44,10 +44,12 @@ export default function DeleteAccountScreen() {
     setDeleting(true);
     try {
       await api.deleteAccount();
-      // Tear down the local session + cache, then go Home and confirm.
+      // Leave this protected screen for Home BEFORE clearing auth, so the
+      // central guard doesn't bounce the teardown to sign-in — a deletion should
+      // land on Home. Then sign out (clears the session + React Query cache).
+      router.replace('/');
       await signOut();
       successNotify();
-      router.replace('/');
       toast.show(t('deleteAccount.success'), { tone: 'success' });
     } catch (err) {
       errorNotify();
