@@ -11,7 +11,7 @@
 import { useState } from 'react';
 import { ScrollView, View } from 'react-native';
 // (useState used below for the lazily-captured "now" in LastUpdated)
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { RefreshCw } from 'lucide-react-native';
@@ -86,7 +86,9 @@ export default function EsimDetailScreen() {
   const showInstall = status === 'notActivated' && (detail.qr_code || detail.ios_tap_link);
 
   return (
-    <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
+    // Top safe-area inset so the Header clears the status bar (the sticky Top-up
+    // bar below handles the bottom inset itself). Mirrors how <Screen> insets its top.
+    <SafeAreaView edges={['top']} style={{ flex: 1, backgroundColor: theme.colors.background }}>
       <ScrollView
         style={{ flex: 1 }}
         contentContainerStyle={{
@@ -174,7 +176,7 @@ export default function EsimDetailScreen() {
           }}
         />
       </View>
-    </View>
+    </SafeAreaView>
   );
 }
 

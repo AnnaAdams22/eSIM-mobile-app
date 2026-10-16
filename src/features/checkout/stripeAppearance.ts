@@ -13,9 +13,15 @@ import type { Theme } from '@/theme';
 
 export function buildPaymentSheetAppearance(theme: Theme): PaymentSheet.AppearanceParams {
   return {
-    // Inter PostScript / font-file name. Resolves in the native (dev/prod) build
-    // where the font is bundled; silently falls back to the system font if not.
-    font: { family: theme.fontFamily.medium },
+    // NOTE: no `font.family`. On Android the Stripe SDK requires the family to be
+    // a lowercase-alphanumeric native font resource filename (e.g. `inter_medium`
+    // under android/app/src/main/res/font). Passing our JS font name
+    // ("Inter_500Medium") makes initPaymentSheet throw. We let the sheet use the
+    // system font on both platforms for consistency (colours/shape still brand it).
+    //
+    // TODO: To use Inter inside the Stripe sheet, bundle the Inter TTF as a native
+    // font via the expo-font config plugin with a lowercase filename (e.g.
+    // inter_medium), then set font.family per platform. Requires a rebuild.
     colors: {
       primary: theme.colors.primary,
       background: theme.colors.surface,
