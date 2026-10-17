@@ -47,7 +47,9 @@ export function ListRow({
     <>
       {leading ? <View accessible={false}>{leading}</View> : null}
       <View style={{ flex: 1 }}>
-        <Text variant="h3" numberOfLines={1}>
+        {/* Up to two lines so long localised names (e.g. German "Vereinigte
+            Staaten von Amerika") wrap instead of truncating. */}
+        <Text variant="h3" numberOfLines={2}>
           {title}
         </Text>
         {subtitle ? (
@@ -62,7 +64,8 @@ export function ListRow({
             variant="bodySmall"
             color="textSecondary"
             dense
-            style={{ fontFamily: theme.fontFamily.medium }}
+            numberOfLines={1}
+            style={{ fontFamily: theme.fontFamily.medium, flexShrink: 0 }}
           >
             {value}
           </Text>

@@ -321,12 +321,13 @@ function TopupSuccessState({
   onDone: () => void;
 }) {
   const theme = useTheme();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const lang = i18n.language;
   // Usage was invalidated on success, so this reads the fresh post-top-up balance.
   const { data: usage } = useEsimUsage(iccid, !!iccid);
 
-  const left = formatDataSize(usage?.data_left_mb);
-  const total = formatDataSize(usage?.data_total_mb);
+  const left = formatDataSize(usage?.data_left_mb, lang);
+  const total = formatDataSize(usage?.data_total_mb, lang);
   const fraction = usage ? usedFraction(usage) : null;
 
   return (

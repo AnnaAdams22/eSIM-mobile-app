@@ -32,8 +32,10 @@ import {
   FILTERABLE_CONTINENTS,
   POPULAR_DESTINATIONS,
   POPULAR_DESTINATIONS_LIMIT,
+  useCatalogL10n,
   type Destination,
 } from '@/features/catalog';
+import { formatPrice } from '@/lib/price';
 import { useTheme, type Theme } from '@/theme';
 
 export default function HomeScreen() {
@@ -47,7 +49,11 @@ export default function HomeScreen() {
   const g = pickGreeting({ status, displayName });
   const greeting = g.name ? t(g.key, { name: g.name }) : t(g.key);
 
-  const destinations = useMemo(() => buildDestinations(plans ?? []), [plans]);
+  const { nameResolver } = useCatalogL10n();
+  const destinations = useMemo(
+    () => buildDestinations(plans ?? [], nameResolver),
+    [plans, nameResolver]
+  );
 
   const popular = useMemo(() => {
     const byIso = new Map(destinations.map((d) => [d.iso2, d]));
@@ -324,13 +330,14 @@ function SectionHeader({
 
 function PopularRow({ dest, onPress }: { dest: Destination; onPress: () => void }) {
   const theme = useTheme();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const price = formatPrice(dest.lowestPriceCents, i18n.language, dest.lowestPriceDisplay);
   return (
     <PressableScale
       onPress={onPress}
       scaleTo={0.98}
       accessibilityRole="button"
-      accessibilityLabel={`${dest.name}, ${t('destinations.from', { price: dest.lowestPriceDisplay })}`}
+      accessibilityLabel={`${dest.name}, ${t('destinations.from', { price })}`}
       accessibilityHint={t('destinations.rowHint')}
       style={{
         flexDirection: 'row',
@@ -346,7 +353,7 @@ function PopularRow({ dest, onPress }: { dest: Destination; onPress: () => void 
           {dest.name}
         </Text>
         <Text variant="bodySmall" color="textSecondary" dense>
-          {t('destinations.from', { price: dest.lowestPriceDisplay })}
+          {t('destinations.from', { price })}
         </Text>
       </View>
       <ChevronRight size={20} color={theme.colors.textSecondary} />

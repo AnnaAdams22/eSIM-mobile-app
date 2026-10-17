@@ -10,7 +10,12 @@
  */
 
 import type { Plan } from '@/lib/api-types';
-import { buildDestinations, buildRegions } from './catalog';
+import {
+  buildDestinations,
+  buildRegions,
+  type CountryNameResolver,
+  type RegionNameResolvers,
+} from './catalog';
 
 export interface GeoDisplay {
   flag: string | null;
@@ -28,14 +33,27 @@ export interface GeoInput {
   fallbackTitle?: string | null;
 }
 
-export function resolveGeoDisplay(plans: Plan[], input: GeoInput): GeoDisplay {
+export interface GeoResolvers {
+  /** Localises a country name by ISO2 (see `countryNameResolver`). */
+  nameResolver?: CountryNameResolver;
+  /** Localises a region's display name / members (see `useCatalogL10n`). */
+  regionResolvers?: RegionNameResolvers;
+}
+
+export function resolveGeoDisplay(
+  plans: Plan[],
+  input: GeoInput,
+  resolvers: GeoResolvers = {}
+): GeoDisplay {
   if (input.countryIso2) {
     const iso2 = input.countryIso2.toUpperCase();
-    const dest = buildDestinations(plans).find((d) => d.iso2 === iso2);
+    const dest = buildDestinations(plans, resolvers.nameResolver).find((d) => d.iso2 === iso2);
     if (dest) return { flag: dest.flag, title: dest.name };
   }
   if (input.planType) {
-    const region = buildRegions(plans).find((r) => r.key === input.planType);
+    const region = buildRegions(plans, resolvers.regionResolvers).find(
+      (r) => r.key === input.planType
+    );
     if (region) return { flag: region.flag, title: region.name };
   }
   return {

@@ -17,7 +17,8 @@ Its rules and API live in `../esim-backend/CLAUDE.md`.
 - **@tanstack/react-query** for server state.
 - **@supabase/supabase-js** for auth only (identity provider; no business data).
   Session persisted via a large-value-safe **expo-secure-store** adapter.
-- **i18next / react-i18next / expo-localization** (English only for now).
+- **i18next / react-i18next / expo-localization**. Ships **English (source +
+  fallback), Russian, German and Spanish** — see "Translations" below.
 - **expo-image**, **expo-font**, **@expo-google-fonts/inter**.
 - Icons: **lucide-react-native** (the one icon set — use it everywhere).
 - **Payments: `@stripe/stripe-react-native`** (native PaymentSheet) + Apple Pay /
@@ -131,6 +132,69 @@ and set the slot to its `require(...)`. Slots that need real photography:
 - `.env` currently has staging API + Supabase URL; the two publishable keys are
   left blank for the owner to fill in.
 
+## Translations
+The app is localised with i18next. Bundles live in `src/i18n/` (`en.json`,
+`ru.json`, `de.json`, `es.json`) and are registered in **one** place,
+`src/i18n/resources.ts`. The language catalogue (code + native name) is
+`AVAILABLE_LANGUAGES` in `src/features/settings/language.ts`.
+
+**Translation status** — English is the source of truth and fallback. The other
+three are **machine-generated drafts that need native review**:
+
+| Code | Language | Native name | Status |
+| ---- | -------- | ----------- | ------ |
+| `en` | English  | English     | source |
+| `ru` | Russian  | Русский     | draft — needs native review |
+| `de` | German   | Deutsch     | draft — needs native review |
+| `es` | Spanish  | Español     | draft — needs native review |
+
+See `translations/README.md` for the full note. `src/i18n/__tests__/translations.test.ts`
+fails CI if any language is missing/adds a key, has mismatched `{{placeholders}}`,
+or lacks a plural form it needs (Russian: one/few/many/other; German/Spanish:
+one/other). Keep it green.
+
+**Language selection.** The Language screen (`app/account/language.tsx`) is
+**public** — guests can change language from the Profile signed-out card and from
+About. Options: "Use device language" (default) then each language in its own
+name, with a checkmark on the current one. The choice persists (SecureStore),
+applies instantly (no restart) and is re-applied on startup. Device detection maps
+regional variants (`es-MX → es`, `de-AT → de`, `ru-UA → ru`) to the base language
+and falls back to English for anything unsupported (`resolveLanguage`).
+
+**Localised data, not just UI strings.**
+- Country names come from `i18n-iso-countries` (en/ru/de/es registered;
+  `src/features/catalog/countryNames.ts`) — NOT `Intl.DisplayNames`, which is
+  unreliable on Hermes/Android. The backend's English name is the fallback. The
+  catalog transforms stay pure: screens inject a locale-bound resolver via
+  `useCatalogL10n()`.
+- Search matches in the selected language **and** English (plus a curated alias
+  list), case- and accent-insensitive — "Germany", "Deutschland", "Alemania" and
+  "Германия" all find Germany.
+- Prices: one shared formatter, `formatPrice(cents, locale, fallback)` in
+  `src/lib/price.ts`, formats the backend's `price_eur_cents` with
+  `Intl.NumberFormat` as EUR ("€4.99" / "4,99 €"). **Formatting only, never
+  calculation** (CLAUDE.md rule 7). `Intl.NumberFormat`/`DateTimeFormat` ARE
+  available on Hermes in SDK 57 (full-ICU); every call is still guarded and falls
+  back to the backend's `*_display` string if Intl ever fails.
+- Dates (`src/lib/date.ts`) and data amounts (`formatDataSize`, catalog
+  `formatData`) take the current locale — localised month names and decimal
+  separator ("0,49 GB" in German); data sizes don't use thousands grouping.
+
+**Fonts.** The bundled Inter (`@expo-google-fonts/inter`) covers Latin-Extended
+and **Cyrillic** (verified: U+0410/0434/0413 present), so Russian needs no font
+change.
+
+**RTL (Arabic, Hebrew) is out of scope.** Adding it later would need: `I18nManager`
+(`allowRTL`/`forceRTL`) driven by the selected language, a **full app restart** to
+flip layout direction (RN only mirrors on reload), an audit of every
+directional style (replace `left`/`right` with `start`/`end`, mirror icons/chevrons
+and back-swipe), and RTL-aware test coverage. None of that exists today.
+
+**Follow-ups (not translated now):** backend + Supabase auth emails (owned by
+`../esim-backend`) stay English; website legal pages (Terms/Privacy/Refund) would
+need translated versions there; region group names that aren't continents (e.g.
+"Regional Asia") stay English until a backend region taxonomy exists.
+
 ## Auth routing (guard)
 Auth state lives in `AuthProvider` (`useAuth()`): `user`/`displayName` are derived
 live from the Supabase session (display only), so signing out drops them
@@ -151,13 +215,15 @@ The decision is the pure `guardDecision()` in `src/features/auth/guard.ts`
 
 **Protected** (in `app/(protected)/`): `checkout`, `order-success`, eSIM detail
 (`esim/[iccid]`), top-up, and the account screens `account/{edit,password,
-language,notifications,delete-account}`. To protect a new screen, put it in the
+notifications,delete-account}`. To protect a new screen, put it in the
 `(protected)` group — the URL is unchanged (route groups are invisible).
 
 **Public** (guests, no sign-in): Home, destinations list + detail, Explore,
-Support, Install guide, **About** (`account/about`), the `(auth)` screens, and the
-tabs (My eSIMs / Profile show their own signed-out prompts). Tabs never render
-cached user content because the cache is cleared on sign-out.
+Support, Install guide, **About** (`account/about`), **Language**
+(`account/language` — guests can change language too; reachable from the Profile
+signed-out card and from About), the `(auth)` screens, and the tabs (My eSIMs /
+Profile show their own signed-out prompts). Tabs never render cached user content
+because the cache is cleared on sign-out.
 
 **`REQUIRE_SIGN_IN_TO_BROWSE`** (`src/config.ts`, default `false`; override with
 `EXPO_PUBLIC_REQUIRE_SIGN_IN=true`): when `true`, `guardDecision` returns

@@ -37,10 +37,12 @@ import {
   formatPlanLabel,
   plansForDestination,
   plansForRegion,
+  useCatalogL10n,
 } from '@/features/catalog';
 import { useAuth } from '@/features/auth';
 import { lightTap, selectionTap } from '@/lib/haptics';
 import type { Plan } from '@/lib/api-types';
+import { formatPrice } from '@/lib/price';
 import { useTheme, type Theme } from '@/theme';
 
 const HERO_HEIGHT = 300;
@@ -62,18 +64,34 @@ export default function DestinationDetailScreen() {
     [plans, id, isRegion]
   );
 
+  const { lang, nameResolver, regionResolvers } = useCatalogL10n();
+
   const meta = useMemo(() => {
     if (isRegion) {
-      const region = buildRegions(plans ?? []).find((r) => r.key === id);
+      const region = buildRegions(plans ?? [], regionResolvers).find((r) => r.key === id);
       return region
-        ? { name: region.name, flag: region.flag, price: region.lowestPriceDisplay, seed: region.name, countries: region.countries }
+        ? {
+            name: region.name,
+            flag: region.flag,
+            priceCents: region.lowestPriceCents,
+            priceDisplay: region.lowestPriceDisplay,
+            seed: region.name,
+            countries: region.countries,
+          }
         : null;
     }
-    const dest = buildDestinations(plans ?? []).find((d) => d.iso2 === id.toUpperCase());
+    const dest = buildDestinations(plans ?? [], nameResolver).find((d) => d.iso2 === id.toUpperCase());
     return dest
-      ? { name: dest.name, flag: dest.flag, price: dest.lowestPriceDisplay, seed: dest.continent, countries: [] as string[] }
+      ? {
+          name: dest.name,
+          flag: dest.flag,
+          priceCents: dest.lowestPriceCents,
+          priceDisplay: dest.lowestPriceDisplay,
+          seed: dest.continent,
+          countries: [] as string[],
+        }
       : null;
-  }, [plans, id, isRegion]);
+  }, [plans, id, isRegion, nameResolver, regionResolvers]);
 
   // Track the user's explicit choice; default (derived, no effect) is the first
   // plan — the cheapest/smallest after sorting.
@@ -178,7 +196,9 @@ export default function DestinationDetailScreen() {
                 {meta.name}
               </Text>
               <Text variant="bodySmall" color="textSecondary" style={{ fontFamily: theme.fontFamily.medium }}>
-                {t('productDetail.from', { price: meta.price })}
+                {t('productDetail.from', {
+                  price: formatPrice(meta.priceCents, lang, meta.priceDisplay),
+                })}
               </Text>
             </View>
           </View>
@@ -284,7 +304,9 @@ export default function DestinationDetailScreen() {
         <Button
           label={
             selectedPlan
-              ? t('productDetail.buyNowPrice', { price: selectedPlan.price_display })
+              ? t('productDetail.buyNowPrice', {
+                  price: formatPrice(selectedPlan.price_eur_cents, lang, selectedPlan.price_display),
+                })
               : t('productDetail.buyNow')
           }
           onPress={buyNow}
@@ -317,15 +339,16 @@ function PlanRow({
   onSelect: () => void;
 }) {
   const theme = useTheme();
-  const { t } = useTranslation();
-  const label = formatPlanLabel(plan, t);
+  const { t, i18n } = useTranslation();
+  const label = formatPlanLabel(plan, t, i18n.language);
+  const price = formatPrice(plan.price_eur_cents, i18n.language, plan.price_display);
 
   return (
     <Pressable
       onPress={onSelect}
       accessibilityRole="radio"
       accessibilityState={{ selected }}
-      accessibilityLabel={`${label}, ${plan.price_display}`}
+      accessibilityLabel={`${label}, ${price}`}
       style={({ pressed }) => ({
         flexDirection: 'row',
         alignItems: 'center',
@@ -369,7 +392,7 @@ function PlanRow({
         </Text>
       </View>
       <Text variant="h3" dense style={{ fontFamily: theme.fontFamily.semibold }}>
-        {plan.price_display}
+        {price}
       </Text>
     </Pressable>
   );

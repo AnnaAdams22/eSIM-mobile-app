@@ -31,7 +31,12 @@ import {
 import { Flag } from '@/components/Flag';
 import { usePlans } from '@/hooks/usePlans';
 import { useAuth } from '@/features/auth';
-import { formatPlanLabel, resolveGeoDisplay } from '@/features/catalog';
+import {
+  formatPlanLabel,
+  resolveGeoDisplay,
+  useCatalogL10n,
+  type GeoResolvers,
+} from '@/features/catalog';
 import {
   buildPaymentSheetAppearance,
   makeRequestIdHolder,
@@ -45,7 +50,7 @@ import { api, ApiError } from '@/lib/api';
 import type { Plan, PaymentSheetResponse, PromoValidation } from '@/lib/api-types';
 import { formatShortDate } from '@/lib/date';
 import { config } from '@/config';
-import { formatEurCents } from '@/lib/money';
+import { formatPrice } from '@/lib/price';
 import { errorNotify, lightTap, successNotify } from '@/lib/haptics';
 import { uuidv4 } from '@/lib/uuid';
 import { useTheme } from '@/theme';
@@ -59,14 +64,22 @@ interface AppliedPromo {
   amountCents: number;
 }
 
-/** Resolve the flag + human title for a plan from the catalog groupings. */
-function planSummary(plans: Plan[], plan: Plan): { flag: string | null; title: string } {
-  return resolveGeoDisplay(plans, {
-    countryIso2: plan.countryIso2,
-    planType: plan.plan_type,
-    fallbackFlag: plan.image,
-    fallbackTitle: plan.countries_included?.trim() || plan.name,
-  });
+/** Resolve the flag + localised title for a plan from the catalog groupings. */
+function planSummary(
+  plans: Plan[],
+  plan: Plan,
+  resolvers: GeoResolvers
+): { flag: string | null; title: string } {
+  return resolveGeoDisplay(
+    plans,
+    {
+      countryIso2: plan.countryIso2,
+      planType: plan.plan_type,
+      fallbackFlag: plan.image,
+      fallbackTitle: plan.countries_included?.trim() || plan.name,
+    },
+    resolvers
+  );
 }
 
 export default function CheckoutScreen() {
@@ -88,11 +101,15 @@ export default function CheckoutScreen() {
   const email = user?.email ?? null;
   const { initPaymentSheet, presentPaymentSheet } = useStripe();
 
+  const { lang, nameResolver, regionResolvers } = useCatalogL10n();
   const { data: plans, isLoading, isError, refetch } = usePlans();
   const plan = useMemo(() => plans?.find((p) => p.id === planId) ?? null, [plans, planId]);
   const summary = useMemo(
-    () => (plan && plans ? planSummary(plans, plan) : null),
-    [plan, plans]
+    () =>
+      plan && plans
+        ? planSummary(plans, plan, { nameResolver, regionResolvers })
+        : null,
+    [plan, plans, nameResolver, regionResolvers]
   );
 
   // One idempotency id per checkout attempt; reused across retries (same ref
@@ -144,11 +161,13 @@ export default function CheckoutScreen() {
     );
   }
 
-  const planLabel = formatPlanLabel(plan, t);
+  const planLabel = formatPlanLabel(plan, t, lang);
 
-  // All money shown comes from the server: list price verbatim, total/discount
-  // formatted from the promo response's cents (never computed here).
-  const totalDisplay = applied ? formatEurCents(applied.amountCents) : plan.price_display;
+  // All money shown comes from the server: the amount is the server's (list price
+  // in cents, or the promo response's total); we only FORMAT it for the locale.
+  const totalDisplay = applied
+    ? formatPrice(applied.amountCents, lang, plan.price_display)
+    : formatPrice(plan.price_eur_cents, lang, plan.price_display);
 
   // ─── Promo code ──────────────────────────────────────────────────────────
   const applyPromo = async () => {
@@ -190,8 +209,8 @@ export default function CheckoutScreen() {
   // A native confirm for a plan-replacing top-up, resolving true to proceed.
   const confirmReplace = (info: ReplaceInfo) =>
     new Promise<boolean>((resolve) => {
-      const amount = formatDataSize(info.dataLeftMb);
-      const date = formatShortDate(info.expiresAt);
+      const amount = formatDataSize(info.dataLeftMb, lang);
+      const date = formatShortDate(info.expiresAt, lang);
       const body =
         amount && date
           ? t('topup.confirmBody', { amount, date })
@@ -332,7 +351,7 @@ export default function CheckoutScreen() {
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: theme.spacing.md }}>
             <Flag uri={summary.flag} size={44} />
             <View style={{ flex: 1 }}>
-              <Text variant="h3" numberOfLines={1}>
+              <Text variant="h3" numberOfLines={2}>
                 {summary.title}
               </Text>
               <Text
@@ -344,8 +363,12 @@ export default function CheckoutScreen() {
                 {planLabel}
               </Text>
             </View>
-            <Text variant="h3" style={{ fontFamily: theme.fontFamily.semibold }}>
-              {plan.price_display}
+            <Text
+              variant="h3"
+              numberOfLines={1}
+              style={{ fontFamily: theme.fontFamily.semibold, flexShrink: 0 }}
+            >
+              {formatPrice(plan.price_eur_cents, lang, plan.price_display)}
             </Text>
           </View>
         </Card>
@@ -386,11 +409,14 @@ export default function CheckoutScreen() {
           {t('checkout.summaryTitle')}
         </Text>
         <Card padding="lg" radius="lg" shadow="sm">
-          <SummaryRow label={t('checkout.priceLabel')} value={plan.price_display} />
+          <SummaryRow
+            label={t('checkout.priceLabel')}
+            value={formatPrice(plan.price_eur_cents, lang, plan.price_display)}
+          />
           {applied ? (
             <SummaryRow
               label={t('checkout.discountLabel')}
-              value={formatEurCents(-applied.discountCents)}
+              value={formatPrice(-applied.discountCents, lang)}
               tone="discount"
             />
           ) : null}

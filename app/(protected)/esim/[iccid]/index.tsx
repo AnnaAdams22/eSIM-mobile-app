@@ -30,7 +30,7 @@ import {
 } from '@/components/ui';
 import { Flag } from '@/components/Flag';
 import { InstallSection, UsageMeter } from '@/components/esim';
-import { resolveGeoDisplay, formatPlanLabel } from '@/features/catalog';
+import { resolveGeoDisplay, formatPlanLabel, useCatalogL10n } from '@/features/catalog';
 import {
   esimDisplayStatus,
   formatDataSize,
@@ -41,6 +41,7 @@ import { useEsim, useEsimUsage } from '@/hooks/useEsims';
 import { usePlans } from '@/hooks/usePlans';
 import type { EsimOrder, EsimUsage } from '@/lib/api-types';
 import { formatShortDate, relativeTimeParts } from '@/lib/date';
+import { formatPrice } from '@/lib/price';
 import { lightTap } from '@/lib/haptics';
 import { useTheme } from '@/theme';
 
@@ -48,7 +49,9 @@ export default function EsimDetailScreen() {
   const theme = useTheme();
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const lang = i18n.language;
+  const { nameResolver, regionResolvers } = useCatalogL10n();
   const { iccid } = useLocalSearchParams<{ iccid: string }>();
 
   const { data: detail, isLoading, isError, refetch } = useEsim(iccid);
@@ -81,12 +84,16 @@ export default function EsimDetailScreen() {
   }
 
   const plan = plans?.find((p) => p.id === detail.plan_id) ?? null;
-  const geo = resolveGeoDisplay(plans ?? [], {
-    countryIso2: plan?.countryIso2,
-    planType: plan?.plan_type,
-    fallbackTitle: plan?.countries_included?.trim() || plan?.name || '',
-  });
-  const planLabel = plan ? formatPlanLabel(plan, t) : '';
+  const geo = resolveGeoDisplay(
+    plans ?? [],
+    {
+      countryIso2: plan?.countryIso2,
+      planType: plan?.plan_type,
+      fallbackTitle: plan?.countries_included?.trim() || plan?.name || '',
+    },
+    { nameResolver, regionResolvers }
+  );
+  const planLabel = plan ? formatPlanLabel(plan, t, lang) : '';
   const status = esimDisplayStatus({ orderStatus: detail.status, usage });
   const showInstall = status === 'notActivated' && (detail.qr_code || detail.ios_tap_link);
 
@@ -201,11 +208,12 @@ function UsageCard({
   refreshing: boolean;
 }) {
   const theme = useTheme();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const lang = i18n.language;
 
-  const left = formatDataSize(usage?.data_left_mb);
-  const total = formatDataSize(usage?.data_total_mb);
-  const used = formatDataSize(usage?.data_used_mb);
+  const left = formatDataSize(usage?.data_left_mb, lang);
+  const total = formatDataSize(usage?.data_total_mb, lang);
+  const used = formatDataSize(usage?.data_used_mb, lang);
   const fraction = usage ? usedFraction(usage) : null;
 
   return (
@@ -276,13 +284,13 @@ function UsageCard({
       <View style={{ gap: theme.spacing.xxs }}>
         {usage?.activated_at ? (
           <Text variant="caption" color="textSecondary">
-            {t('esimDetail.activatedOn', { date: formatShortDate(usage.activated_at) })}
+            {t('esimDetail.activatedOn', { date: formatShortDate(usage.activated_at, lang) })}
           </Text>
         ) : null}
         {usage?.expires_at ? (
           <Text variant="caption" color="textSecondary">
             {t(status === 'expired' ? 'esimDetail.expiredOn' : 'esimDetail.expiresOn', {
-              date: formatShortDate(usage.expires_at),
+              date: formatShortDate(usage.expires_at, lang),
             })}
           </Text>
         ) : null}
@@ -320,13 +328,14 @@ function LastUpdated({ fetchedAt }: { fetchedAt: string }) {
 
 function OrderRow({ order, last }: { order: EsimOrder; last: boolean }) {
   const theme = useTheme();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const lang = i18n.language;
   const label = order.order_kind === 'topup' ? t('esimDetail.orderTopup') : t('esimDetail.orderPurchase');
   return (
     <ListRow
       title={label}
-      subtitle={formatShortDate(order.created_at) ?? ''}
-      value={order.amount_paid_display}
+      subtitle={formatShortDate(order.created_at, lang) ?? ''}
+      value={formatPrice(order.amount_paid_eur_cents, lang, order.amount_paid_display)}
       chevron={false}
       style={last ? undefined : { borderBottomWidth: 1, borderBottomColor: theme.colors.border }}
     />

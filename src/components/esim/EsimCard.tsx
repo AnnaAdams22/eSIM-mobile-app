@@ -60,10 +60,11 @@ export function EsimCard({
   onTopUp,
 }: EsimCardProps) {
   const theme = useTheme();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const lang = i18n.language;
 
   const status = esimDisplayStatus({ orderStatus: item.status, usage });
-  const planLabel = item.plan ? formatPlanLabel(item.plan, t) : '';
+  const planLabel = item.plan ? formatPlanLabel(item.plan, t, lang) : '';
   const iccid = item.iccid;
 
   const copyIccid = async () => {
@@ -78,7 +79,7 @@ export function EsimCard({
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: theme.spacing.md }}>
         <Flag uri={flag} size={40} />
         <View style={{ flex: 1 }}>
-          <Text variant="h3" numberOfLines={1}>
+          <Text variant="h3" numberOfLines={2}>
             {title}
           </Text>
           {planLabel ? (
@@ -176,7 +177,8 @@ function DateLine({
   onRetry?: () => void;
 }) {
   const theme = useTheme();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const lang = i18n.language;
 
   const lineState = usageLineState({
     status,
@@ -229,7 +231,7 @@ function DateLine({
   let text: string | null = null;
   switch (status) {
     case 'active': {
-      const date = formatShortDate(usage?.expires_at);
+      const date = formatShortDate(usage?.expires_at, lang);
       text = date ? t('esims.activeUntil', { date }) : null;
       break;
     }
@@ -237,7 +239,7 @@ function DateLine({
       text = t('esims.activatesOnConnection');
       break;
     case 'expired': {
-      const date = formatShortDate(usage?.expires_at);
+      const date = formatShortDate(usage?.expires_at, lang);
       text = date ? t('esims.expiredOn', { date }) : t('esims.status.expired');
       break;
     }

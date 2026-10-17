@@ -26,6 +26,7 @@ import {
 } from '@/components/ui';
 import { formatPlanLabel } from '@/features/catalog';
 import { formatDataSize, needsReplaceConfirm } from '@/features/esims';
+import { formatPrice } from '@/lib/price';
 import { useTopupOptions } from '@/hooks/useEsims';
 import type { TopupCurrent, TopupOption } from '@/lib/api-types';
 import { formatShortDate } from '@/lib/date';
@@ -35,7 +36,8 @@ import { useTheme } from '@/theme';
 export default function TopupOptionsScreen() {
   const theme = useTheme();
   const router = useRouter();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const lang = i18n.language;
   const { iccid } = useLocalSearchParams<{ iccid: string }>();
 
   const { data, isLoading, isError, refetch } = useTopupOptions(iccid);
@@ -68,8 +70,8 @@ export default function TopupOptionsScreen() {
       return;
     }
 
-    const amount = formatDataSize(current?.data_left_mb);
-    const date = formatShortDate(current?.expires_at);
+    const amount = formatDataSize(current?.data_left_mb, lang);
+    const date = formatShortDate(current?.expires_at, lang);
     const body =
       amount && date
         ? t('topup.confirmBody', { amount, date })
@@ -129,13 +131,14 @@ export default function TopupOptionsScreen() {
 
 function CurrentPlanCard({ current }: { current: TopupCurrent }) {
   const theme = useTheme();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const lang = i18n.language;
 
-  const left = formatDataSize(current.data_left_mb);
+  const left = formatDataSize(current.data_left_mb, lang);
   const expiry = current.is_expired
     ? t('topup.expired')
     : current.expires_at
-      ? t('topup.expires', { date: formatShortDate(current.expires_at) })
+      ? t('topup.expires', { date: formatShortDate(current.expires_at, lang) })
       : null;
 
   return (
@@ -158,8 +161,9 @@ function CurrentPlanCard({ current }: { current: TopupCurrent }) {
 
 function OptionCard({ option, onSelect }: { option: TopupOption; onSelect: () => void }) {
   const theme = useTheme();
-  const { t } = useTranslation();
-  const label = formatPlanLabel(option, t);
+  const { t, i18n } = useTranslation();
+  const lang = i18n.language;
+  const label = formatPlanLabel(option, t, lang);
 
   return (
     <PressableScale
@@ -175,7 +179,7 @@ function OptionCard({ option, onSelect }: { option: TopupOption; onSelect: () =>
             </Text>
           </View>
           <Text variant="h3" style={{ fontFamily: theme.fontFamily.semibold }}>
-            {option.price_display}
+            {formatPrice(option.price_eur_cents, lang, option.price_display)}
           </Text>
         </View>
         <View style={{ flexDirection: 'row' }}>

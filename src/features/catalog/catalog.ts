@@ -19,6 +19,16 @@ import { dataAmountGb } from './format';
 /** Plans whose `plan_type` is exactly this are single-country plans. */
 export const COUNTRY_PLAN_TYPE = 'country';
 
+/**
+ * Resolves a display name for a country from its ISO2 code, given the backend's
+ * English name as a fallback. Injected (rather than imported) so these transforms
+ * stay pure and i18n-free: screens pass a resolver bound to the current language
+ * (see `countryNameResolver`); tests and the default use the English fallback.
+ */
+export type CountryNameResolver = (iso2: string, fallback: string) => string;
+
+const identityName: CountryNameResolver = (_iso2, fallback) => fallback;
+
 export interface Destination {
   /** Uppercased ISO2 country code — the grouping key. */
   iso2: string;
@@ -39,8 +49,10 @@ export interface Region {
   key: string;
   /** Display name derived from the key. */
   name: string;
-  /** Distinct country names covered by the group. */
+  /** Distinct country names covered by the group (localised for display). */
   countries: string[];
+  /** ISO2 codes for the member countries (for cross-language search; may be empty). */
+  countryCodes: string[];
   countryCount: number;
   flag: string | null;
   planCount: number;
@@ -84,7 +96,10 @@ function humanizeKey(key: string): string {
  * One Destination per country (keyed by ISO2), carrying the plan count and the
  * cheapest plan's display price. Sorted alphabetically by name.
  */
-export function buildDestinations(plans: Plan[]): Destination[] {
+export function buildDestinations(
+  plans: Plan[],
+  resolveName: CountryNameResolver = identityName
+): Destination[] {
   const groups = new Map<string, Plan[]>();
 
   for (const plan of countryPlans(plans)) {
@@ -97,8 +112,10 @@ export function buildDestinations(plans: Plan[]): Destination[] {
   const destinations: Destination[] = [];
   for (const [iso2, group] of groups) {
     const low = cheapest(group);
-    // Prefer the vendor's country name; fall back to the ISO2 code.
-    const name = group.find((p) => p.countries_included)?.countries_included?.trim() || iso2;
+    // Prefer the vendor's country name; fall back to the ISO2 code. The resolver
+    // localises it (keyed by ISO2) when a translation exists, else keeps this.
+    const backendName = group.find((p) => p.countries_included)?.countries_included?.trim() || iso2;
+    const name = resolveName(iso2, backendName);
     const flag = group.find((p) => p.image)?.image ?? null;
 
     destinations.push({
@@ -119,7 +136,17 @@ export function buildDestinations(plans: Plan[]): Destination[] {
  * One Region per non-country `plan_type`, with the number of distinct countries
  * covered and the cheapest plan's display price. Sorted alphabetically by name.
  */
-export function buildRegions(plans: Plan[]): Region[] {
+export interface RegionNameResolvers {
+  /** Localise a region's display name (its `plan_type`), e.g. for a `regions.*` key. */
+  regionName?: (key: string, humanized: string) => string;
+  /** Localise an English member-country name for display; defaults to identity. */
+  countryName?: (englishName: string) => string;
+  /** Map an English member-country name to its ISO2 code (for cross-language search). */
+  toIso2?: (englishName: string) => string | undefined;
+}
+
+export function buildRegions(plans: Plan[], resolvers: RegionNameResolvers = {}): Region[] {
+  const { regionName, countryName = (n) => n, toIso2 } = resolvers;
   const groups = new Map<string, Plan[]>();
 
   for (const plan of regionPlans(plans)) {
@@ -133,16 +160,24 @@ export function buildRegions(plans: Plan[]): Region[] {
   for (const [key, group] of groups) {
     const low = cheapest(group);
     const countrySet = new Set<string>();
+    const codeSet = new Set<string>();
     for (const plan of group) {
-      for (const country of splitCountries(plan.countries_included)) countrySet.add(country);
+      for (const country of splitCountries(plan.countries_included)) {
+        // Localise the member name for display; keep its ISO2 for search.
+        countrySet.add(countryName(country));
+        const iso2 = toIso2?.(country);
+        if (iso2) codeSet.add(iso2.toUpperCase());
+      }
     }
     const countries = [...countrySet].sort((a, b) => a.localeCompare(b));
     const flag = group.find((p) => p.image)?.image ?? null;
+    const humanized = humanizeKey(key);
 
     regions.push({
       key,
-      name: humanizeKey(key),
+      name: regionName ? regionName(key, humanized) : humanized,
       countries,
+      countryCodes: [...codeSet],
       countryCount: countries.length,
       flag,
       planCount: group.length,

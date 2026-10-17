@@ -1,0 +1,549 @@
+{
+  "common": {
+    "appName": "ESIM Global",
+    "back": "Zurück",
+    "retry": "Erneut versuchen",
+    "loading": "Wird geladen",
+    "close": "Schließen",
+    "cancel": "Abbrechen",
+    "continue": "Weiter",
+    "search": "Suchen"
+  },
+  "tabs": {
+    "home": "Start",
+    "esims": "Meine eSIMs",
+    "explore": "Entdecken",
+    "profile": "Profil"
+  },
+  "home": {
+    "greeting": "Hallo, {{name}}",
+    "greetingGuest": "Hallo",
+    "subtitle": "Wohin geht die Reise heute?",
+    "searchPlaceholder": "Reiseziel oder Land suchen",
+    "searchHint": "Öffnet die Liste der Reiseziele",
+    "heroTitle": "Bleiben Sie in über {{count}} Ländern verbunden",
+    "heroHint": "Alle Reiseziele ansehen",
+    "popularTitle": "Beliebte Reiseziele",
+    "seeAll": "Alle ansehen",
+    "exploreRegionsTitle": "Regionen entdecken",
+    "howItWorks": {
+      "title": "So funktioniert’s",
+      "step1Title": "Tarif wählen",
+      "step1Body": "Wählen Sie Daten für Ihr Reiseziel.",
+      "step2Title": "eSIM installieren",
+      "step2Body": "Mit wenigen Tipps – kein SIM-Wechsel nötig.",
+      "step3Title": "Bei Ankunft verbunden",
+      "step3Body": "Landen und sofort online sein."
+    }
+  },
+  "destinations": {
+    "title": "Wählen Sie Ihr Reiseziel",
+    "searchPlaceholder": "Land oder Region suchen",
+    "filters": {
+      "all": "Alle",
+      "europe": "Europa",
+      "asia": "Asien",
+      "americas": "Amerika",
+      "africa": "Afrika",
+      "middleEast": "Naher Osten",
+      "oceania": "Ozeanien",
+      "regions": "Regionen"
+    },
+    "from": "Ab {{price}}",
+    "rowHint": "Verfügbare Tarife ansehen",
+    "emptyTitle": "Keine Treffer",
+    "emptyBody": "Wir konnten kein Reiseziel für „{{query}}“ finden. Versuchen Sie einen anderen Namen.",
+    "noneTitle": "Noch keine Reiseziele",
+    "noneBody": "Der Katalog ist derzeit leer. Bitte schauen Sie bald wieder vorbei."
+  },
+  "productDetail": {
+    "availablePlans": "Verfügbare Tarife",
+    "buyNow": "Jetzt kaufen",
+    "buyNowPrice": "Jetzt kaufen · {{price}}",
+    "fastInternet": "Schnelles Internet",
+    "noRoaming": "Keine Roaming-Gebühren",
+    "easySetup": "Einfache Einrichtung",
+    "from": "Ab {{price}}",
+    "includedCountries": "Enthaltene Länder",
+    "selectPlanHint": "Diesen Tarif auswählen",
+    "buyNowHint": "Weiter zur Kasse",
+    "notFoundTitle": "Reiseziel nicht gefunden",
+    "notFoundBody": "Wir konnten keine Tarife für dieses Reiseziel finden. Es ist möglicherweise nicht mehr verfügbar.",
+    "noPlansTitle": "Keine Tarife verfügbar",
+    "noPlansBody": "Für dieses Reiseziel gibt es derzeit keine Tarife."
+  },
+  "catalog": {
+    "unlimited": "Unbegrenzt",
+    "dataUnknown": "Daten",
+    "daysUnknown": "Flexibel",
+    "dayWithCount_one": "{{count}} Tag",
+    "dayWithCount_other": "{{count}} Tage",
+    "planCount_one": "{{count}} Tarif",
+    "planCount_other": "{{count}} Tarife",
+    "countriesCount_one": "{{count}} Land",
+    "countriesCount_other": "{{count}} Länder"
+  },
+  "continents": {
+    "Europe": "Europa",
+    "Asia": "Asien",
+    "Americas": "Amerika",
+    "Africa": "Afrika",
+    "Middle East": "Naher Osten",
+    "Oceania": "Ozeanien",
+    "Other": "Sonstige"
+  },
+  "checkout": {
+    "title": "Kasse",
+    "receipt": "Beleg gesendet an {{email}}",
+    "promoToggle": "Haben Sie einen Gutscheincode?",
+    "promoLabel": "Gutscheincode",
+    "promoPlaceholder": "Code eingeben",
+    "promoApply": "Anwenden",
+    "promoApplying": "Wird angewendet…",
+    "promoRemove": "Entfernen",
+    "promoRemoveHint": "Angewendeten Gutscheincode entfernen",
+    "promoApplied": "Code „{{code}}“ angewendet",
+    "summaryTitle": "Bestellübersicht",
+    "priceLabel": "Preis",
+    "discountLabel": "Rabatt",
+    "totalLabel": "Gesamt",
+    "payNow": "Jetzt bezahlen · {{price}}",
+    "paying": "Wird verarbeitet…",
+    "terms": "Mit „Weiter“ stimmen Sie unseren AGB und der Datenschutzerklärung zu.",
+    "errorTitle": "Zahlung konnte nicht abgeschlossen werden",
+    "errorGeneric": "Etwas ist schiefgelaufen. Bitte versuchen Sie es erneut.",
+    "notFoundTitle": "Tarif nicht verfügbar",
+    "notFoundBody": "Wir konnten diesen Tarif nicht laden. Er ist möglicherweise nicht mehr verfügbar.",
+    "promoErrors": {
+      "promo_not_found": "Diesen Code gibt es nicht. Bitte prüfen Sie ihn und versuchen Sie es erneut.",
+      "promo_expired": "Dieser Code ist abgelaufen.",
+      "promo_not_applicable": "Dieser Code kann für diesen Tarif nicht verwendet werden.",
+      "promo_min_amount": "Dieser Code erfordert einen höheren Bestellwert.",
+      "promo_exhausted": "Dieser Code hat sein Nutzungslimit erreicht.",
+      "promo_below_minimum": "Ihre Bestellung erreicht den Mindestwert dieses Codes nicht.",
+      "generic": "Dieser Code kann derzeit nicht angewendet werden."
+    }
+  },
+  "orderSuccess": {
+    "headerTitle": "Ihre Bestellung",
+    "processingTitle": "Ihre eSIM wird eingerichtet…",
+    "processingBody": "Das dauert in der Regel nur wenige Sekunden.",
+    "topupProcessingTitle": "Ihr Aufladen wird hinzugefügt…",
+    "topupProcessingBody": "Das dauert in der Regel nur wenige Sekunden.",
+    "successTitle": "Alles bereit",
+    "successBody": "Ihre eSIM ist bereit zur Installation.",
+    "topupSuccessTitle": "Aufladen hinzugefügt",
+    "topupSuccessBody": "Ihre zusätzlichen Daten wurden dieser eSIM hinzugefügt.",
+    "activationNote": "Ihr Tarif wird aktiviert, sobald Sie sich am Reiseziel zum ersten Mal verbinden.",
+    "viewEsims": "Meine eSIMs ansehen",
+    "viewEsim": "eSIM ansehen",
+    "done": "Fertig",
+    "installGuide": "Installationsanleitung",
+    "timeoutTitle": "Wird noch verarbeitet",
+    "timeoutBody": "Wir benachrichtigen Sie per E-Mail, sobald es bereit ist. Sie können diesen Bildschirm schließen.",
+    "topupTimeoutTitle": "Wird noch verarbeitet",
+    "topupTimeoutBody": "Ihr Aufladen wird angewendet. Das Guthaben wird in Kürze aktualisiert.",
+    "failedTitle": "Zahlung erstattet",
+    "failedBody": "Wir konnten Ihre eSIM nicht einrichten, daher wird Ihre Zahlung automatisch erstattet – Sie müssen nichts tun.",
+    "topupFailedTitle": "Aufladen erstattet",
+    "topupFailedBody": "Wir konnten Ihr Aufladen nicht anwenden, daher wird Ihre Zahlung automatisch erstattet – Sie müssen nichts tun.",
+    "contactSupport": "Support kontaktieren"
+  },
+  "install": {
+    "scanTitle": "Zum Installieren scannen",
+    "scanBody": "Scannen Sie diesen QR-Code von einem anderen Gerät, um Ihre eSIM zu installieren.",
+    "installIphone": "Auf iPhone installieren",
+    "installIphoneHint": "Öffnet Apples eSIM-Einrichtung mit einem Tipp",
+    "installManualTitle": "Manuell installieren",
+    "installManualHintIos": "Einstellungen → Mobilfunk → eSIM hinzufügen → Daten manuell eingeben.",
+    "installManualHintAndroid": "Einstellungen → Netzwerk & Internet (oder Verbindungen) → SIMs → eSIM hinzufügen / SIM herunterladen → Daten manuell eingeben. Die Menünamen variieren je nach Hersteller.",
+    "smdpLabel": "SM-DP+ Adresse",
+    "activationLabel": "Aktivierungscode",
+    "copy": "Kopieren",
+    "copyHint": "In die Zwischenablage kopieren",
+    "copied": "Kopiert"
+  },
+  "esims": {
+    "title": "Meine eSIMs",
+    "segments": {
+      "active": "Aktiv",
+      "past": "Vergangen"
+    },
+    "status": {
+      "active": "Aktiv",
+      "notActivated": "Noch nicht aktiviert",
+      "expired": "Abgelaufen",
+      "processing": "Wird verarbeitet",
+      "refunded": "Erstattet",
+      "failed": "Nicht eingerichtet"
+    },
+    "activeUntil": "Aktiv bis {{date}}",
+    "expiredOn": "Abgelaufen am {{date}}",
+    "activatesOnConnection": "Aktiviert bei erster Verbindung",
+    "setupInProgress": "Ihre eSIM wird eingerichtet…",
+    "refundedNote": "Zahlung erstattet",
+    "failedNote": "Wir konnten diese eSIM nicht einrichten",
+    "iccidLabel": "ICCID",
+    "copyIccid": "ICCID kopieren",
+    "copyIccidHint": "Kopiert die vollständige ICCID in die Zwischenablage",
+    "viewDetails": "Details ansehen",
+    "topUp": "Aufladen",
+    "quickActions": "Schnellaktionen",
+    "addEsim": "eSIM hinzufügen",
+    "support": "Support",
+    "emptyTitle": "Noch keine eSIMs",
+    "emptyBody": "Finden Sie einen Tarif für Ihre nächste Reise.",
+    "emptyAction": "Reiseziele durchsuchen",
+    "emptyPastTitle": "Hier ist noch nichts",
+    "emptyPastBody": "Abgelaufene und vergangene eSIMs erscheinen hier.",
+    "errorTitle": "Ihre eSIMs konnten nicht geladen werden",
+    "errorBody": "Bitte prüfen Sie Ihre Verbindung und versuchen Sie es erneut.",
+    "usageUnavailable": "Verbrauch nicht verfügbar",
+    "usageRetry": "Erneut versuchen"
+  },
+  "esimDetail": {
+    "title": "eSIM-Details",
+    "usageTitle": "Verbrauch",
+    "dataUsedOf": "{{used}} von {{total}} übrig",
+    "dataUsedA11y": "{{used}} von {{total}} verbraucht",
+    "dataUnknown": "Der Verbrauch wird angezeigt, sobald Ihr Tarif aktiv ist.",
+    "activatedOn": "Aktiviert am {{date}}",
+    "expiresOn": "Läuft ab am {{date}}",
+    "expiredOn": "Abgelaufen am {{date}}",
+    "notActivatedTitle": "Noch nicht aktiviert",
+    "notActivatedBody": "Ihr Tarif beginnt, sobald Sie sich am Reiseziel zum ersten Mal verbinden.",
+    "lastUpdated": "Zuletzt aktualisiert {{time}}",
+    "relativeNow": "gerade eben",
+    "relativeMinutes_one": "vor {{count}} Min.",
+    "relativeMinutes_other": "vor {{count}} Min.",
+    "relativeHours_one": "vor {{count}} Std.",
+    "relativeHours_other": "vor {{count}} Std.",
+    "relativeDays_one": "vor {{count}} Tag",
+    "relativeDays_other": "vor {{count}} Tagen",
+    "refresh": "Aktualisieren",
+    "installTitle": "Ihre eSIM installieren",
+    "orderHistoryTitle": "Bestellverlauf",
+    "orderPurchase": "Tarifkauf",
+    "orderTopup": "Aufladen",
+    "topUp": "Aufladen",
+    "errorTitle": "Diese eSIM konnte nicht geladen werden",
+    "installGuide": "Installationsanleitung",
+    "usageUnavailable": "Verbrauch nicht verfügbar",
+    "usageRetry": "Erneut versuchen"
+  },
+  "topup": {
+    "title": "Aufladen",
+    "currentPlanTitle": "Aktueller Tarif",
+    "dataLeft": "{{amount}} übrig",
+    "dataLeftUnknown": "Guthaben wird aktualisiert",
+    "expires": "Läuft ab am {{date}}",
+    "expired": "Abgelaufen",
+    "chooseTitle": "Aufladung wählen",
+    "addsToPlan": "Wird zu Ihrem aktuellen Tarif hinzugefügt",
+    "replacesPlan": "Ersetzt Ihren aktuellen Tarif",
+    "selectOption": "{{plan}} auswählen",
+    "confirmTitle": "Aktuellen Tarif ersetzen?",
+    "confirmBody": "Ihr aktueller Tarif hat noch {{amount}} übrig bis {{date}}. Der Kauf eines anderen Tarifs ersetzt ihn und die verbleibenden Daten gehen verloren.",
+    "confirmBodyNoDate": "Der Kauf eines anderen Tarifs ersetzt Ihren aktuellen Tarif und alle verbleibenden Daten gehen verloren.",
+    "confirmReplace": "Tarif ersetzen",
+    "errorTitle": "Aufladeoptionen konnten nicht geladen werden",
+    "emptyTitle": "Keine Aufladeoptionen",
+    "emptyBody": "Für diese eSIM sind derzeit keine Aufladungen verfügbar."
+  },
+  "installGuide": {
+    "title": "So installieren Sie eine eSIM",
+    "segments": {
+      "iphone": "iPhone",
+      "android": "Android"
+    },
+    "iphoneTitle": "So installieren Sie eine eSIM auf dem iPhone",
+    "androidTitle": "So installieren Sie eine eSIM auf Android",
+    "stepA11y": "Schritt {{number}}",
+    "iphoneSteps": [
+      "Tippen Sie nach dem Kauf auf „eSIM installieren“ – oder scannen Sie den QR-Code von einem anderen Gerät.",
+      "Öffnen Sie die Einstellungen.",
+      "Tippen Sie auf Mobilfunk → eSIM hinzufügen.",
+      "Warten Sie, bis die eSIM installiert ist.",
+      "Fertig!",
+      "Schalten Sie bei Ankunft das Daten-Roaming für die eSIM-Leitung ein und genießen Sie das Internet."
+    ],
+    "androidSteps": [
+      "Öffnen Sie Einstellungen → Netzwerk & Internet (oder Verbindungen).",
+      "Tippen Sie auf SIMs → eSIM hinzufügen (oder „Stattdessen SIM herunterladen“).",
+      "Scannen Sie den QR-Code oder geben Sie die SM-DP+ Adresse und den Aktivierungscode manuell ein.",
+      "Schalten Sie bei Ankunft mobile Daten und Roaming für die eSIM-Leitung ein."
+    ],
+    "androidNote": "Die Menünamen variieren je nach Hersteller (Samsung, Pixel und andere), aber die Schritte sind dieselben.",
+    "tipsTitle": "Tipps",
+    "tips": [
+      "Installieren Sie die eSIM vor der Reise, während Sie mit Wi-Fi verbunden sind.",
+      "Löschen Sie die eSIM nach der Installation nicht.",
+      "Ihr Tarif beginnt mit Ihrer ersten Verbindung am Reiseziel."
+    ],
+    "needHelpTitle": "Brauchen Sie Hilfe?",
+    "needHelpBody": "Unser Support-Team ist rund um die Uhr für Sie da.",
+    "needHelpAction": "Support kontaktieren"
+  },
+  "explore": {
+    "title": "Entdecken",
+    "subtitle": "Nach Region durchsuchen",
+    "destinationCount": "Über {{count}} Reiseziele",
+    "cardHint": "Reiseziele in dieser Region ansehen"
+  },
+  "profile": {
+    "title": "Profil",
+    "editHint": "Profil bearbeiten",
+    "menu": {
+      "myEsims": "Meine eSIMs",
+      "myEsimsHint": "Ihre eSIMs ansehen und verwalten",
+      "notifications": "Benachrichtigungen",
+      "notificationsHint": "Benachrichtigungseinstellungen verwalten",
+      "language": "Sprache",
+      "languageHint": "Die App-Sprache ändern",
+      "help": "Hilfe & Support",
+      "helpHint": "FAQ und Kontaktmöglichkeiten",
+      "install": "So installieren Sie eine eSIM",
+      "installHint": "Schritt-für-Schritt-Installationsanleitung",
+      "about": "Über ESIM Global",
+      "aboutHint": "App-Version und rechtliche Informationen"
+    },
+    "signOut": "Abmelden",
+    "signOutHint": "Von Ihrem Konto abmelden",
+    "signOutConfirmTitle": "Abmelden?",
+    "signOutConfirmMessage": "Sie müssen sich erneut anmelden, um Ihre eSIMs zu verwalten.",
+    "signOutConfirm": "Abmelden",
+    "deleteAccount": "Konto löschen",
+    "deleteAccountHint": "Ihr Konto dauerhaft löschen"
+  },
+  "editProfile": {
+    "title": "Profil bearbeiten",
+    "nameLabel": "Vollständiger Name",
+    "namePlaceholder": "Ihr Name",
+    "emailLabel": "E-Mail-Adresse",
+    "emailReadonlyNote": "Wenden Sie sich an den Support, um Ihre E-Mail-Adresse zu ändern.",
+    "changePasswordRow": "Passwort ändern",
+    "changePasswordHint": "Ihr Kontopasswort aktualisieren",
+    "save": "Änderungen speichern",
+    "saved": "Profil aktualisiert",
+    "validation": {
+      "nameRequired": "Bitte geben Sie Ihren Namen ein.",
+      "nameTooLong": "Dieser Name ist zu lang."
+    },
+    "errorGeneric": "Ihre Änderungen konnten nicht gespeichert werden. Bitte versuchen Sie es erneut."
+  },
+  "changePassword": {
+    "title": "Passwort ändern",
+    "currentLabel": "Aktuelles Passwort",
+    "currentPlaceholder": "Ihr aktuelles Passwort",
+    "newLabel": "Neues Passwort",
+    "confirmLabel": "Neues Passwort bestätigen",
+    "hint": "Mindestens {{count}} Zeichen",
+    "submit": "Passwort aktualisieren",
+    "changed": "Passwort geändert",
+    "validation": {
+      "currentRequired": "Geben Sie Ihr aktuelles Passwort ein.",
+      "tooShort": "Das neue Passwort muss mindestens {{count}} Zeichen lang sein.",
+      "mismatch": "Die neuen Passwörter stimmen nicht überein.",
+      "sameAsCurrent": "Ihr neues Passwort muss sich vom aktuellen unterscheiden."
+    },
+    "errors": {
+      "incorrectCurrent": "Ihr aktuelles Passwort ist falsch.",
+      "sameAsCurrent": "Ihr neues Passwort muss sich vom aktuellen unterscheiden.",
+      "weakPassword": "Bitte wählen Sie ein stärkeres Passwort (mindestens {{count}} Zeichen).",
+      "rateLimited": "Zu viele Versuche, bitte warten Sie einen Moment.",
+      "network": "Wir konnten den Server nicht erreichen. Prüfen Sie Ihre Verbindung und versuchen Sie es erneut.",
+      "generic": "Etwas ist schiefgelaufen. Bitte versuchen Sie es erneut."
+    }
+  },
+  "language": {
+    "title": "Sprache",
+    "useDevice": "Gerätesprache verwenden",
+    "useDeviceSubtitle": "An die Sprache Ihres Telefons anpassen",
+    "comingSoonNote": "Weitere Sprachen folgen in Kürze.",
+    "selectHint": "{{language}} verwenden"
+  },
+  "notifications": {
+    "title": "Benachrichtigungen",
+    "comingSoonTitle": "Benachrichtigungseinstellungen folgen in Kürze",
+    "comingSoonBody": "In einem zukünftigen Update können Sie Push-Benachrichtigungen hier verwalten."
+  },
+  "support": {
+    "title": "Support",
+    "faqTitle": "FAQ",
+    "faqSubtitle": "Antworten auf häufige Fragen finden",
+    "contactTitle": "Kontakt aufnehmen",
+    "whatsapp": "WhatsApp",
+    "whatsappSubtitle": "Chatten Sie mit uns",
+    "instagram": "Instagram",
+    "instagramSubtitle": "Senden Sie uns eine Nachricht",
+    "email": "E-Mail",
+    "emailSubject": "ESIM Global Support — v{{version}}",
+    "bannerTitle": "Wir sind für Sie da",
+    "bannerSubtitle": "Unser Support-Team ist rund um die Uhr erreichbar.",
+    "openHint": "Öffnet {{channel}}",
+    "expandHint": "Antwort anzeigen",
+    "collapseHint": "Antwort ausblenden",
+    "faqItems": [
+      {
+        "q": "Was ist eine eSIM?",
+        "a": "Eine eSIM ist eine digitale SIM, die in Ihr Telefon integriert ist. Statt eine Plastik-SIM-Karte einzulegen, installieren Sie einen Datentarif über das Netz – so kommen Sie im Ausland online, ohne Ihre gewohnte SIM zu wechseln oder zu verlieren."
+      },
+      {
+        "q": "Welche Telefone unterstützen eSIM und wie prüfe ich das?",
+        "a": "Die meisten aktuellen iPhones (XR/XS und neuer), Google Pixel (3 und neuer) und viele Samsung Galaxy Modelle unterstützen eSIM. So prüfen Sie es: Öffnen Sie auf dem iPhone Einstellungen → Allgemein → Info und suchen Sie nach einer EID; wählen Sie auf Android *#06# und suchen Sie nach einer EID-Nummer. Wenn Ihr Telefon eine EID hat, unterstützt es eSIM."
+      },
+      {
+        "q": "Wann wird mein Tarif aktiviert?",
+        "a": "Ihr Tarif wird aktiviert, wenn Sie sich am Reiseziel zum ersten Mal mit einem Netz verbinden – nicht beim Installieren der eSIM. Sie können sie jederzeit vor der Reise installieren; die Gültigkeitsdauer beginnt erst mit der ersten Verbindung."
+      },
+      {
+        "q": "Wie installiere ich die eSIM auf dem iPhone?",
+        "a": "Tippen Sie nach dem Kauf auf „eSIM installieren“ (oder scannen Sie den QR-Code von einem anderen Gerät), gehen Sie dann zu Einstellungen → Mobilfunk → eSIM hinzufügen und folgen Sie den Anweisungen. Schalten Sie bei Ankunft das Daten-Roaming für die eSIM-Leitung ein. Die vollständigen Schritte finden Sie unter „So installieren Sie eine eSIM“."
+      },
+      {
+        "q": "Wie installiere ich die eSIM auf Android?",
+        "a": "Gehen Sie zu Einstellungen → Netzwerk & Internet (oder Verbindungen) → SIMs → eSIM hinzufügen / SIM herunterladen, scannen Sie dann den QR-Code oder geben Sie die SM-DP+ Adresse und den Aktivierungscode manuell ein. Die Menünamen variieren je nach Hersteller. Schalten Sie bei Ankunft mobile Daten und Roaming für die eSIM-Leitung ein."
+      },
+      {
+        "q": "Muss ich Daten-Roaming einschalten?",
+        "a": "Ja – schalten Sie das Daten-Roaming nur für die eSIM-Leitung ein. Ihre eSIM verbindet sich als Roaming-Leitung mit lokalen Netzen, daher muss Roaming aktiviert sein, damit sie funktioniert. Wenn Sie die Daten auf der eSIM-Leitung lassen, vermeiden Sie Roaming-Gebühren auf Ihrer normalen Nummer."
+      },
+      {
+        "q": "Funktioniert meine normale Telefonnummer weiterhin?",
+        "a": "Ja. Die eSIM ist eine zweite Leitung, daher bleiben Ihre reguläre SIM und Nummer für Anrufe und SMS aktiv (Dual-SIM). Lassen Sie die mobilen Daten auf der eSIM-Leitung, um Roaming-Gebühren auf Ihrem Heimtarif zu vermeiden."
+      },
+      {
+        "q": "Was passiert, wenn meine Daten aufgebraucht sind?",
+        "a": "Sie können jederzeit in der App aufladen – öffnen Sie Meine eSIMs, wählen Sie die eSIM und tippen Sie auf „Aufladen“. Manche Aufladungen werden zu Ihrem aktuellen Tarif hinzugefügt, andere ersetzen ihn – Sie sehen immer, was gilt, bevor Sie bezahlen."
+      },
+      {
+        "q": "Kann ich eine Rückerstattung erhalten?",
+        "a": "Wenn wir Ihre eSIM nicht ausstellen können, werden Sie automatisch erstattet – Sie müssen nichts tun. Bei allen anderen Fragen zur Rückerstattung wenden Sie sich an unser Support-Team, wir helfen Ihnen gerne."
+      },
+      {
+        "q": "Kann ich eine eSIM auf zwei Telefonen verwenden?",
+        "a": "Nein. Jede eSIM kann nur auf einem einzigen Gerät installiert und aktiv sein. Wenn Sie Daten auf einem anderen Telefon benötigen, kaufen Sie dafür eine separate eSIM."
+      }
+    ]
+  },
+  "about": {
+    "title": "Über uns",
+    "tagline": "Ihre eSIM für eine größere Welt.",
+    "versionLabel": "Version {{version}}",
+    "company": "eSIM.Global LLC",
+    "legalTitle": "Rechtliches",
+    "terms": "AGB",
+    "privacy": "Datenschutzerklärung",
+    "refund": "Rückerstattungsrichtlinie",
+    "openHint": "Öffnet in Ihrem Browser"
+  },
+  "deleteAccount": {
+    "title": "Konto löschen",
+    "heading": "Ihr Konto dauerhaft löschen",
+    "intro": "Bevor Sie fortfahren, beachten Sie bitte, was passiert:",
+    "bullets": [
+      "Ihr Konto und Ihr Login werden dauerhaft gelöscht.",
+      "Bereits auf Ihrem Telefon installierte eSIMs funktionieren bis zum Ende ihres Tarifs weiter, erscheinen aber nicht mehr in der App.",
+      "Ihre Kaufaufzeichnungen werden aus rechtlichen und buchhalterischen Gründen aufbewahrt.",
+      "Dies kann nicht rückgängig gemacht werden."
+    ],
+    "confirmLabel": "Geben Sie DELETE ein, um zu bestätigen",
+    "confirmPlaceholder": "DELETE",
+    "button": "Mein Konto löschen",
+    "deleting": "Wird gelöscht…",
+    "success": "Ihr Konto wurde gelöscht",
+    "errors": {
+      "ordersInProgress": "Eine Bestellung von Ihnen wird gerade verarbeitet. Bitte versuchen Sie es in einer Minute erneut.",
+      "network": "Wir konnten den Server nicht erreichen. Prüfen Sie Ihre Verbindung und versuchen Sie es erneut.",
+      "generic": "Etwas ist schiefgelaufen. Bitte versuchen Sie es erneut."
+    }
+  },
+  "settings": {
+    "title": "Einstellungen"
+  },
+  "auth": {
+    "close": "Schließen",
+    "signInTitle": "Willkommen zurück",
+    "signInSubtitle": "Melden Sie sich an, um Ihre eSIMs zu verwalten.",
+    "signUpTitle": "Konto erstellen",
+    "signUpSubtitle": "In wenigen Minuten verbunden reisen.",
+    "fullNameLabel": "Vollständiger Name",
+    "fullNamePlaceholder": "Ihr Name",
+    "emailLabel": "E-Mail-Adresse",
+    "emailPlaceholder": "sie@beispiel.de",
+    "passwordLabel": "Passwort",
+    "passwordPlaceholder": "Ihr Passwort",
+    "newPasswordLabel": "Neues Passwort",
+    "confirmPasswordLabel": "Passwort bestätigen",
+    "passwordHint": "Mindestens {{count}} Zeichen",
+    "showPassword": "Passwort anzeigen",
+    "hidePassword": "Passwort ausblenden",
+    "strength": {
+      "label": "Passwortstärke",
+      "weak": "Schwach",
+      "fair": "Mittel",
+      "strong": "Stark"
+    },
+    "signIn": "Anmelden",
+    "signUp": "Konto erstellen",
+    "forgotPassword": "Passwort vergessen?",
+    "noAccount": "Neu hier?",
+    "createOne": "Konto erstellen",
+    "haveAccount": "Haben Sie bereits ein Konto?",
+    "signInLink": "Anmelden",
+    "termsPrefix": "Mit „Weiter“ stimmen Sie unseren ",
+    "termsLink": "AGB",
+    "termsAnd": " und der ",
+    "privacyLink": "Datenschutzerklärung",
+    "termsSuffix": " zu.",
+    "verifyTitle": "E-Mail bestätigen",
+    "verifySubtitle": "Geben Sie den 6-stelligen Code ein, den wir an {{email}} gesendet haben.",
+    "codeLabel": "6-stelliger Bestätigungscode",
+    "verify": "Bestätigen",
+    "resend": "Code erneut senden",
+    "resendIn": "Code erneut senden in {{seconds}} Sek.",
+    "resent": "Wir haben Ihnen einen neuen Code gesendet.",
+    "forgotTitle": "Passwort zurücksetzen",
+    "forgotSubtitle": "Geben Sie Ihre E-Mail-Adresse ein und wir senden Ihnen einen 6-stelligen Code.",
+    "sendCode": "Code senden",
+    "resetTitle": "Code eingeben",
+    "resetSubtitle": "Wir haben einen 6-stelligen Code an {{email}} gesendet. Geben Sie ihn zusammen mit Ihrem neuen Passwort ein.",
+    "resetPassword": "Passwort zurücksetzen",
+    "resetDoneTitle": "Passwort aktualisiert",
+    "resetDoneBody": "Sie können sich jetzt mit Ihrem neuen Passwort anmelden.",
+    "backToSignIn": "Zurück zur Anmeldung",
+    "errors": {
+      "invalidCredentials": "Diese E-Mail-Adresse oder dieses Passwort sieht nicht richtig aus.",
+      "emailNotConfirmed": "Bitte bestätigen Sie zuerst Ihre E-Mail-Adresse – wir haben Ihnen einen neuen Code gesendet.",
+      "userAlreadyExists": "Es existiert bereits ein Konto mit dieser E-Mail-Adresse. Versuchen Sie, sich anzumelden.",
+      "invalidCode": "Dieser Code ist ungültig oder abgelaufen. Fordern Sie einen neuen an.",
+      "weakPassword": "Bitte wählen Sie ein stärkeres Passwort (mindestens {{count}} Zeichen).",
+      "rateLimited": "Zu viele Versuche, bitte warten Sie einen Moment.",
+      "network": "Wir konnten den Server nicht erreichen. Prüfen Sie Ihre Verbindung und versuchen Sie es erneut.",
+      "accountDeleted": "Dieses Konto wurde gelöscht. Bitte wenden Sie sich an den Support, wenn Sie Hilfe benötigen.",
+      "generic": "Etwas ist schiefgelaufen. Bitte versuchen Sie es erneut."
+    },
+    "validation": {
+      "email": "Geben Sie eine gültige E-Mail-Adresse ein.",
+      "password": "Das Passwort muss mindestens {{count}} Zeichen lang sein.",
+      "passwordsMatch": "Die Passwörter stimmen nicht überein.",
+      "name": "Bitte geben Sie Ihren Namen ein."
+    },
+    "signedOut": {
+      "esimsTitle": "Melden Sie sich an, um Ihre eSIMs zu sehen",
+      "esimsBody": "Ihre gekauften Datentarife erscheinen hier, sobald Sie sich anmelden.",
+      "profileTitle": "Anmelden oder Konto erstellen",
+      "profileBody": "Verwalten Sie Ihre eSIMs, Zahlungen und den Support an einem Ort."
+    }
+  },
+  "states": {
+    "emptyTitle": "Hier ist noch nichts",
+    "emptyBody": "Sobald Sie etwas haben, erscheint es hier.",
+    "errorTitle": "Etwas ist schiefgelaufen",
+    "errorBody": "Wir konnten dies nicht laden. Prüfen Sie Ihre Verbindung und versuchen Sie es erneut.",
+    "noEsimsTitle": "Noch keine eSIMs",
+    "noEsimsBody": "Kaufen Sie Ihren ersten Datentarif und er erscheint hier.",
+    "configTitle": "Konfiguration erforderlich",
+    "configBody": "Der App fehlen erforderliche Einstellungen. Fügen Sie diese zu Ihrer .env-Datei hinzu:"
+  }
+}

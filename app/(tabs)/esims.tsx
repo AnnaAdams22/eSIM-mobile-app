@@ -31,7 +31,7 @@ import {
 import { EsimCard } from '@/components/esim';
 import { PlaceholderScreen } from '@/components/PlaceholderScreen';
 import { useAuth } from '@/features/auth';
-import { resolveGeoDisplay } from '@/features/catalog';
+import { resolveGeoDisplay, useCatalogL10n } from '@/features/catalog';
 import { classifyEsim } from '@/features/esims';
 import { useEsims, useEsimUsages } from '@/hooks/useEsims';
 import { usePlans } from '@/hooks/usePlans';
@@ -73,6 +73,7 @@ function MyEsimsList() {
 
   const { data: items, isLoading, isError, refetch } = useEsims();
   const { data: plans } = usePlans();
+  const { nameResolver, regionResolvers } = useCatalogL10n();
   const list = items ?? [];
 
   // One usage query per row (index-aligned with `list`); null ICCIDs are skipped.
@@ -95,11 +96,15 @@ function MyEsimsList() {
         const q = usageQueries[i];
         const usage = q?.data ?? null;
         const hasIccid = Boolean(item.iccid);
-        const geo = resolveGeoDisplay(plans ?? [], {
-          countryIso2: item.plan?.countryIso2,
-          planType: item.plan?.plan_type,
-          fallbackTitle: item.plan?.country?.trim() || item.plan?.name || '',
-        });
+        const geo = resolveGeoDisplay(
+          plans ?? [],
+          {
+            countryIso2: item.plan?.countryIso2,
+            planType: item.plan?.plan_type,
+            fallbackTitle: item.plan?.country?.trim() || item.plan?.name || '',
+          },
+          { nameResolver, regionResolvers }
+        );
         return {
           key: rowKey(item, i),
           item,
@@ -114,7 +119,7 @@ function MyEsimsList() {
         };
       }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [list, plans, usageSig]
+    [list, plans, usageSig, nameResolver, regionResolvers]
   );
 
   const active = rows.filter((r) => r.bucket === 'active');

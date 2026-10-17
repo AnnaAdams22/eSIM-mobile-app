@@ -11,7 +11,23 @@ export {
   continentCounts,
   roundedDestinationCount,
 } from './catalog';
-export type { Destination, Region } from './catalog';
+export type {
+  Destination,
+  Region,
+  CountryNameResolver,
+  RegionNameResolvers,
+} from './catalog';
+
+export {
+  COUNTRY_NAME_LOCALES,
+  localizedCountryName,
+  countryNameResolver,
+  iso2ForEnglishName,
+  localizeEnglishCountryName,
+  allCountryNames,
+} from './countryNames';
+
+export { useCatalogL10n } from './useCatalogL10n';
 
 export {
   CONTINENTS,
@@ -43,4 +59,4 @@ export { heroImage, destinationImage, countryPhoto } from './images';
 export type { HeroSlot } from './images';
 
 export { resolveGeoDisplay } from './geo';
-export type { GeoDisplay, GeoInput } from './geo';
+export type { GeoDisplay, GeoInput, GeoResolvers } from './geo';

@@ -65,6 +65,20 @@ export default function ProfileScreen() {
             />
           </View>
         </Card>
+
+        {/* Language is public — guests can change it without signing in. */}
+        <Card padding="xs" style={{ marginTop: theme.spacing.lg }}>
+          <ListRow
+            title={t('profile.menu.language')}
+            leading={<Globe size={22} color={theme.colors.textSecondary} />}
+            accessibilityHint={t('profile.menu.languageHint')}
+            onPress={() => {
+              lightTap();
+              router.push('/account/language');
+            }}
+            style={{ paddingHorizontal: theme.spacing.md }}
+          />
+        </Card>
       </Screen>
     );
   }

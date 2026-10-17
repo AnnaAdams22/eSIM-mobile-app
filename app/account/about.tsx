@@ -6,17 +6,21 @@
 
 import { View } from 'react-native';
 import Constants from 'expo-constants';
+import { useRouter } from 'expo-router';
 import * as WebBrowser from 'expo-web-browser';
 import { useTranslation } from 'react-i18next';
+import { Globe } from 'lucide-react-native';
 
 import { Card, Divider, Header, ListRow, Logo, Screen, Text } from '@/components/ui';
 import { legal } from '@/config';
+import { lightTap } from '@/lib/haptics';
 import { useTheme } from '@/theme';
 
 const APP_VERSION = Constants.expoConfig?.version ?? '1.0.0';
 
 export default function AboutScreen() {
   const theme = useTheme();
+  const router = useRouter();
   const { t } = useTranslation();
 
   const open = (url: string) => () => {
@@ -39,6 +43,20 @@ export default function AboutScreen() {
           {t('about.company')}
         </Text>
       </View>
+
+      {/* Language — public, so guests reach it from About too. */}
+      <Card padding="xs" style={{ marginBottom: theme.spacing.lg }}>
+        <ListRow
+          title={t('profile.menu.language')}
+          leading={<Globe size={22} color={theme.colors.textSecondary} />}
+          accessibilityHint={t('profile.menu.languageHint')}
+          onPress={() => {
+            lightTap();
+            router.push('/account/language');
+          }}
+          style={{ paddingHorizontal: theme.spacing.md }}
+        />
+      </Card>
 
       <Text
         variant="caption"

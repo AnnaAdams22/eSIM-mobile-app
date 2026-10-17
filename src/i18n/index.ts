@@ -1,9 +1,10 @@
 /**
  * i18n setup (i18next + react-i18next).
  *
- * English only for now. Device language is detected via expo-localization, with
- * English as the guaranteed fallback. Adding a locale later = drop a `<lang>.json`
- * next to `en.json` and register it in `resources`.
+ * Ships English (source + fallback), Russian, German and Spanish. Device
+ * language is detected via expo-localization, with English as the guaranteed
+ * fallback. The language bundles live in `./resources.ts`; adding a locale is a
+ * JSON file + one entry there (see that file's header).
  *
  * Rule: every user-visible string must come from a translation key. See CLAUDE.md.
  */
@@ -12,15 +13,13 @@ import { getLocales } from 'expo-localization';
 import { createInstance } from 'i18next';
 import { initReactI18next } from 'react-i18next';
 
-import en from './en.json';
+import { resources } from './resources';
 import { resolveLanguage } from '@/features/settings/language';
 import { getStoredLanguage } from '@/features/settings/languageStore';
 
 export const defaultNS = 'translation';
 
-export const resources = {
-  en: { translation: en },
-} as const;
+export { resources };
 
 const supportedLngs = Object.keys(resources);
 

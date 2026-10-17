@@ -41,9 +41,11 @@ import {
   filterDestinations,
   filterRegions,
   FILTERABLE_CONTINENTS,
+  useCatalogL10n,
   type Destination,
   type Region,
 } from '@/features/catalog';
+import { formatPrice } from '@/lib/price';
 import { useTheme, type Theme } from '@/theme';
 
 const ALL = 'all';
@@ -63,8 +65,15 @@ export default function DestinationsScreen() {
   const [filter, setFilter] = useState<string>(params.continent ?? ALL);
   const [scrolled, setScrolled] = useState(false);
 
-  const destinations = useMemo(() => buildDestinations(plans ?? []), [plans]);
-  const regions = useMemo(() => buildRegions(plans ?? []), [plans]);
+  const { lang, nameResolver, regionResolvers } = useCatalogL10n();
+  const destinations = useMemo(
+    () => buildDestinations(plans ?? [], nameResolver),
+    [plans, nameResolver]
+  );
+  const regions = useMemo(
+    () => buildRegions(plans ?? [], regionResolvers),
+    [plans, regionResolvers]
+  );
 
   const filterOptions = useMemo(() => {
     const opts: { value: string; label: string }[] = [
@@ -119,7 +128,9 @@ export default function DestinationsScreen() {
             <ListRow
               title={item.name}
               subtitle={t('catalog.countriesCount', { count: item.countryCount })}
-              value={t('destinations.from', { price: item.lowestPriceDisplay })}
+              value={t('destinations.from', {
+                price: formatPrice(item.lowestPriceCents, lang, item.lowestPriceDisplay),
+              })}
               leading={<Flag uri={item.flag} size={FLAG_SIZE} />}
               onPress={() =>
                 router.push({
@@ -148,7 +159,9 @@ export default function DestinationsScreen() {
         renderItem={({ item }: { item: Destination }) => (
           <ListRow
             title={item.name}
-            value={t('destinations.from', { price: item.lowestPriceDisplay })}
+            value={t('destinations.from', {
+              price: formatPrice(item.lowestPriceCents, lang, item.lowestPriceDisplay),
+            })}
             leading={<Flag uri={item.flag} size={FLAG_SIZE} />}
             onPress={() =>
               router.push({ pathname: '/destinations/[id]', params: { id: item.iso2 } })

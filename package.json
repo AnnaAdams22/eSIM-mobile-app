@@ -32,6 +32,7 @@
     "expo-status-bar": "~57.0.1",
     "expo-system-ui": "~57.0.4",
     "expo-web-browser": "~57.0.3",
+    "i18n-iso-countries": "^7.14.0",
     "i18next": "^26.4.2",
     "lucide-react-native": "^1.52.0",
     "react": "19.2.3",

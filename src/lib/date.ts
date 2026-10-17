@@ -1,14 +1,22 @@
 /**
  * Small date helpers for user-facing dates. Locale-aware via the runtime's Intl
  * (Hermes ships it); all inputs are the backend's ISO-8601 UTC strings.
+ *
+ * Callers pass the current i18n language so dates follow the selected app
+ * language ("Apr 28, 2025" in English, "28. Apr. 2025" in German). An omitted
+ * locale uses the runtime default, which keeps the pure helpers easy to test.
  */
 
-/** "Apr 28, 2025", or null for a missing/unparseable date. */
-export function formatShortDate(iso: string | null | undefined): string | null {
+/** "Apr 28, 2025" / "28. Apr. 2025", or null for a missing/unparseable date. */
+export function formatShortDate(iso: string | null | undefined, locale?: string): string | null {
   if (!iso) return null;
   const d = new Date(iso);
   if (Number.isNaN(d.getTime())) return null;
-  return d.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
+  try {
+    return d.toLocaleDateString(locale, { year: 'numeric', month: 'short', day: 'numeric' });
+  } catch {
+    return d.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
+  }
 }
 
 export type RelativeUnit = 'now' | 'seconds' | 'minutes' | 'hours' | 'days';
