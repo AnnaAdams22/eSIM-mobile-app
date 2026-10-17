@@ -122,7 +122,10 @@
       "promo_exhausted": "This code has reached its usage limit.",
       "promo_below_minimum": "Your order doesn't meet this code's minimum.",
       "generic": "This code can't be applied right now."
-    }
+    },
+    "cannotAddTitle": "Can't add this to your eSIM",
+    "cannotAddBody": "This plan can't be added to your current eSIM. Buy it as a new eSIM instead — your current eSIM stays on your phone.",
+    "cannotAddAction": "Buy a new eSIM"
   },
   "orderSuccess": {
     "headerTitle": "Your order",
@@ -161,7 +164,11 @@
     "activationLabel": "Activation code",
     "copy": "Copy",
     "copyHint": "Copy to clipboard",
-    "copied": "Copied"
+    "copied": "Copied",
+    "installThisPhone": "Install on this phone",
+    "installThisPhoneHint": "Opens your phone's eSIM setup",
+    "androidFallbackHint": "If the button doesn't work on your phone, scan the QR code from another device or enter the details manually.",
+    "androidOpenFailed": "We couldn't open eSIM setup on this phone. Scan the QR code from another device, or enter the details manually below."
   },
   "esims": {
     "title": "My eSIMs",
@@ -229,7 +236,8 @@
     "errorTitle": "Couldn't load this eSIM",
     "installGuide": "Install guide",
     "usageUnavailable": "Usage unavailable",
-    "usageRetry": "Retry"
+    "usageRetry": "Retry",
+    "usageDelayNote": "Usage is reported by the network and can take a little while to update."
   },
   "topup": {
     "title": "Top up",
@@ -238,17 +246,15 @@
     "dataLeftUnknown": "Balance updating",
     "expires": "Expires {{date}}",
     "expired": "Expired",
-    "chooseTitle": "Choose a top-up",
-    "addsToPlan": "Adds to your current plan",
-    "replacesPlan": "Replaces your current plan",
-    "selectOption": "Select {{plan}}",
-    "confirmTitle": "Replace your current plan?",
-    "confirmBody": "Your current plan has {{amount}} left until {{date}}. Buying a different plan will replace it and the remaining data will be lost.",
-    "confirmBodyNoDate": "Buying a different plan will replace your current plan and any remaining data will be lost.",
-    "confirmReplace": "Replace plan",
+    "selectOption": "Add {{plan}} to your current plan",
     "errorTitle": "Couldn't load top-up options",
-    "emptyTitle": "No top-up options",
-    "emptyBody": "There are no top-ups available for this eSIM right now."
+    "addDataTitle": "Add data to your current plan",
+    "addDataCardHint": "Your data and days are added to this eSIM.",
+    "differentPlanTitle": "Want a different plan?",
+    "differentPlanBody": "Buy it as a new eSIM — your current eSIM stays on your phone.",
+    "buyNewEsim": "Buy a new eSIM",
+    "noAddDataTitle": "No top-up for this plan",
+    "noAddDataBody": "This plan can't be topped up right now. You can buy a new eSIM instead — your current eSIM stays on your phone."
   },
   "installGuide": {
     "title": "How to install an eSIM",

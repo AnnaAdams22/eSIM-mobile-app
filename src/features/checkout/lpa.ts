@@ -80,3 +80,37 @@ export function lpaQrValueFromTapLink(tapLink: string | null | undefined): strin
   const activation = parseActivationFromTapLink(tapLink);
   return activation ? buildLpaString(activation) : null;
 }
+
+/**
+ * Google's universal one-tap eSIM install link (Android 10+, Google Play services
+ * 25.14.34+). Opening it externally hands the LPA to the system eSIM installer,
+ * exactly like Apple's link does on iOS:
+ *
+ *   https://esimsetup.android.com/esim_qrcode_provisioning?carddata=LPA:1$<addr>$<code>
+ *
+ * The base URL MUST be lowercase; the carddata value must keep the LPA's literal
+ * `$` and `:` delimiters — the installer expects them unencoded (verified against
+ * Google/AOSP and vendor docs) — while the activation code keeps its capitals.
+ * We still percent-encode anything else unsafe for a URL query (spaces, `&`, `#`,
+ * …) so an unusual code can't break the link, then restore the two structural
+ * delimiters.
+ */
+export const ANDROID_INSTALL_BASE =
+  'https://esimsetup.android.com/esim_qrcode_provisioning';
+
+function encodeCarddata(lpa: string): string {
+  return encodeURIComponent(lpa).replace(/%24/g, '$').replace(/%3A/gi, ':');
+}
+
+/** Build the Android install URL from parsed activation parts, or null if absent. */
+export function androidInstallUrlFromLpa(activation: LpaActivation | null): string | null {
+  if (!activation) return null;
+  return `${ANDROID_INSTALL_BASE}?carddata=${encodeCarddata(buildLpaString(activation))}`;
+}
+
+/** Convenience: tap link → Android install URL, or null when no LPA is parseable. */
+export function androidInstallUrlFromTapLink(
+  tapLink: string | null | undefined
+): string | null {
+  return androidInstallUrlFromLpa(parseActivationFromTapLink(tapLink));
+}

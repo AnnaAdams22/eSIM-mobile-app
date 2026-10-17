@@ -38,6 +38,7 @@ import {
   usedFraction,
 } from '@/features/esims';
 import { useEsim, useEsimUsage } from '@/hooks/useEsims';
+import { useRefreshOnFocus } from '@/hooks/useRefreshOnFocus';
 import { usePlans } from '@/hooks/usePlans';
 import type { EsimOrder, EsimUsage } from '@/lib/api-types';
 import { formatShortDate, relativeTimeParts } from '@/lib/date';
@@ -60,8 +61,15 @@ export default function EsimDetailScreen() {
     isFetching: usageFetching,
     isError: usageIsError,
     refetch: refetchUsage,
+    dataUpdatedAt: usageUpdatedAt,
   } = useEsimUsage(iccid);
   const { data: plans } = usePlans();
+
+  // Keep usage close to real time: refetch on focus / foreground when the cached
+  // reading is older than ~30s (pull-to-refresh and the refresh button still work).
+  useRefreshOnFocus([
+    { dataUpdatedAt: usageUpdatedAt, isFetching: usageFetching, refetch: refetchUsage },
+  ]);
 
   if (isLoading) {
     return (
@@ -296,6 +304,13 @@ function UsageCard({
         ) : null}
         {usage?.fetched_at ? <LastUpdated fetchedAt={usage.fetched_at} /> : null}
       </View>
+
+      {/* The network reports usage with a delay — set the right expectation. */}
+      {status !== 'notActivated' ? (
+        <Text variant="caption" color="textSecondary">
+          {t('esimDetail.usageDelayNote')}
+        </Text>
+      ) : null}
     </Card>
   );
 }

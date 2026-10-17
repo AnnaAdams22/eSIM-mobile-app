@@ -1,5 +1,7 @@
 import {
   activationStringFromTapLink,
+  androidInstallUrlFromLpa,
+  androidInstallUrlFromTapLink,
   buildLpaString,
   lpaQrValueFromTapLink,
   parseActivationFromTapLink,
@@ -84,6 +86,68 @@ describe('buildLpaString', () => {
     const parsed = parseLpa('LPA:1$smdp.example.com$CODE123');
     expect(parsed).not.toBeNull();
     expect(buildLpaString(parsed!)).toBe('LPA:1$smdp.example.com$CODE123');
+  });
+});
+
+describe('androidInstallUrlFromLpa', () => {
+  it('builds the exact Android universal-link URL for a known LPA', () => {
+    expect(
+      androidInstallUrlFromLpa({ smdpAddress: 'smdp.io', activationCode: 'K2-2U0001-1SJIOUX' })
+    ).toBe(
+      'https://esimsetup.android.com/esim_qrcode_provisioning?carddata=LPA:1$smdp.io$K2-2U0001-1SJIOUX'
+    );
+  });
+
+  it('uses a lowercase base URL while preserving activation-code capitals', () => {
+    const url = androidInstallUrlFromLpa({
+      smdpAddress: 'RSP.TRUPHONE.COM',
+      activationCode: 'QR-G1A2B3',
+    });
+    // Base (scheme + host + path) is lowercase; the carddata value keeps its case.
+    expect(url).toBe(
+      'https://esimsetup.android.com/esim_qrcode_provisioning?carddata=LPA:1$RSP.TRUPHONE.COM$QR-G1A2B3'
+    );
+    const [base] = url!.split('?');
+    expect(base).toBe(base.toLowerCase());
+  });
+
+  it('keeps the LPA $ and : delimiters literal (not percent-encoded)', () => {
+    const url = androidInstallUrlFromLpa({ smdpAddress: 'smdp.io', activationCode: 'CODE' })!;
+    expect(url).toContain('carddata=LPA:1$smdp.io$CODE');
+    expect(url).not.toContain('%24');
+    expect(url).not.toContain('%3A');
+  });
+
+  it('percent-encodes characters that would otherwise break the query', () => {
+    const url = androidInstallUrlFromLpa({ smdpAddress: 'smdp.io', activationCode: 'A B&C' })!;
+    // Space and & must not survive raw in a URL query value.
+    expect(url).toBe(
+      'https://esimsetup.android.com/esim_qrcode_provisioning?carddata=LPA:1$smdp.io$A%20B%26C'
+    );
+  });
+
+  it('returns null for a null activation', () => {
+    expect(androidInstallUrlFromLpa(null)).toBeNull();
+  });
+});
+
+describe('androidInstallUrlFromTapLink', () => {
+  it('derives the install URL from a tap link', () => {
+    expect(androidInstallUrlFromTapLink(TAP_LINK)).toBe(
+      'https://esimsetup.android.com/esim_qrcode_provisioning?carddata=LPA:1$smdp.io$K2-2U0001-1SJIOUX'
+    );
+  });
+
+  it('drops the optional confirmation segment', () => {
+    const link = 'https://x.apple.com/p?carddata=' + encodeURIComponent('LPA:1$smdp.io$CODE$1');
+    expect(androidInstallUrlFromTapLink(link)).toBe(
+      'https://esimsetup.android.com/esim_qrcode_provisioning?carddata=LPA:1$smdp.io$CODE'
+    );
+  });
+
+  it('returns null when the tap link has no parseable LPA', () => {
+    expect(androidInstallUrlFromTapLink('https://apple.com/p')).toBeNull();
+    expect(androidInstallUrlFromTapLink(null)).toBeNull();
   });
 });
 

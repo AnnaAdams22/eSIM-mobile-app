@@ -11,7 +11,7 @@
  */
 
 import { useMemo, useRef, useState } from 'react';
-import { Alert, ScrollView, View } from 'react-native';
+import { ScrollView, View } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
@@ -33,6 +33,7 @@ import { usePlans } from '@/hooks/usePlans';
 import { useAuth } from '@/features/auth';
 import {
   formatPlanLabel,
+  newEsimRouteForPlan,
   resolveGeoDisplay,
   useCatalogL10n,
   type GeoResolvers,
@@ -44,11 +45,9 @@ import {
   summarizeCheckoutError,
   type CheckoutStep,
 } from '@/features/checkout';
-import { requestTopupSheet, type ReplaceInfo } from '@/features/esims';
-import { formatDataSize } from '@/features/esims';
+import { requestTopupSheet } from '@/features/esims';
 import { api, ApiError } from '@/lib/api';
 import type { Plan, PaymentSheetResponse, PromoValidation } from '@/lib/api-types';
-import { formatShortDate } from '@/lib/date';
 import { config } from '@/config';
 import { formatPrice } from '@/lib/price';
 import { errorNotify, lightTap, successNotify } from '@/lib/haptics';
@@ -87,15 +86,12 @@ export default function CheckoutScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { t } = useTranslation();
-  const { planId, iccid, acceptReplace } = useLocalSearchParams<{
+  const { planId, iccid } = useLocalSearchParams<{
     planId?: string;
     /** Present ⇒ this is a top-up of the given eSIM. */
     iccid?: string;
-    /** "true" when the user already accepted a plan replacement on the options screen. */
-    acceptReplace?: string;
   }>();
   const isTopup = !!iccid;
-  const acceptReplaceParam = acceptReplace === 'true';
 
   const { user } = useAuth();
   const email = user?.email ?? null;
@@ -124,6 +120,9 @@ export default function CheckoutScreen() {
 
   const [paying, setPaying] = useState(false);
   const [payError, setPayError] = useState<string | null>(null);
+  // Set when the backend rejects a top-up as a plan replacement: the app never
+  // replaces, so we point the customer at buying a new eSIM instead.
+  const [cannotAdd, setCannotAdd] = useState(false);
   // __DEV__ only: a compact "step · code · message" hint shown under the friendly
   // error and logged to the console. Never populated or rendered in production.
   const [devDetail, setDevDetail] = useState<string | null>(null);
@@ -206,29 +205,10 @@ export default function CheckoutScreen() {
     requestId.reset(); // amount changed → new idempotency key
   };
 
-  // A native confirm for a plan-replacing top-up, resolving true to proceed.
-  const confirmReplace = (info: ReplaceInfo) =>
-    new Promise<boolean>((resolve) => {
-      const amount = formatDataSize(info.dataLeftMb, lang);
-      const date = formatShortDate(info.expiresAt, lang);
-      const body =
-        amount && date
-          ? t('topup.confirmBody', { amount, date })
-          : t('topup.confirmBodyNoDate');
-      Alert.alert(
-        t('topup.confirmTitle'),
-        body,
-        [
-          { text: t('common.cancel'), style: 'cancel', onPress: () => resolve(false) },
-          {
-            text: t('topup.confirmReplace'),
-            style: 'destructive',
-            onPress: () => resolve(true),
-          },
-        ],
-        { cancelable: true, onDismiss: () => resolve(false) }
-      );
-    });
+  const goBuyNewEsim = () => {
+    lightTap();
+    router.replace(newEsimRouteForPlan(plan));
+  };
 
   // ─── Pay ─────────────────────────────────────────────────────────────────
   const pay = async () => {
@@ -242,26 +222,19 @@ export default function CheckoutScreen() {
     try {
       let sheet: PaymentSheetResponse;
       if (isTopup && iccid) {
-        // Top-up: handle the backend's replace-confirmation 409 (confirm → retry
-        // with accept_replace and a fresh idempotency id) before presenting Stripe.
+        // Top-up: always a same-plan "add data" (accept_replace:false). If the
+        // backend still rejects it as a replacement, we don't replace — we point
+        // the customer at buying a new eSIM instead.
         const outcome = await requestTopupSheet(
           {
             planId: plan.id,
             promoCode: applied?.code,
             clientRequestId: requestId.current(),
-            acceptReplace: acceptReplaceParam,
           },
-          {
-            createSheet: (payload) => api.createTopupPaymentSheet(iccid, payload),
-            confirmReplace,
-            newRequestId: () => {
-              requestId.reset();
-              return requestId.current();
-            },
-          }
+          { createSheet: (payload) => api.createTopupPaymentSheet(iccid, payload) }
         );
         if (!outcome.ok) {
-          // User cancelled the replacement — stay quietly on checkout.
+          setCannotAdd(true);
           setPaying(false);
           return;
         }
@@ -430,6 +403,31 @@ export default function CheckoutScreen() {
           <SummaryRow label={t('checkout.totalLabel')} value={totalDisplay} emphasize />
         </Card>
 
+        {cannotAdd ? (
+          <View
+            accessibilityLiveRegion="polite"
+            style={{
+              marginTop: theme.spacing.lg,
+              padding: theme.spacing.lg,
+              borderRadius: theme.radii.md,
+              backgroundColor: theme.colors.surfaceMuted,
+              gap: theme.spacing.sm,
+            }}
+          >
+            <Text variant="h3" accessibilityRole="header">
+              {t('checkout.cannotAddTitle')}
+            </Text>
+            <Text variant="bodySmall" color="textSecondary">
+              {t('checkout.cannotAddBody')}
+            </Text>
+            <Button
+              label={t('checkout.cannotAddAction')}
+              onPress={goBuyNewEsim}
+              style={{ marginTop: theme.spacing.xs }}
+            />
+          </View>
+        ) : null}
+
         {payError ? (
           <View
             accessibilityLiveRegion="polite"
@@ -459,33 +457,36 @@ export default function CheckoutScreen() {
         ) : null}
       </ScrollView>
 
-      {/* Sticky Pay bar above the system navigation bar. */}
-      <View
-        style={{
-          paddingTop: theme.spacing.md,
-          paddingHorizontal: theme.layout.screenPadding,
-          paddingBottom: insets.bottom + theme.spacing.md,
-          borderTopWidth: 1,
-          borderTopColor: theme.colors.border,
-          backgroundColor: theme.colors.background,
-        }}
-      >
-        <Button
-          label={paying ? t('checkout.paying') : t('checkout.payNow', { price: totalDisplay })}
-          onPress={pay}
-          loading={paying}
-          disabled={paying}
-          accessibilityHint={t('checkout.payNow', { price: totalDisplay })}
-        />
-        <Text
-          variant="caption"
-          color="textSecondary"
-          center
-          style={{ marginTop: theme.spacing.sm }}
+      {/* Sticky Pay bar above the system navigation bar. Hidden once a top-up is
+          rejected as a replacement — the "buy a new eSIM" action takes over. */}
+      {cannotAdd ? null : (
+        <View
+          style={{
+            paddingTop: theme.spacing.md,
+            paddingHorizontal: theme.layout.screenPadding,
+            paddingBottom: insets.bottom + theme.spacing.md,
+            borderTopWidth: 1,
+            borderTopColor: theme.colors.border,
+            backgroundColor: theme.colors.background,
+          }}
         >
-          {t('checkout.terms')}
-        </Text>
-      </View>
+          <Button
+            label={paying ? t('checkout.paying') : t('checkout.payNow', { price: totalDisplay })}
+            onPress={pay}
+            loading={paying}
+            disabled={paying}
+            accessibilityHint={t('checkout.payNow', { price: totalDisplay })}
+          />
+          <Text
+            variant="caption"
+            color="textSecondary"
+            center
+            style={{ marginTop: theme.spacing.sm }}
+          >
+            {t('checkout.terms')}
+          </Text>
+        </View>
+      )}
     </SafeAreaView>
   );
 }

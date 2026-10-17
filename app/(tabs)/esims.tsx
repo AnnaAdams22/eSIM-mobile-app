@@ -34,6 +34,7 @@ import { useAuth } from '@/features/auth';
 import { resolveGeoDisplay, useCatalogL10n } from '@/features/catalog';
 import { classifyEsim } from '@/features/esims';
 import { useEsims, useEsimUsages } from '@/hooks/useEsims';
+import { useRefreshOnFocus } from '@/hooks/useRefreshOnFocus';
 import { usePlans } from '@/hooks/usePlans';
 import type { EsimListItem } from '@/lib/api-types';
 import { lightTap } from '@/lib/haptics';
@@ -78,6 +79,16 @@ function MyEsimsList() {
 
   // One usage query per row (index-aligned with `list`); null ICCIDs are skipped.
   const usageQueries = useEsimUsages(list.map((e) => e.iccid));
+
+  // Refresh usage on focus / foreground when a reading is older than ~30s, so the
+  // list's balances stay close to real time without hammering the backend.
+  useRefreshOnFocus(
+    usageQueries.map((q) => ({
+      dataUpdatedAt: q?.dataUpdatedAt ?? 0,
+      isFetching: q?.isFetching ?? false,
+      refetch: () => q?.refetch?.(),
+    }))
+  );
 
   const [segment, setSegment] = useState<'active' | 'past'>('active');
   const [refreshing, setRefreshing] = useState(false);

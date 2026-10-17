@@ -1,22 +1,21 @@
 /**
  * Top-up options for one eSIM.
  *
- * Lists the backend's options with the same-plan "adds to your current plan"
- * option first, then same-geography plans that "replace your current plan".
- * Choosing a replacing option while the current plan is still live with data
- * prompts a confirmation (the remaining data would be lost) before handing off to
- * the shared Checkout screen in top-up mode. Checkout still re-checks with the
- * backend, so a last-moment state change is handled there too.
+ * The app only ever ADDS data to the current plan (the backend marks these
+ * `accumulates: true`): there is no "replace your plan" path any more. We list the
+ * same-plan "Add data to your current plan" options; a traveller who wants a
+ * DIFFERENT plan is pointed at buying a NEW eSIM through the normal purchase flow,
+ * so their current eSIM stays on the phone alongside it. If the plan can't be
+ * topped up at all (e.g. it was delisted), only the buy-a-new-eSIM action shows.
  */
 
-import { Alert, View } from 'react-native';
+import { View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 
 import {
-  Badge,
+  Button,
   Card,
-  EmptyState,
   ErrorState,
   Header,
   PressableScale,
@@ -24,10 +23,11 @@ import {
   Skeleton,
   Text,
 } from '@/components/ui';
-import { formatPlanLabel } from '@/features/catalog';
-import { formatDataSize, needsReplaceConfirm } from '@/features/esims';
+import { formatPlanLabel, newEsimRouteForPlan } from '@/features/catalog';
+import { formatDataSize } from '@/features/esims';
 import { formatPrice } from '@/lib/price';
 import { useTopupOptions } from '@/hooks/useEsims';
+import { usePlans } from '@/hooks/usePlans';
 import type { TopupCurrent, TopupOption } from '@/lib/api-types';
 import { formatShortDate } from '@/lib/date';
 import { lightTap } from '@/lib/haptics';
@@ -36,50 +36,24 @@ import { useTheme } from '@/theme';
 export default function TopupOptionsScreen() {
   const theme = useTheme();
   const router = useRouter();
-  const { t, i18n } = useTranslation();
-  const lang = i18n.language;
+  const { t } = useTranslation();
   const { iccid } = useLocalSearchParams<{ iccid: string }>();
 
   const { data, isLoading, isError, refetch } = useTopupOptions(iccid);
+  const { data: plans } = usePlans();
+
+  // Only same-plan "add data" options — never a plan replacement.
+  const addOptions = (data?.options ?? []).filter((o) => o.accumulates);
 
   const goCheckout = (option: TopupOption) => {
-    router.push({
-      pathname: '/checkout',
-      params: {
-        planId: option.id,
-        iccid,
-        // A replace is pre-accepted here; an accumulate doesn't need the flag.
-        ...(option.replaces_current ? { acceptReplace: 'true' } : {}),
-      },
-    });
+    lightTap();
+    router.push({ pathname: '/checkout', params: { planId: option.id, iccid } });
   };
 
-  const onSelect = (option: TopupOption) => {
+  const goBuyNew = () => {
     lightTap();
-    const current = data?.current;
-    const mustConfirm =
-      option.replaces_current &&
-      needsReplaceConfirm({
-        replacesCurrent: true,
-        dataLeftMb: current?.data_left_mb,
-        isExpired: current?.is_expired,
-      });
-
-    if (!mustConfirm) {
-      goCheckout(option);
-      return;
-    }
-
-    const amount = formatDataSize(current?.data_left_mb, lang);
-    const date = formatShortDate(current?.expires_at, lang);
-    const body =
-      amount && date
-        ? t('topup.confirmBody', { amount, date })
-        : t('topup.confirmBodyNoDate');
-    Alert.alert(t('topup.confirmTitle'), body, [
-      { text: t('common.cancel'), style: 'cancel' },
-      { text: t('topup.confirmReplace'), style: 'destructive', onPress: () => goCheckout(option) },
-    ]);
+    const currentPlan = plans?.find((p) => p.id === data?.current.plan_id) ?? null;
+    router.push(newEsimRouteForPlan(currentPlan));
   };
 
   if (isLoading) {
@@ -108,22 +82,24 @@ export default function TopupOptionsScreen() {
 
       <CurrentPlanCard current={data.current} />
 
-      <Text
-        variant="h2"
-        accessibilityRole="header"
-        style={{ marginTop: theme.spacing.xl, marginBottom: theme.spacing.md }}
-      >
-        {t('topup.chooseTitle')}
-      </Text>
-
-      {data.options.length === 0 ? (
-        <EmptyState title={t('topup.emptyTitle')} body={t('topup.emptyBody')} />
+      {addOptions.length > 0 ? (
+        <>
+          <Text
+            variant="h2"
+            accessibilityRole="header"
+            style={{ marginTop: theme.spacing.xl, marginBottom: theme.spacing.md }}
+          >
+            {t('topup.addDataTitle')}
+          </Text>
+          <View style={{ gap: theme.spacing.md }}>
+            {addOptions.map((option) => (
+              <OptionCard key={option.id} option={option} onSelect={() => goCheckout(option)} />
+            ))}
+          </View>
+          <DifferentPlanCard onBuyNew={goBuyNew} />
+        </>
       ) : (
-        <View style={{ gap: theme.spacing.md }}>
-          {data.options.map((option) => (
-            <OptionCard key={option.id} option={option} onSelect={() => onSelect(option)} />
-          ))}
-        </View>
+        <NoAddData onBuyNew={goBuyNew} />
       )}
     </Screen>
   );
@@ -171,7 +147,7 @@ function OptionCard({ option, onSelect }: { option: TopupOption; onSelect: () =>
       accessibilityRole="button"
       accessibilityLabel={t('topup.selectOption', { plan: label })}
     >
-      <Card padding="lg" radius="lg" shadow="sm" style={{ gap: theme.spacing.sm }}>
+      <Card padding="lg" radius="lg" shadow="sm" style={{ gap: theme.spacing.xs }}>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: theme.spacing.md }}>
           <View style={{ flex: 1 }}>
             <Text variant="h3" numberOfLines={1}>
@@ -182,13 +158,55 @@ function OptionCard({ option, onSelect }: { option: TopupOption; onSelect: () =>
             {formatPrice(option.price_eur_cents, lang, option.price_display)}
           </Text>
         </View>
-        <View style={{ flexDirection: 'row' }}>
-          <Badge
-            label={option.accumulates ? t('topup.addsToPlan') : t('topup.replacesPlan')}
-            tone={option.accumulates ? 'success' : 'neutral'}
-          />
-        </View>
+        <Text variant="caption" color="textSecondary">
+          {t('topup.addDataCardHint')}
+        </Text>
       </Card>
     </PressableScale>
+  );
+}
+
+/** Secondary action shown under the add-data options: buy a different plan as a new eSIM. */
+function DifferentPlanCard({ onBuyNew }: { onBuyNew: () => void }) {
+  const theme = useTheme();
+  const { t } = useTranslation();
+  return (
+    <Card
+      padding="lg"
+      radius="lg"
+      style={{ marginTop: theme.spacing.xl, gap: theme.spacing.sm, backgroundColor: theme.colors.surfaceMuted }}
+    >
+      <Text variant="h3">{t('topup.differentPlanTitle')}</Text>
+      <Text variant="bodySmall" color="textSecondary">
+        {t('topup.differentPlanBody')}
+      </Text>
+      <Button
+        label={t('topup.buyNewEsim')}
+        variant="secondary"
+        onPress={onBuyNew}
+        style={{ marginTop: theme.spacing.xs }}
+      />
+    </Card>
+  );
+}
+
+/** Shown when the current plan has no same-plan top-up available. */
+function NoAddData({ onBuyNew }: { onBuyNew: () => void }) {
+  const theme = useTheme();
+  const { t } = useTranslation();
+  return (
+    <Card padding="lg" radius="lg" shadow="sm" style={{ marginTop: theme.spacing.xl, gap: theme.spacing.sm }}>
+      <Text variant="h3" accessibilityRole="header">
+        {t('topup.noAddDataTitle')}
+      </Text>
+      <Text variant="bodySmall" color="textSecondary">
+        {t('topup.noAddDataBody')}
+      </Text>
+      <Button
+        label={t('topup.buyNewEsim')}
+        onPress={onBuyNew}
+        style={{ marginTop: theme.spacing.xs }}
+      />
+    </Card>
   );
 }

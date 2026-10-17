@@ -122,7 +122,10 @@
       "promo_exhausted": "Dieser Code hat sein Nutzungslimit erreicht.",
       "promo_below_minimum": "Ihre Bestellung erreicht den Mindestwert dieses Codes nicht.",
       "generic": "Dieser Code kann derzeit nicht angewendet werden."
-    }
+    },
+    "cannotAddTitle": "Kann nicht zu Ihrer eSIM hinzugefügt werden",
+    "cannotAddBody": "Dieser Tarif kann nicht zu Ihrer aktuellen eSIM hinzugefügt werden. Kaufen Sie ihn stattdessen als neue eSIM — Ihre aktuelle eSIM bleibt auf Ihrem Telefon.",
+    "cannotAddAction": "Neue eSIM kaufen"
   },
   "orderSuccess": {
     "headerTitle": "Ihre Bestellung",
@@ -161,7 +164,11 @@
     "activationLabel": "Aktivierungscode",
     "copy": "Kopieren",
     "copyHint": "In die Zwischenablage kopieren",
-    "copied": "Kopiert"
+    "copied": "Kopiert",
+    "installThisPhone": "Auf diesem Telefon installieren",
+    "installThisPhoneHint": "Öffnet die eSIM-Einrichtung Ihres Telefons",
+    "androidFallbackHint": "Wenn die Schaltfläche auf Ihrem Telefon nicht funktioniert, scannen Sie den QR-Code mit einem anderen Gerät oder geben Sie die Daten manuell ein.",
+    "androidOpenFailed": "Die eSIM-Einrichtung konnte auf diesem Telefon nicht geöffnet werden. Scannen Sie den QR-Code mit einem anderen Gerät oder geben Sie die Daten unten manuell ein."
   },
   "esims": {
     "title": "Meine eSIMs",
@@ -229,7 +236,8 @@
     "errorTitle": "Diese eSIM konnte nicht geladen werden",
     "installGuide": "Installationsanleitung",
     "usageUnavailable": "Verbrauch nicht verfügbar",
-    "usageRetry": "Erneut versuchen"
+    "usageRetry": "Erneut versuchen",
+    "usageDelayNote": "Der Verbrauch wird vom Netz gemeldet und kann etwas Zeit zur Aktualisierung brauchen."
   },
   "topup": {
     "title": "Aufladen",
@@ -238,17 +246,15 @@
     "dataLeftUnknown": "Guthaben wird aktualisiert",
     "expires": "Läuft ab am {{date}}",
     "expired": "Abgelaufen",
-    "chooseTitle": "Aufladung wählen",
-    "addsToPlan": "Wird zu Ihrem aktuellen Tarif hinzugefügt",
-    "replacesPlan": "Ersetzt Ihren aktuellen Tarif",
-    "selectOption": "{{plan}} auswählen",
-    "confirmTitle": "Aktuellen Tarif ersetzen?",
-    "confirmBody": "Ihr aktueller Tarif hat noch {{amount}} übrig bis {{date}}. Der Kauf eines anderen Tarifs ersetzt ihn und die verbleibenden Daten gehen verloren.",
-    "confirmBodyNoDate": "Der Kauf eines anderen Tarifs ersetzt Ihren aktuellen Tarif und alle verbleibenden Daten gehen verloren.",
-    "confirmReplace": "Tarif ersetzen",
+    "selectOption": "{{plan}} zu Ihrem aktuellen Tarif hinzufügen",
     "errorTitle": "Aufladeoptionen konnten nicht geladen werden",
-    "emptyTitle": "Keine Aufladeoptionen",
-    "emptyBody": "Für diese eSIM sind derzeit keine Aufladungen verfügbar."
+    "addDataTitle": "Daten zu Ihrem aktuellen Tarif hinzufügen",
+    "addDataCardHint": "Daten und Tage werden zu dieser eSIM hinzugefügt.",
+    "differentPlanTitle": "Möchten Sie einen anderen Tarif?",
+    "differentPlanBody": "Kaufen Sie ihn als neue eSIM — Ihre aktuelle eSIM bleibt auf Ihrem Telefon.",
+    "buyNewEsim": "Neue eSIM kaufen",
+    "noAddDataTitle": "Keine Aufladung für diesen Tarif",
+    "noAddDataBody": "Dieser Tarif kann derzeit nicht aufgeladen werden. Sie können stattdessen eine neue eSIM kaufen — Ihre aktuelle eSIM bleibt auf Ihrem Telefon."
   },
   "installGuide": {
     "title": "So installieren Sie eine eSIM",

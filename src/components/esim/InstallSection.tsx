@@ -16,8 +16,12 @@ import { useTranslation } from 'react-i18next';
 import { CheckCircle2, ChevronDown, ChevronUp, Copy, Smartphone } from 'lucide-react-native';
 
 import { Button, Card, Text } from '@/components/ui';
-import { lpaQrValueFromTapLink, parseActivationFromTapLink } from '@/features/checkout';
-import { lightTap } from '@/lib/haptics';
+import {
+  androidInstallUrlFromTapLink,
+  lpaQrValueFromTapLink,
+  parseActivationFromTapLink,
+} from '@/features/checkout';
+import { errorNotify, lightTap } from '@/lib/haptics';
 import { useTheme } from '@/theme';
 
 /** Side length (px) of the rendered QR — large enough to scan from another phone. */
@@ -38,6 +42,7 @@ export interface InstallSectionProps {
 export function InstallSection({ qrCode, iosTapLink, style }: InstallSectionProps) {
   const theme = useTheme();
   const { t } = useTranslation();
+  const [androidFailed, setAndroidFailed] = useState(false);
 
   // Prefer a QR we render ourselves from the parsed LPA activation string, so it
   // works offline and doesn't depend on the backend's image. Fall back to the
@@ -48,14 +53,58 @@ export function InstallSection({ qrCode, iosTapLink, style }: InstallSectionProp
   const manual = parseActivationFromTapLink(iosTapLink);
   const canTapInstall = Platform.OS === 'ios' && !!iosTapLink;
 
+  // Android one-tap: Google's universal install link, opened by the SYSTEM (never
+  // an in-app browser). Hidden when the LPA can't be parsed (QR/manual only then).
+  const androidUrl =
+    Platform.OS === 'android' ? androidInstallUrlFromTapLink(iosTapLink) : null;
+
   const openTapLink = () => {
     if (!iosTapLink) return;
     lightTap();
     Linking.openURL(iosTapLink).catch(() => {});
   };
 
+  const openAndroidInstall = async () => {
+    if (!androidUrl) return;
+    lightTap();
+    setAndroidFailed(false);
+    try {
+      await Linking.openURL(androidUrl);
+    } catch {
+      // Couldn't hand off to the system installer — fall back to QR / manual,
+      // which are already rendered below.
+      errorNotify();
+      setAndroidFailed(true);
+    }
+  };
+
   return (
     <View style={[{ gap: theme.spacing.lg }, style]}>
+      {androidUrl ? (
+        <View style={{ gap: theme.spacing.sm }}>
+          <Button
+            label={t('install.installThisPhone')}
+            onPress={openAndroidInstall}
+            accessibilityHint={t('install.installThisPhoneHint')}
+            icon={<Smartphone size={18} color={theme.colors.onPrimary} />}
+          />
+          {androidFailed ? (
+            <Text
+              variant="bodySmall"
+              color="discount"
+              accessibilityLiveRegion="polite"
+              style={{ marginTop: theme.spacing.xs }}
+            >
+              {t('install.androidOpenFailed')}
+            </Text>
+          ) : (
+            <Text variant="caption" color="textSecondary">
+              {t('install.androidFallbackHint')}
+            </Text>
+          )}
+        </View>
+      ) : null}
+
       {hasQr ? (
         <Card padding="lg" radius="lg" shadow="sm" style={{ alignItems: 'center' }}>
           <Text variant="h3" center>

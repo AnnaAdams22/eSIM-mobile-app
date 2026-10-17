@@ -60,3 +60,6 @@ export type { HeroSlot } from './images';
 
 export { resolveGeoDisplay } from './geo';
 export type { GeoDisplay, GeoInput, GeoResolvers } from './geo';
+
+export { newEsimRouteForPlan } from './newEsimRoute';
+export type { NewEsimPlan, NewEsimRoute } from './newEsimRoute';

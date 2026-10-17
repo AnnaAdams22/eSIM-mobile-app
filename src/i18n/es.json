@@ -122,7 +122,10 @@
       "promo_exhausted": "Este código ha alcanzado su límite de uso.",
       "promo_below_minimum": "Tu pedido no alcanza el mínimo de este código.",
       "generic": "Este código no se puede aplicar en este momento."
-    }
+    },
+    "cannotAddTitle": "No se puede añadir a tu eSIM",
+    "cannotAddBody": "Este plan no se puede añadir a tu eSIM actual. Cómpralo como una nueva eSIM: tu eSIM actual se queda en tu teléfono.",
+    "cannotAddAction": "Comprar una nueva eSIM"
   },
   "orderSuccess": {
     "headerTitle": "Tu pedido",
@@ -161,7 +164,11 @@
     "activationLabel": "Código de activación",
     "copy": "Copiar",
     "copyHint": "Copiar al portapapeles",
-    "copied": "Copiado"
+    "copied": "Copiado",
+    "installThisPhone": "Instalar en este teléfono",
+    "installThisPhoneHint": "Abre la configuración de eSIM de tu teléfono",
+    "androidFallbackHint": "Si el botón no funciona en tu teléfono, escanea el código QR desde otro dispositivo o introduce los datos manualmente.",
+    "androidOpenFailed": "No pudimos abrir la configuración de eSIM en este teléfono. Escanea el código QR desde otro dispositivo o introduce los datos manualmente abajo."
   },
   "esims": {
     "title": "Mis eSIM",
@@ -229,7 +236,8 @@
     "errorTitle": "No se pudo cargar esta eSIM",
     "installGuide": "Guía de instalación",
     "usageUnavailable": "Consumo no disponible",
-    "usageRetry": "Reintentar"
+    "usageRetry": "Reintentar",
+    "usageDelayNote": "El consumo lo informa la red y puede tardar un poco en actualizarse."
   },
   "topup": {
     "title": "Recargar",
@@ -238,17 +246,15 @@
     "dataLeftUnknown": "Actualizando saldo",
     "expires": "Caduca el {{date}}",
     "expired": "Caducado",
-    "chooseTitle": "Elige una recarga",
-    "addsToPlan": "Se suma a tu plan actual",
-    "replacesPlan": "Reemplaza tu plan actual",
-    "selectOption": "Seleccionar {{plan}}",
-    "confirmTitle": "¿Reemplazar tu plan actual?",
-    "confirmBody": "A tu plan actual le quedan {{amount}} hasta el {{date}}. Comprar un plan diferente lo reemplazará y se perderán los datos restantes.",
-    "confirmBodyNoDate": "Comprar un plan diferente reemplazará tu plan actual y se perderán los datos restantes.",
-    "confirmReplace": "Reemplazar plan",
+    "selectOption": "Añadir {{plan}} a tu plan actual",
     "errorTitle": "No se pudieron cargar las opciones de recarga",
-    "emptyTitle": "No hay opciones de recarga",
-    "emptyBody": "Por ahora no hay recargas disponibles para esta eSIM."
+    "addDataTitle": "Añade datos a tu plan actual",
+    "addDataCardHint": "Los datos y los días se añaden a esta eSIM.",
+    "differentPlanTitle": "¿Quieres un plan diferente?",
+    "differentPlanBody": "Cómpralo como una nueva eSIM: tu eSIM actual se queda en tu teléfono.",
+    "buyNewEsim": "Comprar una nueva eSIM",
+    "noAddDataTitle": "No hay recarga para este plan",
+    "noAddDataBody": "Este plan no se puede recargar ahora mismo. Puedes comprar una nueva eSIM: tu eSIM actual se queda en tu teléfono."
   },
   "installGuide": {
     "title": "Cómo instalar una eSIM",

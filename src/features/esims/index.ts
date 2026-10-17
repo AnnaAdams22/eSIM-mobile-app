@@ -19,8 +19,7 @@ export type {
 
 export { formatDataSize, usedFraction } from './format';
 
-export { needsReplaceConfirm, replaceConfirmationInfo } from './replace';
-export type { ReplaceInfo, NeedsConfirmInput } from './replace';
+export { shouldRefetchUsage, USAGE_MIN_REFRESH_AGE_MS } from './refresh';
 
 export { requestTopupSheet } from './topupSheet';
 export type {

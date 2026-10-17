@@ -6,6 +6,9 @@ export {
   parseActivationFromTapLink,
   buildLpaString,
   lpaQrValueFromTapLink,
+  androidInstallUrlFromLpa,
+  androidInstallUrlFromTapLink,
+  ANDROID_INSTALL_BASE,
 } from './lpa';
 export type { LpaActivation } from './lpa';
 
