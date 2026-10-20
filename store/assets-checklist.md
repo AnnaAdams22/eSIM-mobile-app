@@ -32,10 +32,8 @@ Capture on a real device or the correct simulator/emulator size. Portrait.
 | **6.9"** (required) | iPhone 16 Pro Max / 15 Pro Max class | **1320 × 2868** |
 | **6.5"** (recommended/legacy) | iPhone 11 Pro Max / XS Max class | **1242 × 2688** |
 
-- 3–10 screenshots per set. (iPad screenshots only needed if you keep
-  `supportsTablet: true` and want to feature iPad — **TO CONFIRM**; the app is
-  phone-first. If not featuring iPad, you may remove tablet support or still must
-  supply 13" iPad screenshots. Decide before iOS submission.)
+- 3–10 screenshots per set. **iPad: not supported for v1.0** — `app.json` sets
+  `ios.supportsTablet: false`, so no iPad screenshots are required.
 
 ### Android phone (Google Play)
 - **2–8 screenshots**, PNG/JPEG, 16:9 or 9:16, min 320 px, max 3840 px on a side;
@@ -59,7 +57,8 @@ Capture on a real device or the correct simulator/emulator size. Portrait.
 
 ## Summary of what's blocked on the client
 - Official high-res / vector **logo** + **1024×1024 icon** master.
-- Decision on **iPad** support for screenshots.
+- ~~Decision on **iPad** support for screenshots.~~ Resolved: iPad **not** supported
+  for v1.0 (`ios.supportsTablet: false`).
 - Final **screenshots** (need the production demo account and, ideally, real brand
   photos for the hero slots — all hero slots currently render brand-gradient
   placeholders; see CLAUDE.md "Hero images — TODO").

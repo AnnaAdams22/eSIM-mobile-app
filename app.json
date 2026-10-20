@@ -15,7 +15,7 @@
       "backgroundColor": "#F4F1EC"
     },
     "ios": {
-      "supportsTablet": true,
+      "supportsTablet": false,
       "bundleIdentifier": "net.esimglobal.app",
       "config": {
         "usesNonExemptEncryption": false

@@ -87,7 +87,8 @@ camera, no contacts).
   Stripe (not us) handles cards. (privacy-apple / data-safety)
 - **Retention period** for detached order records. (all privacy docs)
 - Exactly which identifiers **Yesim** receives. (privacy-apple)
-- **iPad** support decision (affects iOS screenshots / tablet support).
+- ~~**iPad** support decision~~ — resolved: iPad **not** supported for v1.0
+  (`ios.supportsTablet: false`); iPhone-only, no iPad screenshots needed.
 - Play **app-signing SHA-1** added as a second Google OAuth Android client.
 - Apple Developer account **active**; **Sign in with Apple enabled** for the iOS
   build; Apple-token **revocation** backend endpoint (deletion requirement) still a
