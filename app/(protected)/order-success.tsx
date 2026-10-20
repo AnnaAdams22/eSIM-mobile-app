@@ -27,6 +27,7 @@ import { CheckCircle2, LifeBuoy, Smartphone } from 'lucide-react-native';
 import { Button, Card, Screen, Text } from '@/components/ui';
 import { Flag } from '@/components/Flag';
 import { InstallSection, UsageMeter } from '@/components/esim';
+import { NotificationOptInCard } from '@/components/notifications/NotificationOptInCard';
 import {
   POLL_INTERVAL_MS,
   isTerminal,
@@ -278,6 +279,8 @@ function SuccessState({
       <PlanSummaryCard flag={flag} title={title} planLabel={planLabel} />
 
       <InstallSection qrCode={order.qr_code} iosTapLink={order.ios_tap_link} />
+
+      <NotificationOptInCard />
 
       <Text
         variant="bodySmall"

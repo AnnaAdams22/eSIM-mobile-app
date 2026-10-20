@@ -370,8 +370,19 @@
   },
   "notifications": {
     "title": "Benachrichtigungen",
-    "comingSoonTitle": "Benachrichtigungseinstellungen folgen in Kürze",
-    "comingSoonBody": "In einem zukünftigen Update können Sie Push-Benachrichtigungen hier verwalten."
+    "channelName": "eSIM-Hinweise",
+    "toggleTitle": "Daten- und Ablaufhinweise",
+    "toggleSubtitle": "Werde über das Datenvolumen deiner eSIM und den Ablauf deines Tarifs benachrichtigt.",
+    "deniedBody": "Benachrichtigungen sind in deinen Geräteeinstellungen deaktiviert. Aktiviere sie, damit ESIM Global dir Daten- und Ablaufhinweise senden kann.",
+    "openSettings": "Einstellungen öffnen",
+    "whatYouGetTitle": "Das bekommst du",
+    "alertLowData": "Ein Hinweis, wenn dein Datenvolumen zur Neige geht (10 % übrig).",
+    "alertDepleted": "Eine Benachrichtigung, wenn dein Datenvolumen aufgebraucht ist.",
+    "alertExpiring": "Eine Erinnerung, wenn dein Tarif innerhalb von 24 Stunden abläuft.",
+    "softPromptTitle": "Behalte dein Datenvolumen im Blick",
+    "softPromptBody": "Lass dich benachrichtigen, wenn dein Datenvolumen zur Neige geht oder dein Tarif bald abläuft.",
+    "softPromptTurnOn": "Aktivieren",
+    "softPromptNotNow": "Nicht jetzt"
   },
   "support": {
     "title": "Support",

@@ -20,6 +20,7 @@
     },
     "android": {
       "package": "net.esimglobal.app",
+      "googleServicesFile": "./google-services.json",
       "adaptiveIcon": {
         "backgroundColor": "#F4F1EC",
         "foregroundImage": "./assets/android-icon-foreground.png",
@@ -53,6 +54,13 @@
         {
           "merchantIdentifier": "merchant.net.esimglobal.app",
           "enableGooglePay": true
+        }
+      ],
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/notification-icon.png",
+          "color": "#1C2430"
         }
       ]
     ],

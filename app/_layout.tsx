@@ -24,6 +24,7 @@ import { applyStoredLanguage } from '@/i18n';
 import { ConfigError } from '@/components/ConfigError';
 import { ToastProvider } from '@/components/ui';
 import { AuthProvider, guardDecision, useAuth } from '@/features/auth';
+import { NotificationsProvider } from '@/features/notifications/NotificationsProvider';
 import { queryClient } from '@/lib/queryClient';
 import { config, missingConfigKeys, REQUIRE_SIGN_IN_TO_BROWSE } from '@/config';
 import { lightTheme } from '@/theme';
@@ -111,6 +112,7 @@ export default function RootLayout() {
         urlScheme="esimglobal"
       >
         <AuthProvider>
+          <NotificationsProvider>
           <ToastProvider>
             {/* Central guard: enforces REQUIRE_SIGN_IN_TO_BROWSE for public
                 routes and resets the stack to Home on sign-out. Protected routes
@@ -128,6 +130,7 @@ export default function RootLayout() {
               <Stack.Screen name="(auth)" options={{ presentation: 'modal' }} />
             </Stack>
           </ToastProvider>
+          </NotificationsProvider>
         </AuthProvider>
       </StripeProvider>
     );

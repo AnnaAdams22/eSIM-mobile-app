@@ -370,8 +370,19 @@
   },
   "notifications": {
     "title": "Notifications",
-    "comingSoonTitle": "Notification settings are coming soon",
-    "comingSoonBody": "You'll be able to manage push notifications here in a future update."
+    "channelName": "eSIM alerts",
+    "toggleTitle": "Data and expiry alerts",
+    "toggleSubtitle": "Get notified about your eSIM's data and plan expiry.",
+    "deniedBody": "Notifications are turned off in your device settings. Turn them on for ESIM Global to receive data and expiry alerts.",
+    "openSettings": "Open settings",
+    "whatYouGetTitle": "What you'll get",
+    "alertLowData": "A heads-up when your data is running low (10% left).",
+    "alertDepleted": "An alert when your data is used up.",
+    "alertExpiring": "A reminder when your plan expires within 24 hours.",
+    "softPromptTitle": "Stay on top of your data",
+    "softPromptBody": "Get notified when your data is running low or your plan is about to expire.",
+    "softPromptTurnOn": "Turn on",
+    "softPromptNotNow": "Not now"
   },
   "support": {
     "title": "Support",

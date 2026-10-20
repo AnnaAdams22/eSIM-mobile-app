@@ -28,6 +28,8 @@ export type { AuthErrorKey } from './errors';
 
 export { safeRedirect } from './redirect';
 
+export { registerBeforeSignOut, runBeforeSignOutHooks } from './signOutHooks';
+
 export { guardDecision } from './guard';
 export type { GuardDecision, GuardInput } from './guard';
 

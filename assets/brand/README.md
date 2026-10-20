@@ -16,6 +16,12 @@ Also generated from the symbol (on the ivory background `#F4F1EC`):
 `../android-icon-foreground.png`, `../android-icon-background.png`,
 `../android-icon-monochrome.png`.
 
+`../notification-icon.png` is a **TEMPORARY** push-notification status-bar icon:
+a white-on-transparent 96×96 silhouette of the symbol (Android renders it as a
+flat monochrome mask, tinted with the `#1C2430` colour set in `app.json`).
+Replace it with the official logo's silhouette at the same path — no code change
+needed (`app.json`'s `expo-notifications` plugin references this path).
+
 ## ⚠️ TODO before release
 
 **Replace with official SVG / high-res transparent logo files from the client.**

@@ -370,8 +370,19 @@
   },
   "notifications": {
     "title": "Notificaciones",
-    "comingSoonTitle": "Los ajustes de notificaciones llegarán pronto",
-    "comingSoonBody": "Aquí podrás administrar las notificaciones push en una futura actualización."
+    "channelName": "Alertas de eSIM",
+    "toggleTitle": "Alertas de datos y caducidad",
+    "toggleSubtitle": "Recibe avisos sobre los datos de tu eSIM y la caducidad de tu plan.",
+    "deniedBody": "Las notificaciones están desactivadas en los ajustes de tu dispositivo. Actívalas para que ESIM Global pueda enviarte alertas de datos y caducidad.",
+    "openSettings": "Abrir ajustes",
+    "whatYouGetTitle": "Qué recibirás",
+    "alertLowData": "Un aviso cuando tus datos se estén agotando (queda un 10 %).",
+    "alertDepleted": "Una alerta cuando tus datos se hayan agotado.",
+    "alertExpiring": "Un recordatorio cuando tu plan caduque en menos de 24 horas.",
+    "softPromptTitle": "Controla tus datos",
+    "softPromptBody": "Recibe un aviso cuando tus datos se estén agotando o tu plan esté a punto de caducar.",
+    "softPromptTurnOn": "Activar",
+    "softPromptNotNow": "Ahora no"
   },
   "support": {
     "title": "Soporte",

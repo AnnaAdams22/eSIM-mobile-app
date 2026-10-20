@@ -30,6 +30,10 @@ import { supabase } from '@/lib/supabase';
 import { api, ApiError } from '@/lib/api';
 import { queryClient } from '@/lib/queryClient';
 import { deriveAuthState } from './authState';
+import { runBeforeSignOutHooks } from './signOutHooks';
+
+/** Max time we'll wait on best-effort pre-sign-out cleanup before cutting it loose. */
+const BEFORE_SIGN_OUT_TIMEOUT_MS = 2500;
 
 export type AuthStatus = 'loading' | 'signedIn' | 'signedOut';
 
@@ -248,6 +252,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const signOut = async (): Promise<void> => {
+    // Run best-effort cleanup that needs the still-valid session FIRST — notably
+    // deregistering the push device token (DELETE /api/me/devices must be
+    // authenticated). Time-boxed and non-throwing so a flaky network can never
+    // block sign-out.
+    await Promise.race([
+      runBeforeSignOutHooks(),
+      new Promise<void>((resolve) => setTimeout(resolve, BEFORE_SIGN_OUT_TIMEOUT_MS)),
+    ]);
+
     // Flip to signed-out and drop cached user data IMMEDIATELY — don't wait on
     // Supabase's network token-revoke round-trip (which on a flaky connection
     // can take seconds), or the UI would keep showing the old user until it
