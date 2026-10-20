@@ -16,11 +16,19 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "net.esimglobal.app"
+      "bundleIdentifier": "net.esimglobal.app",
+      "config": {
+        "usesNonExemptEncryption": false
+      }
     },
     "android": {
       "package": "net.esimglobal.app",
       "googleServicesFile": "./google-services.json",
+      "blockedPermissions": [
+        "android.permission.SYSTEM_ALERT_WINDOW",
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.WRITE_EXTERNAL_STORAGE"
+      ],
       "adaptiveIcon": {
         "backgroundColor": "#F4F1EC",
         "foregroundImage": "./assets/android-icon-foreground.png",
