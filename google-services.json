@@ -12,7 +12,20 @@
           "package_name": "net.esimglobal.app"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "53531612788-h4g535pt09artjg5ei9j86ith87pjaoj.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "net.esimglobal.app",
+            "certificate_hash": "deec99ec2e716f4c04e72798212984996f2f6964"
+          }
+        },
+        {
+          "client_id": "53531612788-52e97tj98e6ptuofvsup3s95ui1gkn8g.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyCJf2b6atKPeP2Q60Tyve_hqCQxpafLjZg"
@@ -20,7 +33,12 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "53531612788-52e97tj98e6ptuofvsup3s95ui1gkn8g.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }
