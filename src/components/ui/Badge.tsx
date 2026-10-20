@@ -26,9 +26,11 @@ export function Badge({ label, tone = 'neutral', style }: BadgeProps) {
     discount: theme.colors.discountSoft,
     neutral: theme.colors.surfaceMuted,
   };
-  const fg: Record<BadgeTone, 'success' | 'discount' | 'textSecondary'> = {
-    success: 'success',
-    discount: 'discount',
+  // Text tones are the darker *Text variants so the label meets WCAG AA on the
+  // soft tint (the saturated success/discount are for fills/icons, not text).
+  const fg: Record<BadgeTone, 'successText' | 'discountText' | 'textSecondary'> = {
+    success: 'successText',
+    discount: 'discountText',
     neutral: 'textSecondary',
   };
 

@@ -14,6 +14,8 @@
 import { config } from '@/config';
 import { supabase } from './supabase';
 import { ApiError, TimeoutError } from './api-error';
+import { reportRequestError, reportRequestOk } from './network/monitor';
+import { emitSessionExpired } from '@/features/auth/authEvents';
 import type {
   ApiErrorBody,
   EsimDetail,
@@ -109,9 +111,22 @@ async function errorFromResponse(res: Response): Promise<ApiError> {
 
 /**
  * Core request method. Attaches the token, handles a single 401→refresh→retry,
- * and signs out if the refreshed request still 401s.
+ * and signs out if the refreshed request still 401s. Reports the outcome to the
+ * network monitor so the offline banner / auto-refetch stay accurate (any HTTP
+ * response ⇒ online; a connectivity-shaped throw ⇒ offline).
  */
 export async function request<T>(path: string, opts: RequestOptions = {}): Promise<T> {
+  try {
+    const result = await requestInner<T>(path, opts);
+    reportRequestOk();
+    return result;
+  } catch (err) {
+    reportRequestError(err);
+    throw err;
+  }
+}
+
+async function requestInner<T>(path: string, opts: RequestOptions): Promise<T> {
   const useAuth = opts.auth !== false; // default: authenticated
   let token = useAuth ? await getAccessToken() : null;
 
@@ -124,8 +139,10 @@ export async function request<T>(path: string, opts: RequestOptions = {}): Promi
       token = data.session.access_token;
       res = await rawFetch(path, token, opts);
     }
-    // Still unauthorised after a refresh attempt → the session is dead.
+    // Still unauthorised after a refresh attempt → the session is dead. Tell the
+    // UI (friendly "session expired" message) BEFORE the sign-out flips state.
     if (res.status === 401) {
+      emitSessionExpired();
       await supabase.auth.signOut();
       throw await errorFromResponse(res);
     }

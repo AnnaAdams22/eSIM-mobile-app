@@ -15,15 +15,16 @@
  */
 
 import { ActivityIndicator, View } from 'react-native';
-import { Redirect, Stack, usePathname } from 'expo-router';
+import { Redirect, Stack, useGlobalSearchParams, usePathname } from 'expo-router';
 
-import { guardDecision, safeRedirect, useAuth } from '@/features/auth';
+import { guardDecision, pathWithParams, safeRedirect, useAuth } from '@/features/auth';
 import { REQUIRE_SIGN_IN_TO_BROWSE } from '@/config';
 import { lightTheme } from '@/theme';
 
 export default function ProtectedLayout() {
   const { status } = useAuth();
   const pathname = usePathname();
+  const params = useGlobalSearchParams();
 
   const decision = guardDecision({
     status,
@@ -48,8 +49,10 @@ export default function ProtectedLayout() {
   }
 
   if (decision === 'redirect') {
-    // Return the user to the screen they were headed for after they sign in.
-    const redirect = safeRedirect(pathname) ?? undefined;
+    // Return the user to the screen they were headed for after they sign in —
+    // WITH its params (e.g. /checkout?planId=…), so a mid-checkout session
+    // expiry doesn't lose the plan they were buying.
+    const redirect = safeRedirect(pathWithParams(pathname, params)) ?? undefined;
     return (
       <Redirect
         href={{

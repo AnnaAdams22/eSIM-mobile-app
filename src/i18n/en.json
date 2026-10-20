@@ -529,6 +529,7 @@
     "resetDoneTitle": "Password updated",
     "resetDoneBody": "You can now sign in with your new password.",
     "backToSignIn": "Back to sign in",
+    "sessionExpired": "Your session expired. Please sign in again.",
     "errors": {
       "invalidCredentials": "That email or password doesn't look right.",
       "emailNotConfirmed": "Please confirm your email first — we've sent you a new code.",
@@ -568,5 +569,14 @@
     "noEsimsBody": "Buy your first data plan and it'll appear here.",
     "configTitle": "Configuration needed",
     "configBody": "The app is missing required settings. Add these to your .env file:"
+  },
+  "offline": {
+    "banner": "You're offline. Some info may be out of date."
+  },
+  "errorBoundary": {
+    "title": "Something went wrong",
+    "body": "The app hit an unexpected problem. You can restart, or contact us if it keeps happening.",
+    "restart": "Restart",
+    "support": "Contact support"
   }
 }

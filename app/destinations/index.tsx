@@ -11,7 +11,7 @@
  * Expo Go, and the task permits an optimised FlatList — see the report.)
  */
 
-import { useMemo, useState } from 'react';
+import { memo, useCallback, useMemo, useState } from 'react';
 import {
   FlatList,
   ScrollView,
@@ -53,6 +53,60 @@ const REGIONS = 'regions';
 const FLAG_SIZE = 34;
 /** Left inset for row separators so they align under the row text, not the flag. */
 const SEPARATOR_INSET = FLAG_SIZE + 12;
+
+/**
+ * Memoised list rows. With stable `onPress`/`value`/`hint` props they skip
+ * re-rendering when the screen re-renders for unrelated reasons (scroll shadow,
+ * filter chips), keeping the ~200-row list smooth.
+ */
+const DestinationRow = memo(function DestinationRow({
+  item,
+  value,
+  hint,
+  onPress,
+}: {
+  item: Destination;
+  value: string;
+  hint: string;
+  onPress: (iso2: string) => void;
+}) {
+  const handle = useCallback(() => onPress(item.iso2), [onPress, item.iso2]);
+  return (
+    <ListRow
+      title={item.name}
+      value={value}
+      leading={<Flag uri={item.flag} size={FLAG_SIZE} />}
+      onPress={handle}
+      accessibilityHint={hint}
+    />
+  );
+});
+
+const RegionRow = memo(function RegionRow({
+  item,
+  subtitle,
+  value,
+  hint,
+  onPress,
+}: {
+  item: Region;
+  subtitle: string;
+  value: string;
+  hint: string;
+  onPress: (key: string) => void;
+}) {
+  const handle = useCallback(() => onPress(item.key), [onPress, item.key]);
+  return (
+    <ListRow
+      title={item.name}
+      subtitle={subtitle}
+      value={value}
+      leading={<Flag uri={item.flag} size={FLAG_SIZE} />}
+      onPress={handle}
+      accessibilityHint={hint}
+    />
+  );
+});
 
 export default function DestinationsScreen() {
   const theme = useTheme();
@@ -105,6 +159,49 @@ export default function DestinationsScreen() {
     if (next !== scrolled) setScrolled(next);
   };
 
+  // Stable handlers + renderItem callbacks so the memoised rows don't re-render
+  // when the screen re-renders (scroll shadow, filter chips).
+  const pressDestination = useCallback(
+    (iso2: string) => router.push({ pathname: '/destinations/[id]', params: { id: iso2 } }),
+    [router]
+  );
+  const pressRegion = useCallback(
+    (key: string) =>
+      router.push({ pathname: '/destinations/[id]', params: { id: key, type: 'region' } }),
+    [router]
+  );
+
+  const rowHint = t('destinations.rowHint');
+
+  const renderDestination = useCallback(
+    ({ item }: { item: Destination }) => (
+      <DestinationRow
+        item={item}
+        value={t('destinations.from', {
+          price: formatPrice(item.lowestPriceCents, lang, item.lowestPriceDisplay),
+        })}
+        hint={rowHint}
+        onPress={pressDestination}
+      />
+    ),
+    [t, lang, rowHint, pressDestination]
+  );
+
+  const renderRegion = useCallback(
+    ({ item }: { item: Region }) => (
+      <RegionRow
+        item={item}
+        subtitle={t('catalog.countriesCount', { count: item.countryCount })}
+        value={t('destinations.from', {
+          price: formatPrice(item.lowestPriceCents, lang, item.lowestPriceDisplay),
+        })}
+        hint={rowHint}
+        onPress={pressRegion}
+      />
+    ),
+    [t, lang, rowHint, pressRegion]
+  );
+
   const separator = () => (
     <View style={{ height: 1, backgroundColor: theme.colors.border, marginLeft: SEPARATOR_INSET }} />
   );
@@ -124,23 +221,7 @@ export default function DestinationsScreen() {
           keyExtractor={(r) => r.key}
           onScroll={onScroll}
           scrollEventThrottle={16}
-          renderItem={({ item }: { item: Region }) => (
-            <ListRow
-              title={item.name}
-              subtitle={t('catalog.countriesCount', { count: item.countryCount })}
-              value={t('destinations.from', {
-                price: formatPrice(item.lowestPriceCents, lang, item.lowestPriceDisplay),
-              })}
-              leading={<Flag uri={item.flag} size={FLAG_SIZE} />}
-              onPress={() =>
-                router.push({
-                  pathname: '/destinations/[id]',
-                  params: { id: item.key, type: 'region' },
-                })
-              }
-              accessibilityHint={t('destinations.rowHint')}
-            />
-          )}
+          renderItem={renderRegion}
           ItemSeparatorComponent={separator}
           ListEmptyComponent={searchEmpty}
           contentContainerStyle={{ flexGrow: 1, paddingBottom: theme.spacing.xl }}
@@ -156,19 +237,7 @@ export default function DestinationsScreen() {
         keyExtractor={(d) => d.iso2}
         onScroll={onScroll}
         scrollEventThrottle={16}
-        renderItem={({ item }: { item: Destination }) => (
-          <ListRow
-            title={item.name}
-            value={t('destinations.from', {
-              price: formatPrice(item.lowestPriceCents, lang, item.lowestPriceDisplay),
-            })}
-            leading={<Flag uri={item.flag} size={FLAG_SIZE} />}
-            onPress={() =>
-              router.push({ pathname: '/destinations/[id]', params: { id: item.iso2 } })
-            }
-            accessibilityHint={t('destinations.rowHint')}
-          />
-        )}
+        renderItem={renderDestination}
         ItemSeparatorComponent={separator}
         ListEmptyComponent={
           destinations.length === 0 ? (

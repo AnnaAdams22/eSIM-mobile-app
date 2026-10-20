@@ -18,7 +18,7 @@
  */
 
 import { useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, Animated, Easing, View } from 'react-native';
+import { ActivityIndicator, Animated, AppState, Easing, View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
@@ -30,6 +30,7 @@ import { InstallSection, UsageMeter } from '@/components/esim';
 import { NotificationOptInCard } from '@/components/notifications/NotificationOptInCard';
 import {
   POLL_INTERVAL_MS,
+  backgroundAdjustedStart,
   isTerminal,
   pollPhase,
   type PollPhase,
@@ -56,7 +57,13 @@ export default function OrderSuccessScreen() {
   }>();
   const isTopup = mode === 'topup';
 
-  const [startedAt] = useState(() => Date.now());
+  // Elapsed time drives the 60s timeout. We exclude time spent backgrounded (JS
+  // timers freeze there) by shifting this baseline forward on resume, so the app
+  // can't jump straight to "timed out" after being in the background — it keeps
+  // polling from where it left off. (Navigation can't duplicate: `celebrated`
+  // guards the one success side-effect and we arrive via router.replace.)
+  const [startedAt, setStartedAt] = useState(() => Date.now());
+  const backgroundedAtRef = useRef<number | null>(null);
   const [now, setNow] = useState(() => Date.now());
 
   const { data: order } = useQuery({
@@ -93,6 +100,24 @@ export default function OrderSuccessScreen() {
     const id = setInterval(() => setNow(Date.now()), 1000);
     return () => clearInterval(id);
   }, [terminal]);
+
+  // Pause the elapsed clock while backgrounded: record when we leave, and on
+  // return shift the baseline forward by the time spent away.
+  useEffect(() => {
+    const sub = AppState.addEventListener('change', (state) => {
+      if (state === 'active') {
+        if (backgroundedAtRef.current != null) {
+          const bgAt = backgroundedAtRef.current;
+          backgroundedAtRef.current = null;
+          setStartedAt((s) => backgroundAdjustedStart(s, bgAt, Date.now()));
+          setNow(Date.now());
+        }
+      } else if (backgroundedAtRef.current == null) {
+        backgroundedAtRef.current = Date.now();
+      }
+    });
+    return () => sub.remove();
+  }, []);
 
   // Single success haptic, and refresh every screen that shows this eSIM / the list.
   const celebrated = useRef(false);

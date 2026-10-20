@@ -42,6 +42,7 @@ export function DestinationThumb({ iso2, flag, size = 52 }: DestinationThumbProp
       }}
       contentFit="cover"
       transition={150}
+      cachePolicy="memory-disk"
     />
   );
 }

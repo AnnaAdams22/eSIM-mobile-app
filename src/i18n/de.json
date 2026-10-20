@@ -529,6 +529,7 @@
     "resetDoneTitle": "Passwort aktualisiert",
     "resetDoneBody": "Sie können sich jetzt mit Ihrem neuen Passwort anmelden.",
     "backToSignIn": "Zurück zur Anmeldung",
+    "sessionExpired": "Ihre Sitzung ist abgelaufen. Bitte melden Sie sich erneut an.",
     "errors": {
       "invalidCredentials": "Diese E-Mail-Adresse oder dieses Passwort sieht nicht richtig aus.",
       "emailNotConfirmed": "Bitte bestätigen Sie zuerst Ihre E-Mail-Adresse – wir haben Ihnen einen neuen Code gesendet.",
@@ -568,5 +569,14 @@
     "noEsimsBody": "Kaufen Sie Ihren ersten Datentarif und er erscheint hier.",
     "configTitle": "Konfiguration erforderlich",
     "configBody": "Der App fehlen erforderliche Einstellungen. Fügen Sie diese zu Ihrer .env-Datei hinzu:"
+  },
+  "offline": {
+    "banner": "Sie sind offline. Einige Informationen sind möglicherweise nicht aktuell."
+  },
+  "errorBoundary": {
+    "title": "Etwas ist schiefgelaufen",
+    "body": "In der App ist ein unerwartetes Problem aufgetreten. Sie können sie neu starten oder uns kontaktieren, falls es weiterhin auftritt.",
+    "restart": "Neu starten",
+    "support": "Support kontaktieren"
   }
 }

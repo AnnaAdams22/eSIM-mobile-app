@@ -529,6 +529,7 @@
     "resetDoneTitle": "Contraseña actualizada",
     "resetDoneBody": "Ahora puedes iniciar sesión con tu nueva contraseña.",
     "backToSignIn": "Volver a iniciar sesión",
+    "sessionExpired": "Tu sesión ha caducado. Vuelve a iniciar sesión.",
     "errors": {
       "invalidCredentials": "Ese correo o contraseña no parece correcto.",
       "emailNotConfirmed": "Confirma primero tu correo electrónico; te hemos enviado un nuevo código.",
@@ -568,5 +569,14 @@
     "noEsimsBody": "Compra tu primer plan de datos y aparecerá aquí.",
     "configTitle": "Configuración necesaria",
     "configBody": "A la app le faltan ajustes necesarios. Añade estos a tu archivo .env:"
+  },
+  "offline": {
+    "banner": "Estás sin conexión. Es posible que algunos datos no estén actualizados."
+  },
+  "errorBoundary": {
+    "title": "Algo salió mal",
+    "body": "La aplicación tuvo un problema inesperado. Puedes reiniciarla o contactarnos si sigue ocurriendo.",
+    "restart": "Reiniciar",
+    "support": "Contactar con soporte"
   }
 }

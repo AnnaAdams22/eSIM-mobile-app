@@ -4,6 +4,7 @@
  * missing flag never leaves a broken-image gap.
  */
 
+import { useState } from 'react';
 import { View } from 'react-native';
 import { Image } from 'expo-image';
 import { Globe } from 'lucide-react-native';
@@ -19,6 +20,9 @@ export interface FlagProps {
 
 export function Flag({ uri, size = 36 }: FlagProps) {
   const theme = useTheme();
+  // Fall back to the globe if the URL is missing OR fails to load (broken link),
+  // so a flag never leaves a broken-image gap.
+  const [failed, setFailed] = useState(false);
 
   const base = {
     width: size,
@@ -31,7 +35,7 @@ export function Flag({ uri, size = 36 }: FlagProps) {
     borderColor: theme.colors.border,
   };
 
-  if (!uri) {
+  if (!uri || failed) {
     return (
       <View
         accessible={false}
@@ -49,6 +53,8 @@ export function Flag({ uri, size = 36 }: FlagProps) {
       style={base}
       contentFit="cover"
       transition={120}
+      cachePolicy="memory-disk"
+      onError={() => setFailed(true)}
     />
   );
 }

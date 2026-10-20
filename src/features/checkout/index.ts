@@ -32,3 +32,8 @@ export { buildPaymentSheetAppearance } from './stripeAppearance';
 
 export { summarizeCheckoutError } from './devDiagnostics';
 export type { CheckoutStep } from './devDiagnostics';
+
+export { decidePaymentOutcome } from './paymentOutcome';
+export type { PaymentOutcome, PaymentFailureContext } from './paymentOutcome';
+
+export { backgroundAdjustedStart } from './pollClock';

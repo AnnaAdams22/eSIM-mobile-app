@@ -26,7 +26,7 @@ export type { PasswordStrength } from './validation';
 export { mapAuthError, AUTH_ERROR_KEYS } from './errors';
 export type { AuthErrorKey } from './errors';
 
-export { safeRedirect } from './redirect';
+export { safeRedirect, pathWithParams } from './redirect';
 
 export { registerBeforeSignOut, runBeforeSignOutHooks } from './signOutHooks';
 

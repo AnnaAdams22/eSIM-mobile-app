@@ -14,14 +14,22 @@ export const queryClient = new QueryClient({
     queries: {
       staleTime: 30_000,
       gcTime: 5 * 60_000,
+      // networkMode 'always': never let React Query *pause* a query for being
+      // offline — always attempt it so a failure surfaces as a real ErrorState +
+      // Retry (never a blank screen or an endless paused skeleton). Connectivity
+      // is still tracked (onlineManager) for the offline banner, and
+      // refetchOnReconnect auto-refetches the moment we come back online.
+      networkMode: 'always',
       retry: (failureCount, error) => {
         // Don't retry client errors (401/403/404/409/4xx) — only transient ones.
         if (error instanceof ApiError && error.status < 500) return false;
         return failureCount < 2;
       },
+      refetchOnReconnect: true,
       refetchOnWindowFocus: false,
     },
     mutations: {
+      networkMode: 'always',
       retry: false,
     },
   },

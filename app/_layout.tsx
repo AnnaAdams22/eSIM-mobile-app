@@ -22,8 +22,11 @@ import {
 
 import { applyStoredLanguage } from '@/i18n';
 import { ConfigError } from '@/components/ConfigError';
+import { ErrorBoundary } from '@/components/ErrorBoundary';
+import { OfflineBanner } from '@/components/OfflineBanner';
 import { ToastProvider } from '@/components/ui';
 import { AuthProvider, guardDecision, useAuth } from '@/features/auth';
+import { SessionExpiryToast } from '@/features/auth/SessionExpiryToast';
 import { SocialSignOutRegistrar } from '@/features/auth/social/SocialSignOutRegistrar';
 import { NotificationsProvider } from '@/features/notifications/NotificationsProvider';
 import { queryClient } from '@/lib/queryClient';
@@ -107,34 +110,41 @@ export default function RootLayout() {
     ) : (
       // Stripe needs the publishable key and our URL scheme so redirect-based
       // payment methods (and 3DS) can return to the app via esimglobal://.
-      <StripeProvider
-        publishableKey={config.stripePublishableKey}
-        merchantIdentifier="merchant.net.esimglobal.app"
-        urlScheme="esimglobal"
-      >
-        <AuthProvider>
-          <SocialSignOutRegistrar />
-          <NotificationsProvider>
-          <ToastProvider>
-            {/* Central guard: enforces REQUIRE_SIGN_IN_TO_BROWSE for public
-                routes and resets the stack to Home on sign-out. Protected routes
-                are guarded by app/(protected)/_layout.tsx. */}
-            <AuthGate />
-            <Stack
-              screenOptions={{
-                headerShown: false,
-                contentStyle: { backgroundColor: lightTheme.colors.background },
-                animation: 'slide_from_right',
-              }}
-            >
-              <Stack.Screen name="(tabs)" />
-              <Stack.Screen name="(protected)" />
-              <Stack.Screen name="(auth)" options={{ presentation: 'modal' }} />
-            </Stack>
-          </ToastProvider>
-          </NotificationsProvider>
-        </AuthProvider>
-      </StripeProvider>
+      // A render-time crash anywhere below here shows a friendly recovery screen
+      // instead of a white screen (see ErrorBoundary).
+      <ErrorBoundary>
+        <StripeProvider
+          publishableKey={config.stripePublishableKey}
+          merchantIdentifier="merchant.net.esimglobal.app"
+          urlScheme="esimglobal"
+        >
+          <AuthProvider>
+            <SocialSignOutRegistrar />
+            <NotificationsProvider>
+            <ToastProvider>
+              {/* Central guard: enforces REQUIRE_SIGN_IN_TO_BROWSE for public
+                  routes and resets the stack to Home on sign-out. Protected routes
+                  are guarded by app/(protected)/_layout.tsx. */}
+              <AuthGate />
+              <SessionExpiryToast />
+              <Stack
+                screenOptions={{
+                  headerShown: false,
+                  contentStyle: { backgroundColor: lightTheme.colors.background },
+                  animation: 'slide_from_right',
+                }}
+              >
+                <Stack.Screen name="(tabs)" />
+                <Stack.Screen name="(protected)" />
+                <Stack.Screen name="(auth)" options={{ presentation: 'modal' }} />
+              </Stack>
+              {/* Calm, non-blocking offline strip; overlays all routes. */}
+              <OfflineBanner />
+            </ToastProvider>
+            </NotificationsProvider>
+          </AuthProvider>
+        </StripeProvider>
+      </ErrorBoundary>
     );
 
   return (

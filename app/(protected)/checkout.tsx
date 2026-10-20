@@ -40,6 +40,7 @@ import {
 } from '@/features/catalog';
 import {
   buildPaymentSheetAppearance,
+  decidePaymentOutcome,
   makeRequestIdHolder,
   promoErrorKey,
   summarizeCheckoutError,
@@ -219,6 +220,8 @@ export default function CheckoutScreen() {
     if (__DEV__) setDevDetail(null);
     // Which step we're on, so a failure can be attributed precisely in __DEV__.
     let step: CheckoutStep = 'create-sheet';
+    // Captured once we have an intent, so a post-drop failure can route to polling.
+    let paymentIntentId: string | undefined;
     try {
       let sheet: PaymentSheetResponse;
       if (isTopup && iccid) {
@@ -246,6 +249,7 @@ export default function CheckoutScreen() {
           client_request_id: requestId.current(),
         });
       }
+      paymentIntentId = sheet.payment_intent_id;
 
       step = 'init';
       const init = await initPaymentSheet({
@@ -289,6 +293,26 @@ export default function CheckoutScreen() {
         },
       });
     } catch (err) {
+      // If connectivity dropped AFTER the sheet was presented, the payment may
+      // have gone through — go to order-success polling (which reads the real
+      // backend state) instead of suggesting a retry that could double-submit.
+      if (
+        decidePaymentOutcome({ step, error: err, hasPaymentIntentId: !!paymentIntentId }) ===
+          'poll' &&
+        paymentIntentId
+      ) {
+        router.replace({
+          pathname: '/order-success',
+          params: {
+            paymentIntentId,
+            flag: summary.flag ?? '',
+            title: summary.title,
+            planLabel,
+            ...(isTopup && iccid ? { mode: 'topup', iccid } : {}),
+          },
+        });
+        return;
+      }
       errorNotify();
       // __DEV__ only: surface the real failure (step + status/code/message) in the
       // console and under the friendly message. Secret-free — see summarizeCheckoutError.
@@ -438,7 +462,7 @@ export default function CheckoutScreen() {
               backgroundColor: theme.colors.discountSoft,
             }}
           >
-            <Text variant="caption" color="discount" style={{ fontFamily: theme.fontFamily.semibold }}>
+            <Text variant="caption" color="discountText" style={{ fontFamily: theme.fontFamily.semibold }}>
               {t('checkout.errorTitle')}
             </Text>
             <Text variant="bodySmall" color="text" style={{ marginTop: 2 }}>

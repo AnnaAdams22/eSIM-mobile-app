@@ -7,6 +7,7 @@
  *  - Loading:    lightweight skeletons while the session is read from storage.
  */
 
+import { useRef, useState } from 'react';
 import { Alert, Pressable, View } from 'react-native';
 import { useRouter, type Href } from 'expo-router';
 import { useTranslation } from 'react-i18next';
@@ -30,6 +31,8 @@ export default function ProfileScreen() {
   const router = useRouter();
   const { t } = useTranslation();
   const { status, user, displayName, signOut } = useAuth();
+  const [signingOut, setSigningOut] = useState(false);
+  const signingOutRef = useRef(false);
 
   if (status === 'loading') {
     return (
@@ -94,9 +97,22 @@ export default function ProfileScreen() {
   };
 
   const confirmSignOut = () => {
+    if (signingOutRef.current) return; // guard: dialog already open / sign-out in flight
     Alert.alert(t('profile.signOutConfirmTitle'), t('profile.signOutConfirmMessage'), [
       { text: t('common.cancel'), style: 'cancel' },
-      { text: t('profile.signOutConfirm'), style: 'destructive', onPress: () => void signOut() },
+      {
+        text: t('profile.signOutConfirm'),
+        style: 'destructive',
+        onPress: () => {
+          if (signingOutRef.current) return;
+          signingOutRef.current = true;
+          setSigningOut(true);
+          void signOut().finally(() => {
+            signingOutRef.current = false;
+            setSigningOut(false);
+          });
+        },
+      },
     ]);
   };
 
@@ -183,7 +199,13 @@ export default function ProfileScreen() {
 
       {/* Sign out + delete, visually separated at the bottom. */}
       <View style={{ marginTop: theme.spacing.xl, gap: theme.spacing.lg }}>
-        <Button label={t('profile.signOut')} variant="secondary" onPress={confirmSignOut} />
+        <Button
+          label={t('profile.signOut')}
+          variant="secondary"
+          onPress={confirmSignOut}
+          loading={signingOut}
+          disabled={signingOut}
+        />
         <Pressable
           onPress={go('/account/delete-account')}
           accessibilityRole="button"

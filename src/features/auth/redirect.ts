@@ -24,6 +24,26 @@ function hasUnsafeChars(s: string): boolean {
   return false;
 }
 
+/**
+ * Rebuild a "path?query" string from a route's pathname and its current search
+ * params, so a post-auth redirect returns the user to the SAME screen *with its
+ * params* — e.g. `/checkout?planId=…` keeps the plan after a mid-flow sign-in or
+ * a session-expiry sign-out. The `redirect` param is dropped (never nest
+ * redirects) and only plain non-empty string params are carried. Pairs are
+ * sorted for a stable, testable result.
+ */
+export function pathWithParams(pathname: string, params: Record<string, unknown>): string {
+  const pairs: string[] = [];
+  for (const key of Object.keys(params)) {
+    if (key === 'redirect') continue;
+    const value = params[key];
+    if (typeof value !== 'string' || value === '') continue;
+    pairs.push(`${encodeURIComponent(key)}=${encodeURIComponent(value)}`);
+  }
+  pairs.sort();
+  return pairs.length ? `${pathname}?${pairs.join('&')}` : pathname;
+}
+
 export function safeRedirect(value: unknown): string | null {
   if (typeof value !== 'string') return null;
 
