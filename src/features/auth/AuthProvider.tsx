@@ -69,6 +69,18 @@ export interface AuthContextValue {
   /** full_name from user_metadata — display only. */
   displayName: string | null;
   signIn: (email: string, password: string) => Promise<void>;
+  /**
+   * Exchange a provider id token (Google/Apple) for a Supabase session, then run
+   * the same post-auth as email sign-in (GET /api/me). `nonce` is the RAW nonce
+   * for Apple; omitted for Google (its native flow carries no nonce). The native
+   * provider steps live in src/features/auth/social — this primitive stays free
+   * of native imports.
+   */
+  signInWithIdToken: (
+    provider: 'google' | 'apple',
+    token: string,
+    nonce?: string
+  ) => Promise<void>;
   signUp: (params: SignUpParams) => Promise<SignUpResult>;
   verifyEmail: (email: string, code: string) => Promise<void>;
   resendCode: (email: string) => Promise<void>;
@@ -159,6 +171,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       email: email.trim(),
       password,
     });
+    if (error) throw error;
+    await runPostAuth();
+  };
+
+  const signInWithIdToken = async (
+    provider: 'google' | 'apple',
+    token: string,
+    nonce?: string
+  ): Promise<void> => {
+    const { error } = await supabase.auth.signInWithIdToken({ provider, token, nonce });
     if (error) throw error;
     await runPostAuth();
   };
@@ -285,6 +307,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       status,
       displayName,
       signIn,
+      signInWithIdToken,
       signUp,
       verifyEmail,
       resendCode,

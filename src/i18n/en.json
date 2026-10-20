@@ -538,7 +538,8 @@
       "rateLimited": "Too many attempts, please wait a moment.",
       "network": "We couldn't reach the server. Check your connection and try again.",
       "accountDeleted": "This account has been deleted. Please contact support if you need help.",
-      "generic": "Something went wrong. Please try again."
+      "generic": "Something went wrong. Please try again.",
+      "googlePlayServices": "Google Play services are unavailable or out of date. Please update Google Play services and try again."
     },
     "validation": {
       "email": "Enter a valid email address.",
@@ -551,6 +552,11 @@
       "esimsBody": "Your purchased data plans will appear here once you sign in.",
       "profileTitle": "Sign in or create an account",
       "profileBody": "Manage your eSIMs, payments and support in one place."
+    },
+    "social": {
+      "continueWithGoogle": "Continue with Google",
+      "continueWithApple": "Continue with Apple",
+      "or": "or"
     }
   },
   "states": {

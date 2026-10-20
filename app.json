@@ -62,7 +62,9 @@
           "icon": "./assets/notification-icon.png",
           "color": "#1C2430"
         }
-      ]
+      ],
+      "@react-native-google-signin/google-signin",
+      "expo-apple-authentication"
     ],
     "experiments": {
       "typedRoutes": true

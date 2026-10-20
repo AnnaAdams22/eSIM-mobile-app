@@ -24,6 +24,7 @@ import { applyStoredLanguage } from '@/i18n';
 import { ConfigError } from '@/components/ConfigError';
 import { ToastProvider } from '@/components/ui';
 import { AuthProvider, guardDecision, useAuth } from '@/features/auth';
+import { SocialSignOutRegistrar } from '@/features/auth/social/SocialSignOutRegistrar';
 import { NotificationsProvider } from '@/features/notifications/NotificationsProvider';
 import { queryClient } from '@/lib/queryClient';
 import { config, missingConfigKeys, REQUIRE_SIGN_IN_TO_BROWSE } from '@/config';
@@ -112,6 +113,7 @@ export default function RootLayout() {
         urlScheme="esimglobal"
       >
         <AuthProvider>
+          <SocialSignOutRegistrar />
           <NotificationsProvider>
           <ToastProvider>
             {/* Central guard: enforces REQUIRE_SIGN_IN_TO_BROWSE for public

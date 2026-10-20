@@ -231,6 +231,62 @@ because the cache is cleared on sign-out.
 Create account) is shown before anything else and nothing is reachable until the
 user signs in. When `false`, the guest browsing above applies.
 
+## Social sign-in (Google / Apple)
+Lives in `src/features/auth/social/` and mirrors the notifications feature:
+pure, unit-tested decisions + thin native wrappers + a composed UI section. It
+sits **above** the email form on `(auth)/sign-in` and `(auth)/sign-up` via
+`<SocialAuthSection>` (provider buttons + an "or" divider).
+
+**Flow.** Native ID-token flow with Supabase:
+- **Google** — `@react-native-google-signin/google-signin` → `idToken` →
+  `AuthProvider.signInWithIdToken('google', idToken)` (a native-free primitive
+  that calls `supabase.auth.signInWithIdToken` then the same `GET /api/me`
+  post-auth as email). Google's native flow carries **no nonce**, so the Supabase
+  Google provider must have **"Skip nonce check" ON**.
+- **Apple** — `expo-apple-authentication` (iOS only) → `identityToken` +
+  nonce. Nonce handling: a random **raw** nonce is generated, its **SHA-256 hash**
+  is sent to Apple (`signInAsync({ nonce })`), and the **raw** nonce is sent to
+  Supabase (`signInWithIdToken({ nonce })`). Apple's name is only returned on the
+  **first** sign-in → saved to `user_metadata.full_name` (display only) when
+  present; never overwritten with blanks after.
+
+**Config (all OPTIONAL `EXPO_PUBLIC_*`, never required, never crash):**
+`EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID` (required for Google — hides the button if
+blank), `EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID` (iOS, later),
+`EXPO_PUBLIC_APPLE_SIGN_IN_ENABLED` (default `false`). Read in
+`src/features/auth/social/config.ts`; placeholders are in `.env.example` and all
+three `eas.json` profiles. The `@react-native-google-signin/google-signin` config
+plugin is in `app.json` in its Firebase form (bare string) because
+`google-services.json` already exists (project `esim-global-41bbf`, FCM). **iOS
+TODO:** add `GoogleService-Info.plist` + `ios.googleServicesFile` (or an
+`iosUrlScheme`) and the iOS client id before an iOS build.
+
+**Provider visibility** (pure `socialProvidersVisible`, fully unit-tested):
+Apple shows **iOS + enabled** only. Google shows on **Android** whenever
+configured; on **iOS only when Apple is also enabled** — App Store rule: an iOS
+app offering a third-party sign-in must also offer Sign in with Apple. Nothing on
+web.
+
+**Errors:** cancellation is silent; Play-services / in-progress / network /
+Supabase errors map to friendly i18n keys (`classifySocialError` +
+`auth.errors.googlePlayServices`). **Sign-out** also signs the Google SDK out
+(before-sign-out hook in `SocialSignOutRegistrar`, mounted at the app root) so the
+next sign-in shows the account picker.
+
+**Account linking:** we rely on **Supabase's default** behaviour (it auto-links a
+provider identity to an existing account when the email is verified) — no custom
+linking. Apple **"Hide my email"** relay addresses are allowed; past web orders
+won't auto-link for them because the email doesn't match (expected).
+
+**TODO — Apple token revocation (App Store requirement).** On account deletion,
+Apple requires revoking the user's Apple token server-side (needs Team ID,
+Services/Client ID, Key ID and the `.p8` key — backend work, not in the app). The
+app captures the Apple **`authorizationCode`** at sign-in;
+`src/features/auth/social/revocation.ts` is a documented **no-op placeholder** —
+it does NOT persist the code on the device. When the backend adds a revocation
+endpoint (e.g. `POST /api/me/apple/authorization-code`), wire
+`queueAppleAuthorizationCode` to it. The backend already notes this gap.
+
 ## How to run
 The app needs a **development build** (the Stripe SDK is native — Expo Go can no
 longer run it).
@@ -347,3 +403,14 @@ top-up (branch `feat/my-esims`):
 `tsc --noEmit`, `expo lint` and `npm test` (146 tests) all pass; the app bundles
 for iOS (`expo export`). Auth polish and install-guide deep links are still later
 tasks.
+
+**Social sign-in complete** (branch `feat/social-sign-in`) — Sign in with Google
+(Android now, iOS-ready) and Sign in with Apple (fully coded, disabled by config
+until the Apple account is active). See "## Social sign-in (Google / Apple)"
+above for the architecture, config flags, provider-visibility rules, nonce
+handling, Supabase provider setup ("Skip nonce check" for Google), account
+linking and the Apple-revocation TODO. Native code was added
+(`@react-native-google-signin/google-signin`, `expo-apple-authentication`,
+`expo-crypto`) → a **new dev build is required** before on-device testing. Pure
+logic (visibility, nonce, error mapping, post-sign-in flow) is unit-tested;
+`tsc`, `expo lint`, `jest` (308 tests) and an Android `expo export` all pass.

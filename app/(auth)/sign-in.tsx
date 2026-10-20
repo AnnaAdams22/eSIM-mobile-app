@@ -20,6 +20,7 @@ import {
   useAuth,
   useAuthNavigation,
 } from '@/features/auth';
+import { SocialAuthSection } from '@/features/auth/social';
 import { errorNotify, successNotify } from '@/lib/haptics';
 import { useTheme } from '@/theme';
 
@@ -89,6 +90,8 @@ export default function SignInScreen() {
         />
       }
     >
+      <SocialAuthSection redirect={redirect} />
+
       <TextField
         label={t('auth.emailLabel')}
         placeholder={t('auth.emailPlaceholder')}

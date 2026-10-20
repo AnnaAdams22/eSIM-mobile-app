@@ -538,7 +538,8 @@
       "rateLimited": "Demasiados intentos, espera un momento.",
       "network": "No pudimos conectar con el servidor. Revisa tu conexión e inténtalo de nuevo.",
       "accountDeleted": "Esta cuenta ha sido eliminada. Contacta con soporte si necesitas ayuda.",
-      "generic": "Algo salió mal. Inténtalo de nuevo."
+      "generic": "Algo salió mal. Inténtalo de nuevo.",
+      "googlePlayServices": "Los servicios de Google Play no están disponibles o están desactualizados. Actualiza los servicios de Google Play e inténtalo de nuevo."
     },
     "validation": {
       "email": "Introduce un correo electrónico válido.",
@@ -551,6 +552,11 @@
       "esimsBody": "Tus planes de datos comprados aparecerán aquí una vez que inicies sesión.",
       "profileTitle": "Inicia sesión o crea una cuenta",
       "profileBody": "Administra tus eSIM, pagos y soporte en un solo lugar."
+    },
+    "social": {
+      "continueWithGoogle": "Continuar con Google",
+      "continueWithApple": "Continuar con Apple",
+      "or": "o"
     }
   },
   "states": {

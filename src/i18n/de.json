@@ -538,7 +538,8 @@
       "rateLimited": "Zu viele Versuche, bitte warten Sie einen Moment.",
       "network": "Wir konnten den Server nicht erreichen. Prüfen Sie Ihre Verbindung und versuchen Sie es erneut.",
       "accountDeleted": "Dieses Konto wurde gelöscht. Bitte wenden Sie sich an den Support, wenn Sie Hilfe benötigen.",
-      "generic": "Etwas ist schiefgelaufen. Bitte versuchen Sie es erneut."
+      "generic": "Etwas ist schiefgelaufen. Bitte versuchen Sie es erneut.",
+      "googlePlayServices": "Google-Play-Dienste sind nicht verfügbar oder veraltet. Bitte aktualisieren Sie die Google-Play-Dienste und versuchen Sie es erneut."
     },
     "validation": {
       "email": "Geben Sie eine gültige E-Mail-Adresse ein.",
@@ -551,6 +552,11 @@
       "esimsBody": "Ihre gekauften Datentarife erscheinen hier, sobald Sie sich anmelden.",
       "profileTitle": "Anmelden oder Konto erstellen",
       "profileBody": "Verwalten Sie Ihre eSIMs, Zahlungen und den Support an einem Ort."
+    },
+    "social": {
+      "continueWithGoogle": "Mit Google fortfahren",
+      "continueWithApple": "Mit Apple fortfahren",
+      "or": "oder"
     }
   },
   "states": {
