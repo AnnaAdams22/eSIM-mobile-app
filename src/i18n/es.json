@@ -382,7 +382,16 @@
     "softPromptTitle": "Controla tus datos",
     "softPromptBody": "Recibe un aviso cuando tus datos se estén agotando o tu plan esté a punto de caducar.",
     "softPromptTurnOn": "Activar",
-    "softPromptNotNow": "Ahora no"
+    "softPromptNotNow": "Ahora no",
+    "retry": "Reintentar",
+    "errors": {
+      "permission": "Las notificaciones están desactivadas. Permítelas para recibir alertas de datos y caducidad.",
+      "device": "Las notificaciones push no están disponibles en este dispositivo.",
+      "config": "Las notificaciones aún no están configuradas para esta compilación.",
+      "token": "No pudimos registrar este dispositivo para las notificaciones. Inténtalo de nuevo.",
+      "server": "No pudimos guardar tus ajustes de notificaciones. Inténtalo de nuevo.",
+      "generic": "Algo salió mal al activar las notificaciones. Inténtalo de nuevo."
+    }
   },
   "support": {
     "title": "Soporte",

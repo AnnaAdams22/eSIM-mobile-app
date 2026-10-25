@@ -382,7 +382,16 @@
     "softPromptTitle": "Behalte dein Datenvolumen im Blick",
     "softPromptBody": "Lass dich benachrichtigen, wenn dein Datenvolumen zur Neige geht oder dein Tarif bald abläuft.",
     "softPromptTurnOn": "Aktivieren",
-    "softPromptNotNow": "Nicht jetzt"
+    "softPromptNotNow": "Nicht jetzt",
+    "retry": "Erneut versuchen",
+    "errors": {
+      "permission": "Benachrichtigungen sind deaktiviert. Erlaube sie, um Daten- und Ablaufhinweise zu erhalten.",
+      "device": "Push-Benachrichtigungen sind auf diesem Gerät nicht verfügbar.",
+      "config": "Benachrichtigungen sind für diesen Build noch nicht eingerichtet.",
+      "token": "Dieses Gerät konnte nicht für Benachrichtigungen registriert werden. Bitte versuche es erneut.",
+      "server": "Deine Benachrichtigungseinstellungen konnten nicht gespeichert werden. Bitte versuche es erneut.",
+      "generic": "Beim Aktivieren der Benachrichtigungen ist etwas schiefgelaufen. Bitte versuche es erneut."
+    }
   },
   "support": {
     "title": "Support",

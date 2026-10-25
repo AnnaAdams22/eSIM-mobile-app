@@ -382,7 +382,16 @@
     "softPromptTitle": "Stay on top of your data",
     "softPromptBody": "Get notified when your data is running low or your plan is about to expire.",
     "softPromptTurnOn": "Turn on",
-    "softPromptNotNow": "Not now"
+    "softPromptNotNow": "Not now",
+    "retry": "Try again",
+    "errors": {
+      "permission": "Notifications are turned off. Allow them to get data and expiry alerts.",
+      "device": "Push notifications aren't available on this device.",
+      "config": "Notifications aren't set up for this build yet.",
+      "token": "We couldn't register this device for notifications. Please try again.",
+      "server": "We couldn't save your notification settings. Please try again.",
+      "generic": "Something went wrong turning on notifications. Please try again."
+    }
   },
   "support": {
     "title": "Support",

@@ -14,3 +14,11 @@ export type {
 
 export { decideNotificationRoute } from './routing';
 export type { NavTarget, RouteInput } from './routing';
+
+export {
+  registrationErrorKey,
+  pickProjectId,
+  isValidExpoPushToken,
+  EMPTY_DIAG,
+} from './diagnostics';
+export type { RegistrationStep, RegistrationDiag } from './diagnostics';
