@@ -16,6 +16,7 @@ import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { useStripe } from '@stripe/stripe-react-native';
+import * as WebBrowser from 'expo-web-browser';
 import { Tag, X } from 'lucide-react-native';
 
 import {
@@ -49,7 +50,7 @@ import {
 import { requestTopupSheet } from '@/features/esims';
 import { api, ApiError } from '@/lib/api';
 import type { Plan, PaymentSheetResponse, PromoValidation } from '@/lib/api-types';
-import { config } from '@/config';
+import { config, legal } from '@/config';
 import { formatPrice } from '@/lib/price';
 import { errorNotify, lightTap, successNotify } from '@/lib/haptics';
 import { uuidv4 } from '@/lib/uuid';
@@ -507,7 +508,27 @@ export default function CheckoutScreen() {
             center
             style={{ marginTop: theme.spacing.sm }}
           >
-            {t('checkout.terms')}
+            {t('auth.termsPrefix')}
+            <Text
+              variant="caption"
+              color="accent"
+              onPress={() => WebBrowser.openBrowserAsync(legal.termsUrl)}
+              accessibilityRole="link"
+              accessibilityLabel={t('auth.termsLink')}
+            >
+              {t('auth.termsLink')}
+            </Text>
+            {t('auth.termsAnd')}
+            <Text
+              variant="caption"
+              color="accent"
+              onPress={() => WebBrowser.openBrowserAsync(legal.privacyUrl)}
+              accessibilityRole="link"
+              accessibilityLabel={t('auth.privacyLink')}
+            >
+              {t('auth.privacyLink')}
+            </Text>
+            {t('auth.termsSuffix')}
           </Text>
         </View>
       )}

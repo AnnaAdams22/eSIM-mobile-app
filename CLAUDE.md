@@ -89,17 +89,21 @@ A calm, premium travel brand. Specifics:
 - Soft status accents: green for "Active", soft red for discounts, lavender for
   install-guide steps.
 
-## Logo / brand assets — TODO
-`assets/brand/` holds **TEMPORARY** logo files derived from `design/logo.png`
-(background cleaned + tightly cropped; shapes unchanged; colour kept black).
-Variants: `esim-logo-full.png`, `esim-logo-symbol.png`, `esim-logo-wordmark.png`.
-The symbol also drives the splash + app icon on the ivory background.
+## Logo / brand assets
+`assets/brand/` holds the **official client logo** files, derived from the
+high-res source `design/logo-hires.png` (2048×2048; a pure-black logo whose shape
+lives in its alpha channel, so the background was already transparent — only
+split + tightly cropped; shapes unchanged; colour kept black). Variants:
+`esim-logo-full.png`, `esim-logo-symbol.png`, `esim-logo-wordmark.png`. The symbol
+also drives the splash, app icon, Android adaptive icon and notification icon on
+the ivory background. Store copies: `store/assets/icon-1024.png` / `icon-512.png`.
 
-> **TODO: Replace with official SVG / high-res transparent logo files from the
-> client before release.** Keep the same file names so the swap needs no code
-> changes (`src/components/ui/Logo.tsx` and `app.json` reference these paths; if
-> aspect ratios change, update the `ASPECT` map in `Logo.tsx`). Do **not**
-> recolour the logo.
+> Changing the icon/splash/notification/adaptive-icon images requires a **new
+> native build** to take effect. A vector **SVG** master would still be ideal
+> later (crisper, smaller pipeline). Keep the same file names when swapping so
+> `src/components/ui/Logo.tsx` and `app.json` need no code changes (if aspect
+> ratios change, update the `ASPECT` map in `Logo.tsx`). Do **not** recolour the
+> logo.
 
 ## Hero images — TODO (need real licensed photos)
 The Home hero, destination hero and Explore cards currently render tasteful warm

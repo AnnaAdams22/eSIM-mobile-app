@@ -70,8 +70,8 @@ The policy MUST mention:
 
 ### Related website pages the stores/Stripe also expect (TO CONFIRM they're live)
 - **Privacy Policy** (this).
-- **Terms & Conditions** — app links to `esim-global.net/terms-and-conditions`.
-- **Refund Policy** — app links to `esim-global.net/refund-policy`.
+- **Terms & Conditions** — app links to `esim-global.net/terms-of-service`.
+- **Refund Policy** — app links to `esim-global.net/return-policy`.
 - **Account deletion** — `esim-global.net/delete-account` (see `account-deletion-page.md`).
 
 > The app's About screen links to Terms, Privacy and Refund at the URLs above

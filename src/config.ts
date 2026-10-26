@@ -69,18 +69,24 @@ export const config = {
 };
 
 /**
- * Legal document URLs, shown on the Create-account and About screens (opened in
- * an in-app browser). Not secrets and not required for startup; overridable via
- * optional EXPO_PUBLIC_* vars, otherwise the production placeholders are used.
+ * Legal document URLs, shown on the Create-account, Checkout and About screens
+ * (opened in an in-app browser). The defaults are the client's real published
+ * pages on esim-global.net. Not secrets and not required for startup; overridable
+ * via optional EXPO_PUBLIC_* vars.
+ *
+ * `deleteAccountUrl` is the web account-deletion page (a Google Play requirement,
+ * referenced in the store docs). The client will publish it at this path.
  */
 export const legal = {
   termsUrl:
-    process.env.EXPO_PUBLIC_TERMS_URL?.trim() ||
-    'https://esim-global.net/terms-and-conditions',
+    process.env.EXPO_PUBLIC_TERMS_URL?.trim() || 'https://esim-global.net/terms-of-service',
   privacyUrl:
     process.env.EXPO_PUBLIC_PRIVACY_URL?.trim() || 'https://esim-global.net/privacy-policy',
   refundUrl:
-    process.env.EXPO_PUBLIC_REFUND_URL?.trim() || 'https://esim-global.net/refund-policy',
+    process.env.EXPO_PUBLIC_REFUND_URL?.trim() || 'https://esim-global.net/return-policy',
+  deleteAccountUrl:
+    process.env.EXPO_PUBLIC_DELETE_ACCOUNT_URL?.trim() ||
+    'https://esim-global.net/delete-account',
 } as const;
 
 /**

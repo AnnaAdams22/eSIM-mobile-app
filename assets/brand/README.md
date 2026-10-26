@@ -1,30 +1,39 @@
-# Brand assets (TEMPORARY)
+# Brand assets
 
-These logo files were derived programmatically from `design/logo.png` (the
-client's supplied logo). The source PNG already had a transparent background in
-its palette; these crops only **remove stray background data and tightly crop** —
-no shapes were redrawn or recoloured. The logo keeps its own colour (black).
+These are the **official client logo** files, derived from the high-resolution
+source the client supplied (`design/logo-hires.png`, 2048×2048). The source is a
+pure-black logo whose shape lives entirely in its alpha channel, so the
+"background" is already transparent — nothing was keyed out, recoloured or
+reshaped. We only split and tightly crop it. The logo keeps its own colour (black).
 
 | File | Contents | Intrinsic size (px) |
 | --- | --- | --- |
-| `esim-logo-full.png` | symbol + "ESIM GLOBAL" wordmark | 182 × 129 |
-| `esim-logo-symbol.png` | interlocking-e mark only | 154 × 98 |
-| `esim-logo-wordmark.png` | "ESIM GLOBAL" wordmark only | 182 × 21 |
+| `esim-logo-full.png` | symbol + "ESIM GLOBAL" wordmark | 1802 × 1187 |
+| `esim-logo-symbol.png` | interlocking-e mark only | 1368 × 851 |
+| `esim-logo-wordmark.png` | "ESIM GLOBAL" wordmark only | 1802 × 194 |
 
-Also generated from the symbol (on the ivory background `#F4F1EC`):
-`../icon.png`, `../splash-icon.png`, `../favicon.png`,
-`../android-icon-foreground.png`, `../android-icon-background.png`,
-`../android-icon-monochrome.png`.
+Also generated from the **symbol** (centred with padding on the ivory background
+`#F4F1EC`, or transparent where noted):
+- `../icon.png` — 1024×1024, **opaque** ivory (store requirement).
+- `../splash-icon.png` — 1024×1024, symbol on ivory.
+- `../favicon.png` — 48×48, symbol on ivory.
+- `../android-icon-foreground.png` — 1024×1024, symbol on **transparent**, inside
+  the adaptive-icon safe zone; `../android-icon-background.png` — solid ivory;
+  `../android-icon-monochrome.png` — symbol silhouette on transparent (themed icon).
+- `../notification-icon.png` — 96×96, **white silhouette on transparent** (Android
+  renders the notification status-bar icon as a flat monochrome mask, tinted with
+  the `#1C2430` colour set in `app.json`).
 
-`../notification-icon.png` is a **TEMPORARY** push-notification status-bar icon:
-a white-on-transparent 96×96 silhouette of the symbol (Android renders it as a
-flat monochrome mask, tinted with the `#1C2430` colour set in `app.json`).
-Replace it with the official logo's silhouette at the same path — no code change
-needed (`app.json`'s `expo-notifications` plugin references this path).
+Store copies live in `../../store/assets/` (`icon-1024.png` for the App Store,
+`icon-512.png` for Google Play).
 
-## ⚠️ TODO before release
+To regenerate from a new source, the deterministic pipeline is documented inline
+in the commit that introduced these assets (PIL: source alpha → pure-black →
+auto-split symbol/wordmark by the empty row gap → compose per target).
 
-**Replace with official SVG / high-res transparent logo files from the client.**
-Keep the same file names so the swap needs no code changes (the `Logo` component
-and `app.json` reference these paths). If the aspect ratios change, update the
+## Future improvement
+
+A vector **SVG** master from the client would still be ideal (crisper at every
+size, smaller icon pipeline). Keep the same file names when swapping so the `Logo`
+component and `app.json` need no code changes. If aspect ratios change, update the
 `ASPECT` map in `src/components/ui/Logo.tsx`.

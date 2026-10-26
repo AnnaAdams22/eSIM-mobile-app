@@ -12,10 +12,11 @@ import { useState } from 'react';
 import { Linking, Pressable, View } from 'react-native';
 import Constants from 'expo-constants';
 import { useTranslation } from 'react-i18next';
-import { Camera, ChevronDown, Mail, MessageCircle } from 'lucide-react-native';
+import { ChevronDown, Mail } from 'lucide-react-native';
 
 import { Card, Divider, Header, ListRow, Screen, Text } from '@/components/ui';
 import { HeroImage } from '@/components/HeroImage';
+import { InstagramIcon, WhatsAppIcon } from '@/components/icons/BrandIcons';
 import { support } from '@/config/support';
 import { buildInstagramUrl, buildMailtoUrl, buildWhatsappUrl } from '@/features/support';
 import { selectionTap } from '@/lib/haptics';
@@ -42,7 +43,7 @@ export default function SupportScreen() {
 
   const faqs = t('support.faqItems', { returnObjects: true }) as unknown as Faq[];
 
-  const whatsappUrl = buildWhatsappUrl(support.whatsappNumber);
+  const whatsappUrl = buildWhatsappUrl(support.whatsappNumber, support.whatsappUrl);
   const instagramUrl = buildInstagramUrl(support.instagramHandle);
   const mailtoUrl = buildMailtoUrl(
     support.supportEmail,
@@ -56,14 +57,14 @@ export default function SupportScreen() {
       title: t('support.whatsapp'),
       subtitle: t('support.whatsappSubtitle'),
       url: whatsappUrl,
-      icon: <MessageCircle size={22} color={iconColor} />,
+      icon: <WhatsAppIcon size={22} color={iconColor} />,
     },
     instagramUrl && {
       key: 'instagram',
       title: t('support.instagram'),
       subtitle: t('support.instagramSubtitle'),
       url: instagramUrl,
-      icon: <Camera size={22} color={iconColor} />,
+      icon: <InstagramIcon size={22} color={iconColor} />,
     },
     mailtoUrl && {
       key: 'email',

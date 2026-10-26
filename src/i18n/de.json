@@ -109,7 +109,6 @@
     "totalLabel": "Gesamt",
     "payNow": "Jetzt bezahlen · {{price}}",
     "paying": "Wird verarbeitet…",
-    "terms": "Mit „Weiter“ stimmen Sie unseren AGB und der Datenschutzerklärung zu.",
     "errorTitle": "Zahlung konnte nicht abgeschlossen werden",
     "errorGeneric": "Etwas ist schiefgelaufen. Bitte versuchen Sie es erneut.",
     "notFoundTitle": "Tarif nicht verfügbar",

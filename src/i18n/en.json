@@ -109,7 +109,6 @@
     "totalLabel": "Total",
     "payNow": "Pay now · {{price}}",
     "paying": "Processing…",
-    "terms": "By continuing, you agree to our Terms & Conditions and Privacy Policy.",
     "errorTitle": "Payment couldn't be completed",
     "errorGeneric": "Something went wrong. Please try again.",
     "notFoundTitle": "Plan unavailable",

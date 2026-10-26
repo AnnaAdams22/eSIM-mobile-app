@@ -1,23 +1,45 @@
 import { buildInstagramUrl, buildMailtoUrl, buildWhatsappUrl } from '../links';
 
 describe('buildWhatsappUrl', () => {
-  it('normalises a human-formatted number to digits', () => {
-    expect(buildWhatsappUrl('+44 7700 900000')).toBe('https://wa.me/447700900000');
-    expect(buildWhatsappUrl('(0044) 7700-900000')).toBe('https://wa.me/00447700900000');
+  it('prefers a full WhatsApp URL, opened verbatim', () => {
+    expect(buildWhatsappUrl('', 'https://wa.me/message/CE4JZHWV2PSJD1')).toBe(
+      'https://wa.me/message/CE4JZHWV2PSJD1'
+    );
+    // A full URL wins even when a number is also present.
+    expect(buildWhatsappUrl('+44 7700 900000', 'https://wa.me/message/ABC')).toBe(
+      'https://wa.me/message/ABC'
+    );
+    expect(buildWhatsappUrl('', '  https://wa.me/message/ABC  ')).toBe('https://wa.me/message/ABC');
   });
 
-  it('returns null for empty or digit-free input', () => {
+  it('falls back to normalising a human-formatted number to digits', () => {
+    expect(buildWhatsappUrl('+44 7700 900000')).toBe('https://wa.me/447700900000');
+    expect(buildWhatsappUrl('(0044) 7700-900000')).toBe('https://wa.me/00447700900000');
+    expect(buildWhatsappUrl('+44 7700 900000', '')).toBe('https://wa.me/447700900000');
+    expect(buildWhatsappUrl('+44 7700 900000', '   ')).toBe('https://wa.me/447700900000');
+  });
+
+  it('returns null when both url and number are empty/unusable', () => {
     expect(buildWhatsappUrl('')).toBeNull();
     expect(buildWhatsappUrl('   ')).toBeNull();
     expect(buildWhatsappUrl('abc')).toBeNull();
+    expect(buildWhatsappUrl('', '')).toBeNull();
   });
 });
 
 describe('buildInstagramUrl', () => {
-  it('builds a profile URL and strips a leading @', () => {
-    expect(buildInstagramUrl('esimglobal')).toBe('https://instagram.com/esimglobal');
-    expect(buildInstagramUrl('@esimglobal')).toBe('https://instagram.com/esimglobal');
-    expect(buildInstagramUrl('  @esimglobal  ')).toBe('https://instagram.com/esimglobal');
+  it('builds a www profile URL and strips a leading @', () => {
+    expect(buildInstagramUrl('esim_global01')).toBe('https://www.instagram.com/esim_global01');
+    expect(buildInstagramUrl('@esim_global01')).toBe('https://www.instagram.com/esim_global01');
+    expect(buildInstagramUrl('  @esim_global01  ')).toBe('https://www.instagram.com/esim_global01');
+  });
+
+  it('strips trailing tracking query / path / fragment', () => {
+    expect(buildInstagramUrl('esim_global01?igsh=abc123')).toBe(
+      'https://www.instagram.com/esim_global01'
+    );
+    expect(buildInstagramUrl('esim_global01/')).toBe('https://www.instagram.com/esim_global01');
+    expect(buildInstagramUrl('esim_global01#foo')).toBe('https://www.instagram.com/esim_global01');
   });
 
   it('returns null for empty input', () => {

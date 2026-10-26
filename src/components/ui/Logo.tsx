@@ -9,8 +9,9 @@
  * The logo keeps its own colour (black) and is never recoloured. `size` sets the
  * HEIGHT; width follows the asset's intrinsic aspect ratio.
  *
- * TEMPORARY assets — see assets/brand/README and the logo TODO in CLAUDE.md.
- * Files are named so they can be swapped without code changes.
+ * Assets are the official client logo (high-res transparent PNG derived from
+ * design/logo-hires.png). See assets/brand/README. Files are named so they can
+ * be swapped (e.g. for a future SVG) without code changes.
  */
 
 import { Image } from 'expo-image';
@@ -21,9 +22,9 @@ export type LogoVariant = 'full' | 'symbol' | 'wordmark';
 
 // Intrinsic pixel dimensions of the cropped assets (width / height).
 const ASPECT: Record<LogoVariant, number> = {
-  full: 182 / 129,
-  symbol: 154 / 98,
-  wordmark: 182 / 21,
+  full: 1802 / 1187,
+  symbol: 1368 / 851,
+  wordmark: 1802 / 194,
 };
 
 const SOURCE: Record<LogoVariant, number> = {

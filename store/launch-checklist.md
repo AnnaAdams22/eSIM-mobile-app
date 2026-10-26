@@ -99,8 +99,8 @@ Do this at a quiet time and watch production logs throughout.
    Production.
 
 ## E. Website prerequisites (must be live before submission)
-- **Privacy Policy** (`/privacy-policy`), **Terms** (`/terms-and-conditions`),
-  **Refund Policy** (`/refund-policy`) — the app links to these.
+- **Privacy Policy** (`/privacy-policy`), **Terms** (`/terms-of-service`),
+  **Refund Policy** (`/return-policy`) — the app links to these.
 - **Account deletion page** (`/delete-account`) — required by Google Play.
 - See `privacy-policy-checklist.md`. **TO CONFIRM** all four are published with real
   content.

@@ -15,24 +15,31 @@ function digitsOnly(value: string): string {
 }
 
 /**
- * WhatsApp click-to-chat link. Accepts a number in any human format
- * ("+44 7700 900000", "(044) 7700-900000") and normalises to digits.
- * Returns null when no digits are present.
+ * WhatsApp link. Prefers a full URL (e.g. a business "message" link like
+ * `https://wa.me/message/XXXX`), opened verbatim. Otherwise falls back to a
+ * number in any human format ("+44 7700 900000", "(044) 7700-900000"),
+ * normalised to a `wa.me/<digits>` link. Returns null when neither is usable.
  */
-export function buildWhatsappUrl(whatsappNumber: string): string | null {
+export function buildWhatsappUrl(whatsappNumber: string, whatsappUrl?: string): string | null {
+  const url = (whatsappUrl ?? '').trim();
+  if (url) return url;
   const digits = digitsOnly(whatsappNumber ?? '');
   if (!digits) return null;
   return `https://wa.me/${digits}`;
 }
 
 /**
- * Instagram profile URL. Accepts a handle with or without a leading "@".
- * Returns null when the handle is empty.
+ * Instagram profile URL. Accepts a handle with or without a leading "@", and
+ * strips any accidental trailing path / tracking query (e.g. a pasted
+ * "esim_global01?igsh=…"). Returns null when the handle is empty.
  */
 export function buildInstagramUrl(instagramHandle: string): string | null {
-  const handle = (instagramHandle ?? '').trim().replace(/^@+/, '');
+  const handle = (instagramHandle ?? '')
+    .trim()
+    .replace(/^@+/, '')
+    .replace(/[/?#].*$/, ''); // drop any trailing path / query / fragment
   if (!handle) return null;
-  return `https://instagram.com/${handle}`;
+  return `https://www.instagram.com/${handle}`;
 }
 
 /**
