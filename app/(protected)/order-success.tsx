@@ -35,7 +35,7 @@ import {
   pollPhase,
   type PollPhase,
 } from '@/features/checkout';
-import { formatDataSize, usedFraction } from '@/features/esims';
+import { formatDataSize, isUnlimitedUsage, usedFraction } from '@/features/esims';
 import { esimsKeys, invalidateEsim, useEsimUsage } from '@/hooks/useEsims';
 import { api, ApiError } from '@/lib/api';
 import type { OrderStatus } from '@/lib/api-types';
@@ -356,7 +356,9 @@ function TopupSuccessState({
 
   const left = formatDataSize(usage?.data_left_mb, lang);
   const total = formatDataSize(usage?.data_total_mb, lang);
+  const used = formatDataSize(usage?.data_used_mb, lang);
   const fraction = usage ? usedFraction(usage) : null;
+  const unlimited = usage ? isUnlimitedUsage(usage) : false;
 
   return (
     <View style={{ gap: theme.spacing.lg }}>
@@ -372,7 +374,19 @@ function TopupSuccessState({
 
       <PlanSummaryCard flag={flag} title={title} planLabel={planLabel} />
 
-      {left && total ? (
+      {unlimited ? (
+        <Card padding="lg" radius="lg" shadow="sm" style={{ gap: theme.spacing.sm }}>
+          <Text variant="h3">{t('esimDetail.usageTitle')}</Text>
+          <Text variant="bodySmall" color="textSecondary">
+            {t('esimDetail.dataUsedUnlimited', { used: used ?? '0 MB' })}
+          </Text>
+          <UsageMeter
+            unlimited
+            fraction={null}
+            accessibilityLabel={t('esimDetail.dataUsedUnlimited', { used: used ?? '0 MB' })}
+          />
+        </Card>
+      ) : left && total ? (
         <Card padding="lg" radius="lg" shadow="sm" style={{ gap: theme.spacing.sm }}>
           <Text variant="h3">{t('esimDetail.usageTitle')}</Text>
           <Text variant="bodySmall" color="textSecondary">

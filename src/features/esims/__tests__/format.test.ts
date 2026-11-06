@@ -1,4 +1,4 @@
-import { formatDataSize, usedFraction } from '../format';
+import { formatDataSize, isUnlimitedUsage, usedFraction } from '../format';
 
 describe('formatDataSize', () => {
   it('shows whole megabytes under 1 GB', () => {
@@ -44,5 +44,26 @@ describe('usedFraction', () => {
     expect(usedFraction({ data_used_mb: 100, data_total_mb: null })).toBeNull();
     expect(usedFraction({ data_used_mb: 100, data_total_mb: 0 })).toBeNull();
     expect(usedFraction({ data_total_mb: 1024 })).toBeNull(); // neither used nor left
+  });
+});
+
+describe('isUnlimitedUsage', () => {
+  it('is true when the total is non-numeric but a used figure is known', () => {
+    // The backend reports a null total for unlimited plans; used still counts up.
+    expect(isUnlimitedUsage({ data_used_mb: 2500, data_total_mb: null })).toBe(true);
+    expect(isUnlimitedUsage({ data_used_mb: 0, data_total_mb: null })).toBe(true);
+    expect(isUnlimitedUsage({ data_used_mb: 100, data_total_mb: Number.NaN })).toBe(true);
+    expect(isUnlimitedUsage({ data_used_mb: 100, data_total_mb: 0 })).toBe(true);
+  });
+
+  it('is false for a finite plan with a real total', () => {
+    expect(isUnlimitedUsage({ data_used_mb: 620, data_total_mb: 1024 })).toBe(false);
+  });
+
+  it('is false when usage is simply unknown (no used figure)', () => {
+    // A plan not yet activated: no total AND no used → "usage unknown", not unlimited.
+    expect(isUnlimitedUsage({ data_total_mb: null })).toBe(false);
+    expect(isUnlimitedUsage({ data_used_mb: null, data_total_mb: null })).toBe(false);
+    expect(isUnlimitedUsage({ data_used_mb: Number.NaN, data_total_mb: null })).toBe(false);
   });
 });

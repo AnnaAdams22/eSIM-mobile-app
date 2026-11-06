@@ -23,7 +23,7 @@ import {
   Skeleton,
   Text,
 } from '@/components/ui';
-import { formatPlanLabel, newEsimRouteForPlan } from '@/features/catalog';
+import { formatPlanLabel, isUnlimitedData, newEsimRouteForPlan } from '@/features/catalog';
 import { formatDataSize } from '@/features/esims';
 import { formatPrice } from '@/lib/price';
 import { useTopupOptions } from '@/hooks/useEsims';
@@ -110,6 +110,8 @@ function CurrentPlanCard({ current }: { current: TopupCurrent }) {
   const { t, i18n } = useTranslation();
   const lang = i18n.language;
 
+  // Unlimited plans report no numeric balance; show "Unlimited data", not "updating".
+  const unlimited = isUnlimitedData(current.plan_name);
   const left = formatDataSize(current.data_left_mb, lang);
   const expiry = current.is_expired
     ? t('topup.expired')
@@ -128,7 +130,11 @@ function CurrentPlanCard({ current }: { current: TopupCurrent }) {
         </Text>
       ) : null}
       <Text variant="bodySmall" color="textSecondary">
-        {left ? t('topup.dataLeft', { amount: left }) : t('topup.dataLeftUnknown')}
+        {unlimited
+          ? t('topup.dataUnlimited')
+          : left
+            ? t('topup.dataLeft', { amount: left })
+            : t('topup.dataLeftUnknown')}
         {expiry ? ` · ${expiry}` : ''}
       </Text>
     </Card>

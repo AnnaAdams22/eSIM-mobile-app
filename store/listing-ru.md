@@ -4,7 +4,7 @@
 
 > Character counts are computed, not hand-counted. Each field is within its store limit (✅). App Store keywords contain no spaces after commas and no competitor names.
 
-> Claims are limited to features the app actually ships. No live chat, no referral program, no AI assistant, no unlimited plans.
+> Claims are limited to features the app actually ships. No live chat, no referral program, no AI assistant. Unlimited data plans are available in selected destinations (added to the catalog), so the listing mentions them.
 
 ## App Store — App name
 **27 / 30 chars ✅**
@@ -35,13 +35,13 @@ esim,туристическая esim,тариф,интернет,роуминг,
 ```
 
 ## App Store — Description
-**1339 / 4000 chars ✅**
+**1400 / 4000 chars ✅**
 
 ```
 ESIM Global помогает оставаться на связи с первой минуты. Купите eSIM для поездки, установите её за пару минут и выходите в сеть без поиска местной SIM-карты и платы за роуминг.
 
 КАК ЭТО РАБОТАЕТ
-- Выберите направление из 148+ стран и регионов.
+- Выберите направление из 148+ стран и регионов, включая тарифы с безлимитным интернетом в отдельных странах.
 - Оплатите безопасно — eSIM придёт мгновенно, прямо в приложении.
 - Установите по QR-коду или, на поддерживаемых телефонах, в одно касание.
 - Тариф активируется при первом подключении в стране назначения — вы готовы сразу по прилёте.
@@ -98,13 +98,13 @@ eSIM для 148+ стран. Установка по QR, баланс трафи
 ```
 
 ## Google Play — Full description
-**1339 / 4000 chars ✅**
+**1400 / 4000 chars ✅**
 
 ```
 ESIM Global помогает оставаться на связи с первой минуты. Купите eSIM для поездки, установите её за пару минут и выходите в сеть без поиска местной SIM-карты и платы за роуминг.
 
 КАК ЭТО РАБОТАЕТ
-- Выберите направление из 148+ стран и регионов.
+- Выберите направление из 148+ стран и регионов, включая тарифы с безлимитным интернетом в отдельных странах.
 - Оплатите безопасно — eSIM придёт мгновенно, прямо в приложении.
 - Установите по QR-коду или, на поддерживаемых телефонах, в одно касание.
 - Тариф активируется при первом подключении в стране назначения — вы готовы сразу по прилёте.

@@ -34,15 +34,26 @@ function localizeDecimal(value: string, locale?: string): string {
 }
 
 /**
+ * True when a plan's `data` field denotes an unlimited allowance. Robust to the
+ * vendor's variants: any case, the abbreviation "unlim", the full word
+ * "unlimited", or the ∞ symbol — so "Unlimited GB", "unlim", "UNLIMITED" all match.
+ */
+export function isUnlimitedData(data: string | null | undefined): boolean {
+  const trimmed = data?.trim();
+  if (!trimmed) return false;
+  return /unlim|∞/i.test(trimmed);
+}
+
+/**
  * Normalises the vendor's `data` field into a display string.
  * - null / empty            → localised "Data"
- * - "unlimited" (any case)  → localised "Unlimited"
+ * - unlimited (any variant) → localised "Unlimited" (never "Unlimited GB")
  * - otherwise               → the value with a locale decimal ("0,49 GB" in de)
  */
 export function formatData(data: string | null | undefined, t: Translate, locale?: string): string {
   const trimmed = data?.trim();
   if (!trimmed) return t('catalog.dataUnknown');
-  if (/unlimited|∞/i.test(trimmed)) return t('catalog.unlimited');
+  if (isUnlimitedData(trimmed)) return t('catalog.unlimited');
   return localizeDecimal(trimmed, locale);
 }
 
@@ -69,7 +80,7 @@ export function formatPlanLabel(
 export function dataAmountGb(data: string | null | undefined): number {
   const trimmed = data?.trim();
   if (!trimmed) return -1;
-  if (/unlimited|∞/i.test(trimmed)) return Number.POSITIVE_INFINITY;
+  if (isUnlimitedData(trimmed)) return Number.POSITIVE_INFINITY;
 
   const match = trimmed.match(/([\d.]+)\s*(TB|GB|MB|KB)?/i);
   if (!match) return -1;

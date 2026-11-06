@@ -1,5 +1,24 @@
-import { formatData, formatDays, formatPlanLabel, dataAmountGb } from '../format';
+import { formatData, formatDays, formatPlanLabel, dataAmountGb, isUnlimitedData } from '../format';
 import { makePlan, fakeT } from './fixtures';
+
+describe('isUnlimitedData', () => {
+  it('detects the vendor unlimited variants, case-insensitively', () => {
+    expect(isUnlimitedData('Unlimited GB')).toBe(true);
+    expect(isUnlimitedData('unlimited')).toBe(true);
+    expect(isUnlimitedData('UNLIMITED')).toBe(true);
+    expect(isUnlimitedData('unlim')).toBe(true);
+    expect(isUnlimitedData('  Unlim  ')).toBe(true);
+    expect(isUnlimitedData('∞')).toBe(true);
+  });
+
+  it('is false for finite amounts and empty values', () => {
+    expect(isUnlimitedData('3 GB')).toBe(false);
+    expect(isUnlimitedData('0.49 GB')).toBe(false);
+    expect(isUnlimitedData(null)).toBe(false);
+    expect(isUnlimitedData(undefined)).toBe(false);
+    expect(isUnlimitedData('   ')).toBe(false);
+  });
+});
 
 describe('formatData', () => {
   it('returns the value verbatim for normal data', () => {
@@ -7,9 +26,12 @@ describe('formatData', () => {
     expect(formatData('0.49 GB', fakeT)).toBe('0.49 GB');
   });
 
-  it('localises Unlimited (any case)', () => {
+  it('localises Unlimited (any case) and never shows "Unlimited GB"', () => {
     expect(formatData('Unlimited', fakeT)).toBe('Unlimited');
     expect(formatData('UNLIMITED data', fakeT)).toBe('Unlimited');
+    // The backend sends "Unlimited GB" for unlimited plans — strip the unit.
+    expect(formatData('Unlimited GB', fakeT)).toBe('Unlimited');
+    expect(formatData('unlim', fakeT)).toBe('Unlimited');
   });
 
   it('falls back for null/empty data', () => {
@@ -62,6 +84,8 @@ describe('dataAmountGb (sorting only)', () => {
 
   it('sorts Unlimited highest and junk lowest', () => {
     expect(dataAmountGb('Unlimited')).toBe(Number.POSITIVE_INFINITY);
+    expect(dataAmountGb('Unlimited GB')).toBe(Number.POSITIVE_INFINITY);
+    expect(dataAmountGb('unlim')).toBe(Number.POSITIVE_INFINITY);
     expect(dataAmountGb(null)).toBe(-1);
     expect(dataAmountGb('n/a')).toBe(-1);
   });

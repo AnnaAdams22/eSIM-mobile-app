@@ -4,7 +4,7 @@
 
 > Character counts are computed, not hand-counted. Each field is within its store limit (✅). App Store keywords contain no spaces after commas and no competitor names.
 
-> Claims are limited to features the app actually ships. No live chat, no referral program, no AI assistant, no unlimited plans.
+> Claims are limited to features the app actually ships. No live chat, no referral program, no AI assistant. Unlimited data plans are available in selected destinations (added to the catalog), so the listing mentions them.
 
 ## App Store — App name
 **26 / 30 chars ✅**
@@ -35,13 +35,13 @@ esim,esim viaje,plan de datos,prepago,roaming,datos moviles,sim internacional,si
 ```
 
 ## App Store — Description
-**1399 / 4000 chars ✅**
+**1463 / 4000 chars ✅**
 
 ```
 ESIM Global te mantiene conectado desde el primer momento. Compra una eSIM de viaje para tu destino, instálala en minutos y conéctate sin buscar una SIM local ni pagar cargos de itinerancia.
 
 CÓMO FUNCIONA
-- Elige tu destino entre 148+ países y regiones.
+- Elige tu destino entre 148+ países y regiones, incluidos planes de datos ilimitados en destinos seleccionados.
 - Paga de forma segura y tu eSIM llega al instante, dentro de la app.
 - Instálala con un código QR o, en teléfonos compatibles, con un solo toque.
 - Tu plan se activa al usarlo por primera vez en el destino, así estás listo nada más llegar.
@@ -98,13 +98,13 @@ eSIM de viaje para 148+ países. Instalación QR, saldo en vivo, recargas.
 ```
 
 ## Google Play — Full description
-**1399 / 4000 chars ✅**
+**1463 / 4000 chars ✅**
 
 ```
 ESIM Global te mantiene conectado desde el primer momento. Compra una eSIM de viaje para tu destino, instálala en minutos y conéctate sin buscar una SIM local ni pagar cargos de itinerancia.
 
 CÓMO FUNCIONA
-- Elige tu destino entre 148+ países y regiones.
+- Elige tu destino entre 148+ países y regiones, incluidos planes de datos ilimitados en destinos seleccionados.
 - Paga de forma segura y tu eSIM llega al instante, dentro de la app.
 - Instálala con un código QR o, en teléfonos compatibles, con un solo toque.
 - Tu plan se activa al usarlo por primera vez en el destino, así estás listo nada más llegar.

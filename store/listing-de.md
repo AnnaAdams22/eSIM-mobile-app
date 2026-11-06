@@ -4,7 +4,7 @@
 
 > Character counts are computed, not hand-counted. Each field is within its store limit (✅). App Store keywords contain no spaces after commas and no competitor names.
 
-> Claims are limited to features the app actually ships. No live chat, no referral program, no AI assistant, no unlimited plans.
+> Claims are limited to features the app actually ships. No live chat, no referral program, no AI assistant. Unlimited data plans are available in selected destinations (added to the catalog), so the listing mentions them.
 
 ## App Store — App name
 **23 / 30 chars ✅**
@@ -35,13 +35,13 @@ esim,reise esim,datentarif,prepaid,roaming,mobile daten,internationale sim,reise
 ```
 
 ## App Store — Description
-**1433 / 4000 chars ✅**
+**1490 / 4000 chars ✅**
 
 ```
 ESIM Global hält dich ab der ersten Minute verbunden. Kaufe eine Reise-eSIM für dein Ziel, installiere sie in Minuten und geh online – ohne lokale SIM-Karte und ohne Roaming-Gebühren.
 
 SO FUNKTIONIERT ES
-- Wähle dein Ziel aus 148+ Ländern und Regionen.
+- Wähle dein Ziel aus 148+ Ländern und Regionen, darunter unbegrenzte Datentarife in ausgewählten Zielen.
 - Bezahle sicher – deine eSIM kommt sofort, direkt in der App.
 - Installiere sie per QR-Code oder, auf unterstützten Handys, mit einem Tipp.
 - Dein Tarif wird bei der ersten Nutzung am Zielort aktiv, du bist also sofort bereit.
@@ -98,13 +98,13 @@ Reise-eSIM für 148+ Länder. QR-Installation, Datenstand live, Aufladungen.
 ```
 
 ## Google Play — Full description
-**1433 / 4000 chars ✅**
+**1490 / 4000 chars ✅**
 
 ```
 ESIM Global hält dich ab der ersten Minute verbunden. Kaufe eine Reise-eSIM für dein Ziel, installiere sie in Minuten und geh online – ohne lokale SIM-Karte und ohne Roaming-Gebühren.
 
 SO FUNKTIONIERT ES
-- Wähle dein Ziel aus 148+ Ländern und Regionen.
+- Wähle dein Ziel aus 148+ Ländern und Regionen, darunter unbegrenzte Datentarife in ausgewählten Zielen.
 - Bezahle sicher – deine eSIM kommt sofort, direkt in der App.
 - Installiere sie per QR-Code oder, auf unterstützten Handys, mit einem Tipp.
 - Dein Tarif wird bei der ersten Nutzung am Zielort aktiv, du bist also sofort bereit.

@@ -2,7 +2,7 @@
 
 > Character counts are computed, not hand-counted. Each field is within its store limit (✅). App Store keywords contain no spaces after commas and no competitor names.
 
-> Claims are limited to features the app actually ships. No live chat, no referral program, no AI assistant, no unlimited plans.
+> Claims are limited to features the app actually ships. No live chat, no referral program, no AI assistant. Unlimited data plans are available in selected destinations (added to the catalog), so the listing mentions them.
 
 ## App Store — App name
 **24 / 30 chars ✅**
@@ -33,13 +33,13 @@ esim,travel esim,data plan,prepaid,roaming,mobile data,international sim,tourist
 ```
 
 ## App Store — Description
-**1311 / 4000 chars ✅**
+**1368 / 4000 chars ✅**
 
 ```
 ESIM Global keeps you connected the moment you arrive. Buy a travel eSIM for your destination, install it in minutes, and go online without hunting for a local SIM card or paying roaming fees.
 
 HOW IT WORKS
-- Choose your destination from 148+ countries and regions.
+- Choose your destination from 148+ countries and regions, including unlimited data plans in selected destinations.
 - Pay securely and your eSIM is delivered instantly, right in the app.
 - Install with a QR code or, on supported phones, a single tap.
 - Your plan activates on first use in the destination, so you're ready the moment you land.
@@ -96,13 +96,13 @@ Travel eSIM for 148+ countries. Instant QR install, live data balance, top-ups.
 ```
 
 ## Google Play — Full description
-**1311 / 4000 chars ✅**
+**1368 / 4000 chars ✅**
 
 ```
 ESIM Global keeps you connected the moment you arrive. Buy a travel eSIM for your destination, install it in minutes, and go online without hunting for a local SIM card or paying roaming fees.
 
 HOW IT WORKS
-- Choose your destination from 148+ countries and regions.
+- Choose your destination from 148+ countries and regions, including unlimited data plans in selected destinations.
 - Pay securely and your eSIM is delivered instantly, right in the app.
 - Install with a QR code or, on supported phones, a single tap.
 - Your plan activates on first use in the destination, so you're ready the moment you land.

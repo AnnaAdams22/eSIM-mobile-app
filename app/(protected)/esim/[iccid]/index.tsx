@@ -34,6 +34,7 @@ import { resolveGeoDisplay, formatPlanLabel, useCatalogL10n } from '@/features/c
 import {
   esimDisplayStatus,
   formatDataSize,
+  isUnlimitedUsage,
   statusTone,
   usedFraction,
 } from '@/features/esims';
@@ -223,6 +224,7 @@ function UsageCard({
   const total = formatDataSize(usage?.data_total_mb, lang);
   const used = formatDataSize(usage?.data_used_mb, lang);
   const fraction = usage ? usedFraction(usage) : null;
+  const unlimited = usage ? isUnlimitedUsage(usage) : false;
 
   return (
     <Card padding="lg" radius="lg" shadow="sm" style={{ marginTop: theme.spacing.lg, gap: theme.spacing.md }}>
@@ -269,6 +271,16 @@ function UsageCard({
             fullWidth={false}
             onPress={onRefresh}
             icon={<RotateCw size={16} color={theme.colors.primary} />}
+          />
+        </View>
+      ) : unlimited ? (
+        // Unlimited plan: show data used + "Unlimited", never a misleading "X left".
+        <View style={{ gap: theme.spacing.sm }}>
+          <Text variant="h3">{t('esimDetail.dataUsedUnlimited', { used: used ?? '0 MB' })}</Text>
+          <UsageMeter
+            unlimited
+            fraction={null}
+            accessibilityLabel={t('esimDetail.dataUsedUnlimited', { used: used ?? '0 MB' })}
           />
         </View>
       ) : left && total ? (

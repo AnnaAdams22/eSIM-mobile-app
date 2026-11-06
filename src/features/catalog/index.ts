@@ -41,6 +41,7 @@ export {
   formatDays,
   formatPlanLabel,
   dataAmountGb,
+  isUnlimitedData,
 } from './format';
 export type { Translate } from './format';
 

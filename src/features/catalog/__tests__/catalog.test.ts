@@ -89,12 +89,22 @@ describe('sortPlansForDisplay', () => {
     expect(fr.map((p) => p.id)).toEqual(['fr-1', 'fr-3', 'fr-10']);
   });
 
-  it('places Unlimited last (highest data amount)', () => {
+  it('places Unlimited last, after the largest finite plan', () => {
     const plans = sortPlansForDisplay([
-      makePlan({ id: 'unl', data: 'Unlimited', days: 30, price_eur_cents: 2000 }),
+      // The backend's "Unlimited GB" spelling, mixed in with large finite plans.
+      makePlan({ id: 'unl', data: 'Unlimited GB', days: 30, price_eur_cents: 2000 }),
+      makePlan({ id: 'big', data: '50 GB', days: 30, price_eur_cents: 1800 }),
       makePlan({ id: 'small', data: '1 GB', days: 7, price_eur_cents: 500 }),
     ]);
-    expect(plans.map((p) => p.id)).toEqual(['small', 'unl']);
+    expect(plans.map((p) => p.id)).toEqual(['small', 'big', 'unl']);
+  });
+
+  it('orders two unlimited plans by days (Infinity ties fall through, not NaN)', () => {
+    const plans = sortPlansForDisplay([
+      makePlan({ id: 'unl-30', data: 'Unlimited GB', days: 30, price_eur_cents: 3000 }),
+      makePlan({ id: 'unl-7', data: 'Unlimited GB', days: 7, price_eur_cents: 1500 }),
+    ]);
+    expect(plans.map((p) => p.id)).toEqual(['unl-7', 'unl-30']);
   });
 
   it('breaks data ties by days, then price', () => {

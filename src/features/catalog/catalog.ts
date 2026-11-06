@@ -195,8 +195,11 @@ export function buildRegions(plans: Plan[], resolvers: RegionNameResolvers = {})
  */
 export function sortPlansForDisplay(plans: Plan[]): Plan[] {
   return [...plans].sort((a, b) => {
-    const dataDiff = dataAmountGb(a.data) - dataAmountGb(b.data);
-    if (dataDiff !== 0) return dataDiff;
+    // Compare by equality first: `Infinity - Infinity` is NaN, which would break
+    // the comparator when two unlimited plans differ only in duration.
+    const dataA = dataAmountGb(a.data);
+    const dataB = dataAmountGb(b.data);
+    if (dataA !== dataB) return dataA - dataB;
 
     const daysDiff = (a.days ?? 0) - (b.days ?? 0);
     if (daysDiff !== 0) return daysDiff;

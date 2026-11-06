@@ -18,10 +18,41 @@ export interface UsageMeterProps {
   accessibilityLabel: string;
   /** Bar height in points. */
   height?: number;
+  /**
+   * Unlimited plan: there is no meaningful percentage, so render a calm, full
+   * bar (never a progress value) instead of a misleading fill.
+   */
+  unlimited?: boolean;
 }
 
-export function UsageMeter({ fraction, accessibilityLabel, height = 10 }: UsageMeterProps) {
+export function UsageMeter({ fraction, accessibilityLabel, height = 10, unlimited = false }: UsageMeterProps) {
   const theme = useTheme();
+
+  // Unlimited: no percentage to convey — a full, calm navy bar, not a progressbar.
+  if (unlimited) {
+    return (
+      <View
+        accessible
+        accessibilityLabel={accessibilityLabel}
+        style={{
+          height,
+          borderRadius: height / 2,
+          backgroundColor: theme.colors.surfaceMuted,
+          overflow: 'hidden',
+        }}
+      >
+        <View
+          style={{
+            width: '100%',
+            height: '100%',
+            borderRadius: height / 2,
+            backgroundColor: theme.colors.primary,
+          }}
+        />
+      </View>
+    );
+  }
+
   const clamped = fraction == null ? 0 : Math.min(1, Math.max(0, fraction));
   // Red once nearly depleted, so "almost out" reads at a glance; navy otherwise.
   const fillColor = clamped >= 0.9 ? theme.colors.discount : theme.colors.primary;

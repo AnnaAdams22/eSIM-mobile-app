@@ -52,6 +52,28 @@ export function formatDataSize(mb: number | null | undefined, locale?: string): 
 }
 
 /**
+ * True when a usage payload describes an UNLIMITED plan.
+ *
+ * The backend reports balances in whole megabytes, but an unlimited plan has no
+ * finite cap: Yesim's package size is non-numeric, so `data_total_mb` comes back
+ * null (or otherwise non-finite). We treat "no usable total, but we do know how
+ * much has been used" as unlimited — distinct from "usage unknown" (where the
+ * used figure is absent too, e.g. a plan not yet activated). The caller then
+ * shows data used plus "Unlimited" instead of a misleading "X left of Y".
+ */
+export function isUnlimitedUsage(usage: {
+  data_used_mb?: number | null;
+  data_left_mb?: number | null;
+  data_total_mb?: number | null;
+}): boolean {
+  const total = usage.data_total_mb;
+  const totalKnown = total != null && Number.isFinite(total) && total > 0;
+  if (totalKnown) return false;
+  const used = usage.data_used_mb;
+  return used != null && Number.isFinite(used);
+}
+
+/**
  * Fraction of the plan's data that has been USED, in [0, 1].
  *
  * Prefers an explicit `data_used_mb`; otherwise derives it from total − left.

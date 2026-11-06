@@ -17,7 +17,7 @@ export type {
   UsageLineInput,
 } from './classify';
 
-export { formatDataSize, usedFraction } from './format';
+export { formatDataSize, usedFraction, isUnlimitedUsage } from './format';
 
 export { shouldRefetchUsage, USAGE_MIN_REFRESH_AGE_MS } from './refresh';
 
