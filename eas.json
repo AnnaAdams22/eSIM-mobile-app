@@ -61,9 +61,27 @@
         "EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID": "53531612788-52e97tj98e6ptuofvsup3s95ui1gkn8g.apps.googleusercontent.com",
         "EXPO_PUBLIC_APPLE_SIGN_IN_ENABLED": "false"
       }
+    },
+    "testflight": {
+      "distribution": "store",
+      "autoIncrement": true,
+      "env": {
+        "EXPO_PUBLIC_API_URL": "https://refreshing-stillness-staging.up.railway.app",
+        "EXPO_PUBLIC_SUPABASE_URL": "https://rfmmpbjohoiqkxanyszk.supabase.co",
+        "EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY": "sb_publishable_xyHJaQr_8XEjSPVzlaCvug_jphvya5-",
+        "EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY": "pk_test_51U1pMjFifplMj5jHheJIr2Q8wiw9be0wrzLhGUhzllym2my40IbX5w8Ap2EKi48OX2hfekqf4RxPKrany7i1mbyV000lw8TciI",
+        "EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID": "53531612788-52e97tj98e6ptuofvsup3s95ui1gkn8g.apps.googleusercontent.com",
+        "EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID": "53531612788-apqeg7vmudiganha106k8ts907jdacds.apps.googleusercontent.com",
+        "EXPO_PUBLIC_APPLE_SIGN_IN_ENABLED": "true"
+      }
     }
   },
   "submit": {
-    "production": {}
+    "production": {},
+    "testflight": {
+      "ios": {
+        "ascAppId": "REPLACE_WITH_ASC_APP_ID"
+      }
+    }
   }
 }
