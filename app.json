@@ -20,6 +20,9 @@
       "usesAppleSignIn": true,
       "config": {
         "usesNonExemptEncryption": false
+      },
+      "infoPlist": {
+        "NSCameraUsageDescription": "ESIM Global uses the camera only if you choose to scan your payment card at checkout."
       }
     },
     "android": {

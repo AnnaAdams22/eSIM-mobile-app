@@ -52,6 +52,12 @@ Supabase) acting on our behalf — declare these as Shared and name the purpose.
 
 ### Messages / App activity / App info & performance
 - **Messages, Photos, Contacts, Calendar, Audio, Files:** not collected.
+- **Camera / card scanning:** the **Stripe** payment sheet offers an optional
+  on-device "scan card" feature that uses the camera. No photo or video is
+  collected, stored, or sent — the scan is processed inside Stripe's SDK on the
+  device — so "Photos and videos" stays **not collected**. (The camera purpose
+  string `NSCameraUsageDescription` is required on iOS for this Stripe feature; the
+  app ships no camera feature of its own.)
 - **Location (approximate or precise):** **not collected** — the app requests no
   location permission.
 - **App activity (in-app search, interactions):** not collected or sent off-device.

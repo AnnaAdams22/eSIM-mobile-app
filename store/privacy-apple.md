@@ -43,6 +43,12 @@ column (c) is **No** for every row.
   (expo-device) to show the right install steps and to decide whether one-tap
   install is available. This is used **on the device only** and is **not sent** to
   our backend, so it is not a "collected" data type.
+- **Camera (card scanning):** the app declares `NSCameraUsageDescription` because
+  the **Stripe** PaymentSheet includes an optional "scan card" feature that uses the
+  camera. The camera is used only if the user taps scan; the card is read **inside
+  Stripe's SDK on the device** and **no image or video is collected, stored, or
+  sent** by us. This is a permission, not a collected data type — "Photos or Videos"
+  stays **No**. (We do not ship any camera/photo feature of our own.)
 
 ## Third parties that process user data
 
