@@ -80,7 +80,7 @@
     "production": {},
     "testflight": {
       "ios": {
-        "ascAppId": "REPLACE_WITH_ASC_APP_ID"
+        "ascAppId": "6831530838"
       }
     }
   }
