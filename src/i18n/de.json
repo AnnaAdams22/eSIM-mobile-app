@@ -480,6 +480,7 @@
     "errors": {
       "ordersInProgress": "Eine Bestellung von Ihnen wird gerade verarbeitet. Bitte versuchen Sie es in einer Minute erneut.",
       "network": "Wir konnten den Server nicht erreichen. Prüfen Sie Ihre Verbindung und versuchen Sie es erneut.",
+      "appleCancelled": "Zur vollständigen Löschung Ihres Kontos ist eine Bestätigung bei Apple erforderlich. Bitte versuchen Sie es erneut.",
       "generic": "Etwas ist schiefgelaufen. Bitte versuchen Sie es erneut."
     }
   },

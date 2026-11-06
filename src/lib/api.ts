@@ -159,8 +159,29 @@ export const api = {
 
   // Account.
   getMe: () => request<Me>('/api/me'),
-  deleteAccount: () =>
-    request<void>('/api/me', { method: 'DELETE', body: { confirm: 'DELETE' } }),
+  /**
+   * Delete the account. For Apple-identity users, `appleAuthorizationCode` is a
+   * fresh code (from re-authenticating with Apple) so the backend can revoke the
+   * Apple tokens (App Store Guideline 5.1.1(v)); omitted otherwise.
+   */
+  deleteAccount: (appleAuthorizationCode?: string | null) =>
+    request<void>('/api/me', {
+      method: 'DELETE',
+      body: {
+        confirm: 'DELETE',
+        ...(appleAuthorizationCode ? { apple_authorization_code: appleAuthorizationCode } : {}),
+      },
+    }),
+  /**
+   * Forward an Apple authorization code so the backend can store the (encrypted)
+   * refresh token for later revocation. Best-effort at sign-in; also sent inline
+   * on account deletion. Returns 204 on success.
+   */
+  submitAppleAuthorizationCode: (code: string) =>
+    request<void>('/api/me/apple/authorization-code', {
+      method: 'POST',
+      body: { authorization_code: code },
+    }),
 
   // Purchase.
   validatePromo: (planId: string, code: string) =>

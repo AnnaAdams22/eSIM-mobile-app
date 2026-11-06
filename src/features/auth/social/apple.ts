@@ -48,6 +48,34 @@ async function makeNonce(): Promise<{ raw: string; hashed: string }> {
   return { raw, hashed };
 }
 
+/**
+ * Re-authenticate with Apple purely to obtain a FRESH `authorizationCode` for
+ * server-side token revocation at account deletion (App Store Guideline
+ * 5.1.1(v)). No extra scopes and no nonce — we only need the short-lived code,
+ * not a Supabase sign-in. Mirrors the `AppleReauthResult` shape the pure
+ * `resolveAppleReauth` decision consumes.
+ */
+export type AppleReauthResult =
+  | { status: 'success'; authorizationCode: string | null }
+  | { status: 'cancelled' }
+  | { status: 'error'; error: unknown };
+
+export async function reauthenticateWithApple(): Promise<AppleReauthResult> {
+  try {
+    const credential = await AppleAuthentication.signInAsync({ requestedScopes: [] });
+    return { status: 'success', authorizationCode: credential.authorizationCode ?? null };
+  } catch (error) {
+    if (
+      error &&
+      typeof error === 'object' &&
+      (error as { code?: string }).code === 'ERR_REQUEST_CANCELED'
+    ) {
+      return { status: 'cancelled' };
+    }
+    return { status: 'error', error };
+  }
+}
+
 export async function signInWithApple(): Promise<AppleResult> {
   try {
     const { raw, hashed } = await makeNonce();

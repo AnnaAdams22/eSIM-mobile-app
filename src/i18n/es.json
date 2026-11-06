@@ -480,6 +480,7 @@
     "errors": {
       "ordersInProgress": "Tienes un pedido en proceso. Inténtalo de nuevo en un minuto.",
       "network": "No pudimos conectar con el servidor. Revisa tu conexión e inténtalo de nuevo.",
+      "appleCancelled": "Para eliminar tu cuenta por completo, es necesario confirmar con Apple. Inténtalo de nuevo.",
       "generic": "Algo salió mal. Inténtalo de nuevo."
     }
   },

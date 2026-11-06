@@ -7,8 +7,14 @@
  * generic failures. On success: sign out locally (which clears the React Query
  * cache and the Supabase session), return to Home, and confirm with a toast.
  *
- * TODO: when Apple Sign-In lands, also revoke the Apple refresh token here
- * (Apple requires token revocation on account deletion).
+ * Apple requirement (Guideline 5.1.1(v)): a user who signed in with Apple must
+ * have their Apple tokens revoked on deletion. For those users we re-authenticate
+ * with Apple FIRST to get a fresh authorization code and forward it on
+ * DELETE /api/me, so the backend can revoke. If the user cancels the Apple
+ * prompt we do NOT delete (and explain why, with a retry). If Apple errors (not a
+ * cancel) we continue without a code — the backend still revokes a stored token
+ * if one exists, and a revoke failure never blocks deletion. Non-Apple users are
+ * unaffected.
  */
 
 import { useState } from 'react';
@@ -19,7 +25,8 @@ import { TriangleAlert } from 'lucide-react-native';
 
 import { Header, Screen, Text, TextField, useToast } from '@/components/ui';
 import { useAuth } from '@/features/auth';
-import { isDeleteConfirmed } from '@/features/account';
+import { hasAppleIdentity, isDeleteConfirmed, resolveAppleReauth } from '@/features/account';
+import { reauthenticateWithApple } from '@/features/auth/social/apple';
 import { api, ApiError } from '@/lib/api';
 import { errorNotify, successNotify } from '@/lib/haptics';
 import { useTheme } from '@/theme';
@@ -29,7 +36,8 @@ export default function DeleteAccountScreen() {
   const router = useRouter();
   const { t } = useTranslation();
   const toast = useToast();
-  const { signOut } = useAuth();
+  const { signOut, user } = useAuth();
+  const needsAppleReauth = hasAppleIdentity(user);
 
   const [confirmText, setConfirmText] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -43,7 +51,21 @@ export default function DeleteAccountScreen() {
     setError(null);
     setDeleting(true);
     try {
-      await api.deleteAccount();
+      // Apple users: re-authenticate with Apple to get a fresh authorization code
+      // for server-side token revocation. Cancel → do not delete; error → delete
+      // without a code (the backend revokes a stored token if one exists).
+      let appleAuthorizationCode: string | null = null;
+      if (needsAppleReauth) {
+        const decision = resolveAppleReauth(await reauthenticateWithApple());
+        if (!decision.proceed) {
+          setError(t('deleteAccount.errors.appleCancelled'));
+          setDeleting(false);
+          return;
+        }
+        appleAuthorizationCode = decision.code;
+      }
+
+      await api.deleteAccount(appleAuthorizationCode);
       // Leave this protected screen for Home BEFORE clearing auth, so the
       // central guard doesn't bounce the teardown to sign-in — a deletion should
       // land on Home. Then sign out (clears the session + React Query cache).

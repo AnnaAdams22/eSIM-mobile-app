@@ -480,6 +480,7 @@
     "errors": {
       "ordersInProgress": "You have an order being processed. Please try again in a minute.",
       "network": "We couldn't reach the server. Check your connection and try again.",
+      "appleCancelled": "Confirming with Apple is needed to fully remove your account. Please try again.",
       "generic": "Something went wrong. Please try again."
     }
   },

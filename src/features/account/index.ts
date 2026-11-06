@@ -11,3 +11,6 @@ export type { PasswordChangeErrorKey, PasswordChangeInput } from './passwordVali
 
 export { PASSWORD_CHANGE_ERRORS, mapPasswordChangeError } from './errors';
 export type { PasswordChangeError } from './errors';
+
+export { hasAppleIdentity, resolveAppleReauth } from './appleIdentity';
+export type { AppleReauthResult, AppleReauthDecision } from './appleIdentity';

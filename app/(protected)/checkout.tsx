@@ -40,6 +40,7 @@ import {
   type GeoResolvers,
 } from '@/features/catalog';
 import {
+  applePaySheetOption,
   buildPaymentSheetAppearance,
   decidePaymentOutcome,
   makeRequestIdHolder,
@@ -50,7 +51,7 @@ import {
 import { requestTopupSheet } from '@/features/esims';
 import { api, ApiError } from '@/lib/api';
 import type { Plan, PaymentSheetResponse, PromoValidation } from '@/lib/api-types';
-import { config, legal } from '@/config';
+import { APPLE_PAY_ENABLED, config, legal } from '@/config';
 import { formatPrice } from '@/lib/price';
 import { errorNotify, lightTap, successNotify } from '@/lib/haptics';
 import { uuidv4 } from '@/lib/uuid';
@@ -264,7 +265,11 @@ export default function CheckoutScreen() {
           currencyCode: 'EUR',
           testEnv: STRIPE_TEST_ENV,
         },
-        applePay: { merchantCountryCode: 'US' },
+        // Apple Pay is gated OFF until Stripe's Apple Pay cert is set up, so the
+        // sheet never shows a broken Apple Pay button. `undefined` omits it.
+        ...(applePaySheetOption(APPLE_PAY_ENABLED)
+          ? { applePay: applePaySheetOption(APPLE_PAY_ENABLED) }
+          : {}),
         defaultBillingDetails: email ? { email } : undefined,
         appearance: buildPaymentSheetAppearance(theme),
       });

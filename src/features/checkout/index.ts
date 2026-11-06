@@ -37,3 +37,6 @@ export { decidePaymentOutcome } from './paymentOutcome';
 export type { PaymentOutcome, PaymentFailureContext } from './paymentOutcome';
 
 export { backgroundAdjustedStart } from './pollClock';
+
+export { applePaySheetOption } from './applePay';
+export type { ApplePaySheetOption } from './applePay';

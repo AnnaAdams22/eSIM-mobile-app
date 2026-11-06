@@ -51,6 +51,16 @@ export const REQUIRE_SIGN_IN_TO_BROWSE =
   process.env.EXPO_PUBLIC_REQUIRE_SIGN_IN?.trim() === 'true';
 
 /**
+ * Whether to offer Apple Pay in the Stripe PaymentSheet (iOS). Default OFF:
+ * Apple Pay only works once Stripe holds an Apple Pay certificate for the
+ * merchant id (merchant.net.esimglobal.app), so until then we must not surface
+ * an Apple Pay button that would fail. Flip EXPO_PUBLIC_APPLE_PAY_ENABLED=true
+ * once Stripe's Apple Pay is fully configured — no code change needed. Google
+ * Pay (Android) is unaffected.
+ */
+export const APPLE_PAY_ENABLED = process.env.EXPO_PUBLIC_APPLE_PAY_ENABLED?.trim() === 'true';
+
+/**
  * Typed, validated config. Accessing a value that is missing throws a clear
  * error — call `missingConfigKeys()` first (the app root does) to fail cleanly
  * at startup instead of deep inside a network call.

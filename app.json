@@ -17,6 +17,7 @@
     "ios": {
       "supportsTablet": false,
       "bundleIdentifier": "net.esimglobal.app",
+      "usesAppleSignIn": true,
       "config": {
         "usesNonExemptEncryption": false
       }
@@ -71,7 +72,12 @@
           "color": "#1C2430"
         }
       ],
-      "@react-native-google-signin/google-signin",
+      [
+        "@react-native-google-signin/google-signin",
+        {
+          "iosUrlScheme": "com.googleusercontent.apps.53531612788-apqeg7vmudiganha106k8ts907jdacds"
+        }
+      ],
       "expo-apple-authentication"
     ],
     "experiments": {
