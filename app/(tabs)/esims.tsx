@@ -31,7 +31,7 @@ import {
 import { EsimCard } from '@/components/esim';
 import { PlaceholderScreen } from '@/components/PlaceholderScreen';
 import { useAuth } from '@/features/auth';
-import { resolveGeoDisplay, useCatalogL10n } from '@/features/catalog';
+import { newEsimRouteForPlan, resolveGeoDisplay, useCatalogL10n } from '@/features/catalog';
 import { classifyEsim } from '@/features/esims';
 import { useEsims, useEsimUsages } from '@/hooks/useEsims';
 import { useRefreshOnFocus } from '@/hooks/useRefreshOnFocus';
@@ -152,6 +152,10 @@ function MyEsimsList() {
     lightTap();
     router.push({ pathname: '/esim/[iccid]/topup', params: { iccid } });
   };
+  const goBuyNew = (item: EsimListItem) => {
+    lightTap();
+    router.push(newEsimRouteForPlan(item.plan));
+  };
   const goDetails = (iccid: string) => {
     lightTap();
     router.push({ pathname: '/esim/[iccid]', params: { iccid } });
@@ -245,6 +249,7 @@ function MyEsimsList() {
               title={r.title}
               onViewDetails={() => r.item.iccid && goDetails(r.item.iccid)}
               onTopUp={() => r.item.iccid && goTopUp(r.item.iccid)}
+              onBuyNew={() => goBuyNew(r.item)}
             />
           ))
         )}

@@ -29,8 +29,13 @@ import {
   Text,
 } from '@/components/ui';
 import { Flag } from '@/components/Flag';
-import { InstallSection, UsageMeter } from '@/components/esim';
-import { resolveGeoDisplay, formatPlanLabel, useCatalogL10n } from '@/features/catalog';
+import { InstallSection, TopupNote, UsageMeter } from '@/components/esim';
+import {
+  resolveGeoDisplay,
+  formatPlanLabel,
+  newEsimRouteForPlan,
+  useCatalogL10n,
+} from '@/features/catalog';
 import {
   esimDisplayStatus,
   formatDataSize,
@@ -196,6 +201,13 @@ export default function EsimDetailScreen() {
             lightTap();
             if (iccid) router.push({ pathname: '/esim/[iccid]/topup', params: { iccid } });
           }}
+        />
+        <TopupNote
+          onBuyNew={() => {
+            lightTap();
+            router.push(newEsimRouteForPlan(plan));
+          }}
+          style={{ marginTop: theme.spacing.sm }}
         />
       </View>
     </SafeAreaView>

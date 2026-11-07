@@ -15,6 +15,7 @@ import { Copy, RotateCw, SignalHigh, SignalLow } from 'lucide-react-native';
 
 import { Badge, Button, Card, Skeleton, Text } from '@/components/ui';
 import { Flag } from '@/components/Flag';
+import { TopupNote } from './TopupNote';
 import { formatPlanLabel } from '@/features/catalog';
 import {
   esimDisplayStatus,
@@ -40,6 +41,8 @@ export interface EsimCardProps {
   title: string;
   onViewDetails: () => void;
   onTopUp: () => void;
+  /** Buy a new eSIM for the same destination (shown in the calm top-up note). */
+  onBuyNew?: () => void;
 }
 
 /** Show the ICCID as its first and last four digits so it's recognisable but compact. */
@@ -58,6 +61,7 @@ export function EsimCard({
   title,
   onViewDetails,
   onTopUp,
+  onBuyNew,
 }: EsimCardProps) {
   const theme = useTheme();
   const { t, i18n } = useTranslation();
@@ -135,20 +139,23 @@ export function EsimCard({
 
       {/* Actions — only meaningful once there's an eSIM to act on */}
       {iccid ? (
-        <View style={{ flexDirection: 'row', gap: theme.spacing.sm }}>
-          <Button
-            label={t('esims.viewDetails')}
-            variant="secondary"
-            size="md"
-            style={{ flex: 1 }}
-            onPress={onViewDetails}
-          />
-          <Button
-            label={t('esims.topUp')}
-            size="md"
-            style={{ flex: 1 }}
-            onPress={onTopUp}
-          />
+        <View style={{ gap: theme.spacing.sm }}>
+          <View style={{ flexDirection: 'row', gap: theme.spacing.sm }}>
+            <Button
+              label={t('esims.viewDetails')}
+              variant="secondary"
+              size="md"
+              style={{ flex: 1 }}
+              onPress={onViewDetails}
+            />
+            <Button
+              label={t('esims.topUp')}
+              size="md"
+              style={{ flex: 1 }}
+              onPress={onTopUp}
+            />
+          </View>
+          <TopupNote onBuyNew={onBuyNew} />
         </View>
       ) : null}
     </Card>

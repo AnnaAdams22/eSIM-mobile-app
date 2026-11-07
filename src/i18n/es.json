@@ -252,8 +252,7 @@
     "errorTitle": "No se pudieron cargar las opciones de recarga",
     "addDataTitle": "Añade datos a tu plan actual",
     "addDataCardHint": "Los datos y los días se añaden a esta eSIM.",
-    "differentPlanTitle": "¿Quieres un plan diferente?",
-    "differentPlanBody": "Cómpralo como una nueva eSIM: tu eSIM actual se queda en tu teléfono.",
+    "note": "La recarga añade el mismo plan a tu eSIM. ¿Necesitas otra cantidad?",
     "buyNewEsim": "Comprar una nueva eSIM",
     "noAddDataTitle": "No hay recarga para este plan",
     "noAddDataBody": "Este plan no se puede recargar ahora mismo. Puedes comprar una nueva eSIM: tu eSIM actual se queda en tu teléfono."

@@ -252,8 +252,7 @@
     "errorTitle": "Couldn't load top-up options",
     "addDataTitle": "Add data to your current plan",
     "addDataCardHint": "Your data and days are added to this eSIM.",
-    "differentPlanTitle": "Want a different plan?",
-    "differentPlanBody": "Buy it as a new eSIM — your current eSIM stays on your phone.",
+    "note": "Top-up adds the same plan to your eSIM. Need a different amount?",
     "buyNewEsim": "Buy a new eSIM",
     "noAddDataTitle": "No top-up for this plan",
     "noAddDataBody": "This plan can't be topped up right now. You can buy a new eSIM instead — your current eSIM stays on your phone."

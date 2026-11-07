@@ -23,6 +23,7 @@ import {
   Skeleton,
   Text,
 } from '@/components/ui';
+import { TopupNote } from '@/components/esim';
 import { formatPlanLabel, isUnlimitedData, newEsimRouteForPlan } from '@/features/catalog';
 import { formatDataSize } from '@/features/esims';
 import { formatPrice } from '@/lib/price';
@@ -84,6 +85,8 @@ export default function TopupOptionsScreen() {
 
       {addOptions.length > 0 ? (
         <>
+          {/* Calm, single note explaining top-up only adds the same plan. */}
+          <TopupNote onBuyNew={goBuyNew} style={{ marginTop: theme.spacing.md }} />
           <Text
             variant="h2"
             accessibilityRole="header"
@@ -96,7 +99,6 @@ export default function TopupOptionsScreen() {
               <OptionCard key={option.id} option={option} onSelect={() => goCheckout(option)} />
             ))}
           </View>
-          <DifferentPlanCard onBuyNew={goBuyNew} />
         </>
       ) : (
         <NoAddData onBuyNew={goBuyNew} />
@@ -169,30 +171,6 @@ function OptionCard({ option, onSelect }: { option: TopupOption; onSelect: () =>
         </Text>
       </Card>
     </PressableScale>
-  );
-}
-
-/** Secondary action shown under the add-data options: buy a different plan as a new eSIM. */
-function DifferentPlanCard({ onBuyNew }: { onBuyNew: () => void }) {
-  const theme = useTheme();
-  const { t } = useTranslation();
-  return (
-    <Card
-      padding="lg"
-      radius="lg"
-      style={{ marginTop: theme.spacing.xl, gap: theme.spacing.sm, backgroundColor: theme.colors.surfaceMuted }}
-    >
-      <Text variant="h3">{t('topup.differentPlanTitle')}</Text>
-      <Text variant="bodySmall" color="textSecondary">
-        {t('topup.differentPlanBody')}
-      </Text>
-      <Button
-        label={t('topup.buyNewEsim')}
-        variant="secondary"
-        onPress={onBuyNew}
-        style={{ marginTop: theme.spacing.xs }}
-      />
-    </Card>
   );
 }
 

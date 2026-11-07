@@ -252,8 +252,7 @@
     "errorTitle": "Aufladeoptionen konnten nicht geladen werden",
     "addDataTitle": "Daten zu Ihrem aktuellen Tarif hinzufügen",
     "addDataCardHint": "Daten und Tage werden zu dieser eSIM hinzugefügt.",
-    "differentPlanTitle": "Möchten Sie einen anderen Tarif?",
-    "differentPlanBody": "Kaufen Sie ihn als neue eSIM — Ihre aktuelle eSIM bleibt auf Ihrem Telefon.",
+    "note": "Die Aufladung fügt denselben Tarif zu Ihrer eSIM hinzu. Brauchen Sie eine andere Menge?",
     "buyNewEsim": "Neue eSIM kaufen",
     "noAddDataTitle": "Keine Aufladung für diesen Tarif",
     "noAddDataBody": "Dieser Tarif kann derzeit nicht aufgeladen werden. Sie können stattdessen eine neue eSIM kaufen — Ihre aktuelle eSIM bleibt auf Ihrem Telefon."

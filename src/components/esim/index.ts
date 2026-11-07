@@ -8,3 +8,6 @@ export type { UsageMeterProps } from './UsageMeter';
 
 export { EsimCard } from './EsimCard';
 export type { EsimCardProps } from './EsimCard';
+
+export { TopupNote } from './TopupNote';
+export type { TopupNoteProps } from './TopupNote';
