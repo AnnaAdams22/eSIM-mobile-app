@@ -155,7 +155,9 @@ export function EsimCard({
               onPress={onTopUp}
             />
           </View>
-          <TopupNote onBuyNew={onBuyNew} />
+          {/* The top-up note only makes sense for a live plan — not past/
+              notActivated/processing eSIMs. */}
+          {status === 'active' ? <TopupNote onBuyNew={onBuyNew} /> : null}
         </View>
       ) : null}
     </Card>
