@@ -28,7 +28,6 @@ import { usePlans } from '@/hooks/usePlans';
 import {
   buildDestinations,
   continentCounts,
-  roundedDestinationCount,
   FILTERABLE_CONTINENTS,
   POPULAR_DESTINATIONS,
   POPULAR_DESTINATIONS_LIMIT,
@@ -66,11 +65,13 @@ export default function HomeScreen() {
     const counts = continentCounts(destinations);
     return FILTERABLE_CONTINENTS.filter((c) => (counts[c] ?? 0) > 0).map((c) => ({
       continent: c,
-      count: Math.floor((counts[c] ?? 0) / 10) * 10 || counts[c],
+      // Exact count — i18next pluralises it per language (no "N+").
+      count: counts[c] ?? 0,
     }));
   }, [destinations]);
 
-  const heroCount = roundedDestinationCount(destinations);
+  // Exact total countries — pluralised, never rounded or suffixed with "+".
+  const heroCount = destinations.length;
 
   const openDestinations = (params?: Record<string, string>) =>
     router.push({ pathname: '/destinations', params });

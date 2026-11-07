@@ -52,7 +52,8 @@ export default function ExploreScreen() {
           [0, 1, 2, 3].map((i) => <Skeleton key={i} height={132} radius="lg" />)
         ) : (
           regions.map((continent) => {
-            const count = Math.floor((counts[continent] ?? 0) / 10) * 10 || counts[continent];
+            // Exact count — i18next pluralises it per language (no "N+").
+            const count = counts[continent] ?? 0;
             const countLabel = t('explore.destinationCount', { count });
             const name = t(`continents.${continent}`);
             return (

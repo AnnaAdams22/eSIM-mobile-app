@@ -21,7 +21,8 @@
     "subtitle": "Where are you going today?",
     "searchPlaceholder": "Search destination or country",
     "searchHint": "Opens the destinations list",
-    "heroTitle": "Stay connected in {{count}}+ countries",
+    "heroTitle_one": "Stay connected in {{count}} country",
+    "heroTitle_other": "Stay connected in {{count}} countries",
     "heroHint": "Browse all destinations",
     "popularTitle": "Popular destinations",
     "seeAll": "See all",
@@ -294,7 +295,8 @@
   "explore": {
     "title": "Explore",
     "subtitle": "Browse by region",
-    "destinationCount": "{{count}}+ destinations",
+    "destinationCount_one": "{{count}} destination",
+    "destinationCount_other": "{{count}} destinations",
     "cardHint": "View destinations in this region"
   },
   "profile": {
@@ -568,7 +570,8 @@
     "social": {
       "continueWithGoogle": "Continue with Google",
       "continueWithApple": "Continue with Apple",
-      "or": "or"
+      "or": "or",
+      "errorCode": "Code: {{code}}"
     }
   },
   "states": {

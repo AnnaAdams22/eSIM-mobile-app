@@ -21,7 +21,10 @@
     "subtitle": "Куда вы отправляетесь сегодня?",
     "searchPlaceholder": "Поиск направления или страны",
     "searchHint": "Открывает список направлений",
-    "heroTitle": "Оставайтесь на связи в {{count}}+ странах",
+    "heroTitle_one": "Оставайтесь на связи в {{count}} стране",
+    "heroTitle_few": "Оставайтесь на связи в {{count}} странах",
+    "heroTitle_many": "Оставайтесь на связи в {{count}} странах",
+    "heroTitle_other": "Оставайтесь на связи в {{count}} странах",
     "heroHint": "Посмотреть все направления",
     "popularTitle": "Популярные направления",
     "seeAll": "Все",
@@ -306,7 +309,10 @@
   "explore": {
     "title": "Обзор",
     "subtitle": "Поиск по регионам",
-    "destinationCount": "{{count}}+ направлений",
+    "destinationCount_one": "{{count}} направление",
+    "destinationCount_few": "{{count}} направления",
+    "destinationCount_many": "{{count}} направлений",
+    "destinationCount_other": "{{count}} направления",
     "cardHint": "Посмотреть направления в этом регионе"
   },
   "profile": {
@@ -580,7 +586,8 @@
     "social": {
       "continueWithGoogle": "Продолжить с Google",
       "continueWithApple": "Продолжить с Apple",
-      "or": "или"
+      "or": "или",
+      "errorCode": "Код: {{code}}"
     }
   },
   "states": {

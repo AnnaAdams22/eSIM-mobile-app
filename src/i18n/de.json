@@ -21,7 +21,8 @@
     "subtitle": "Wohin geht die Reise heute?",
     "searchPlaceholder": "Reiseziel oder Land suchen",
     "searchHint": "Öffnet die Liste der Reiseziele",
-    "heroTitle": "Bleiben Sie in über {{count}} Ländern verbunden",
+    "heroTitle_one": "Bleiben Sie in {{count}} Land verbunden",
+    "heroTitle_other": "Bleiben Sie in {{count}} Ländern verbunden",
     "heroHint": "Alle Reiseziele ansehen",
     "popularTitle": "Beliebte Reiseziele",
     "seeAll": "Alle ansehen",
@@ -294,7 +295,8 @@
   "explore": {
     "title": "Entdecken",
     "subtitle": "Nach Region durchsuchen",
-    "destinationCount": "Über {{count}} Reiseziele",
+    "destinationCount_one": "{{count}} Reiseziel",
+    "destinationCount_other": "{{count}} Reiseziele",
     "cardHint": "Reiseziele in dieser Region ansehen"
   },
   "profile": {
@@ -568,7 +570,8 @@
     "social": {
       "continueWithGoogle": "Mit Google fortfahren",
       "continueWithApple": "Mit Apple fortfahren",
-      "or": "oder"
+      "or": "oder",
+      "errorCode": "Code: {{code}}"
     }
   },
   "states": {

@@ -21,7 +21,8 @@
     "subtitle": "¿A dónde vas hoy?",
     "searchPlaceholder": "Busca un destino o país",
     "searchHint": "Abre la lista de destinos",
-    "heroTitle": "Mantente conectado en más de {{count}} países",
+    "heroTitle_one": "Mantente conectado en {{count}} país",
+    "heroTitle_other": "Mantente conectado en {{count}} países",
     "heroHint": "Ver todos los destinos",
     "popularTitle": "Destinos populares",
     "seeAll": "Ver todo",
@@ -294,7 +295,8 @@
   "explore": {
     "title": "Explorar",
     "subtitle": "Explora por región",
-    "destinationCount": "Más de {{count}} destinos",
+    "destinationCount_one": "{{count}} destino",
+    "destinationCount_other": "{{count}} destinos",
     "cardHint": "Ver destinos en esta región"
   },
   "profile": {
@@ -568,7 +570,8 @@
     "social": {
       "continueWithGoogle": "Continuar con Google",
       "continueWithApple": "Continuar con Apple",
-      "or": "o"
+      "or": "o",
+      "errorCode": "Código: {{code}}"
     }
   },
   "states": {

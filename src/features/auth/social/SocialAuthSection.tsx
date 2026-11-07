@@ -36,7 +36,7 @@ export function SocialAuthSection({ redirect }: SocialAuthSectionProps) {
     appleEnabled: socialConfig.appleSignInEnabled,
   });
 
-  const { submitting, errorKey, signInGoogle, signInApple } = useSocialSignIn();
+  const { submitting, errorKey, errorCode, signInGoogle, signInApple } = useSocialSignIn();
 
   if (!anySocialVisible(visibility)) return null;
 
@@ -59,9 +59,17 @@ export function SocialAuthSection({ redirect }: SocialAuthSectionProps) {
       ) : null}
 
       {errorKey ? (
-        <Text variant="bodySmall" color="danger" accessibilityLiveRegion="polite">
-          {t(errorKey)}
-        </Text>
+        <View accessibilityLiveRegion="polite">
+          <Text variant="bodySmall" color="danger">
+            {t(errorKey)}
+          </Text>
+          {/* Short, non-sensitive code so a tester can report the exact failure. */}
+          {errorCode ? (
+            <Text variant="caption" color="textSecondary">
+              {t('auth.social.errorCode', { code: errorCode })}
+            </Text>
+          ) : null}
+        </View>
       ) : null}
 
       {/* "or" divider between the social buttons and the email form. */}

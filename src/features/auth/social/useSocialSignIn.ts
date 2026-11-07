@@ -17,8 +17,14 @@ import { errorNotify, successNotify } from '@/lib/haptics';
 import { useAuth } from '../AuthProvider';
 import { useAuthNavigation } from '../useAuthNavigation';
 import { mapAuthError } from '../errors';
-import { classifySocialError, type SocialErrorKey } from './errors';
+import {
+  classifySocialError,
+  socialErrorCode,
+  type SocialErrorKey,
+  type SocialErrorCode,
+} from './errors';
 import { appleDisplayName, decidePostSignIn } from './flow';
+import { appleIdTokenExchange, googleIdTokenExchange } from './idToken';
 import { signInWithGoogle } from './google';
 import { signInWithApple } from './apple';
 import { queueAppleAuthorizationCode } from './revocation';
@@ -30,6 +36,8 @@ export interface UseSocialSignIn {
   submitting: SocialProvider | null;
   /** Friendly i18n key for the last failure, or null. */
   errorKey: SocialErrorKey | null;
+  /** Short, non-sensitive diagnostic code shown under the message, or null. */
+  errorCode: SocialErrorCode | null;
   clearError: () => void;
   signInGoogle: (redirect?: string) => Promise<void>;
   signInApple: (redirect?: string) => Promise<void>;
@@ -41,10 +49,16 @@ export function useSocialSignIn(): UseSocialSignIn {
 
   const [submitting, setSubmitting] = useState<SocialProvider | null>(null);
   const [errorKey, setErrorKey] = useState<SocialErrorKey | null>(null);
+  const [errorCode, setErrorCode] = useState<SocialErrorCode | null>(null);
+
+  const clearError = () => {
+    setErrorKey(null);
+    setErrorCode(null);
+  };
 
   const signInGoogle = async (redirect?: string): Promise<void> => {
     if (submitting) return;
-    setErrorKey(null);
+    clearError();
     setSubmitting('google');
     try {
       const result = await signInWithGoogle();
@@ -54,18 +68,22 @@ export function useSocialSignIn(): UseSocialSignIn {
         if (!mapped.silent) {
           errorNotify();
           setErrorKey(mapped.key);
+          setErrorCode(mapped.code);
         }
         return;
       }
       if (!decidePostSignIn(result.idToken).proceed) return;
 
-      await signInWithIdToken('google', result.idToken);
+      // Google carries NO nonce (library exposes none) — rely on "Skip nonce check".
+      const exchange = googleIdTokenExchange(result.idToken);
+      await signInWithIdToken(exchange.provider, exchange.token, exchange.nonce);
       successNotify();
       finishAuth(redirect);
     } catch (err) {
-      // A Supabase error from signInWithIdToken (network, rate limit, …).
+      // A Supabase error from signInWithIdToken (nonce, network, rate limit, …).
       errorNotify();
       setErrorKey(mapAuthError(err));
+      setErrorCode(socialErrorCode(err));
     } finally {
       setSubmitting(null);
     }
@@ -73,7 +91,7 @@ export function useSocialSignIn(): UseSocialSignIn {
 
   const signInApple = async (redirect?: string): Promise<void> => {
     if (submitting) return;
-    setErrorKey(null);
+    clearError();
     setSubmitting('apple');
     try {
       const result = await signInWithApple();
@@ -83,12 +101,15 @@ export function useSocialSignIn(): UseSocialSignIn {
         if (!mapped.silent) {
           errorNotify();
           setErrorKey(mapped.key);
+          setErrorCode(mapped.code);
         }
         return;
       }
       if (!decidePostSignIn(result.identityToken).proceed) return;
 
-      await signInWithIdToken('apple', result.identityToken, result.rawNonce);
+      // Apple carries the RAW nonce; Supabase re-hashes it to match the token claim.
+      const exchange = appleIdTokenExchange(result.identityToken, result.rawNonce);
+      await signInWithIdToken(exchange.provider, exchange.token, exchange.nonce);
 
       // Apple only shares the name on the FIRST sign-in — persist it for display
       // if present (never overwrite with blanks on later sign-ins).
@@ -111,6 +132,7 @@ export function useSocialSignIn(): UseSocialSignIn {
     } catch (err) {
       errorNotify();
       setErrorKey(mapAuthError(err));
+      setErrorCode(socialErrorCode(err));
     } finally {
       setSubmitting(null);
     }
@@ -119,7 +141,8 @@ export function useSocialSignIn(): UseSocialSignIn {
   return {
     submitting,
     errorKey,
-    clearError: () => setErrorKey(null),
+    errorCode,
+    clearError,
     signInGoogle,
     signInApple,
   };

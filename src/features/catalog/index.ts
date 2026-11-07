@@ -9,7 +9,6 @@ export {
   plansForRegion,
   destinationsByContinent,
   continentCounts,
-  roundedDestinationCount,
 } from './catalog';
 export type {
   Destination,

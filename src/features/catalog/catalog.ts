@@ -240,14 +240,3 @@ export function continentCounts(destinations: Destination[]): Record<string, num
   }
   return counts;
 }
-
-/**
- * The total number of countries the catalog reaches, rounded DOWN to a "nice"
- * marketing number (e.g. 193 → 190) for the home hero ("Stay connected in {N}+").
- */
-export function roundedDestinationCount(destinations: Destination[]): number {
-  const n = destinations.length;
-  if (n < 10) return n;
-  if (n < 100) return Math.floor(n / 10) * 10;
-  return Math.floor(n / 10) * 10;
-}

@@ -5,7 +5,6 @@ import {
   plansForDestination,
   plansForRegion,
   continentCounts,
-  roundedDestinationCount,
 } from '../catalog';
 import { makePlan, SAMPLE_PLANS } from './fixtures';
 
@@ -136,17 +135,11 @@ describe('plansForDestination / plansForRegion', () => {
   });
 });
 
-describe('continentCounts & roundedDestinationCount', () => {
-  it('counts destinations per continent', () => {
+describe('continentCounts', () => {
+  it('counts destinations per continent (exact, for pluralised labels)', () => {
     const counts = continentCounts(buildDestinations(SAMPLE_PLANS));
     expect(counts.Europe).toBe(2); // FR + ES
     expect(counts.Americas).toBe(1); // US
     expect(counts.Other).toBe(1); // ZZ
-  });
-
-  it('rounds the destination total down to a nice number', () => {
-    expect(roundedDestinationCount(new Array(193).fill(null).map(() => ({} as never)))).toBe(190);
-    expect(roundedDestinationCount(new Array(45).fill(null).map(() => ({} as never)))).toBe(40);
-    expect(roundedDestinationCount(new Array(7).fill(null).map(() => ({} as never)))).toBe(7);
   });
 });

@@ -241,18 +241,32 @@ pure, unit-tested decisions + thin native wrappers + a composed UI section. It
 sits **above** the email form on `(auth)/sign-in` and `(auth)/sign-up` via
 `<SocialAuthSection>` (provider buttons + an "or" divider).
 
-**Flow.** Native ID-token flow with Supabase:
+**Flow.** Native ID-token flow with Supabase. The per-provider nonce rule is the
+pure `idToken.ts` (`appleIdTokenExchange` / `googleIdTokenExchange`, unit-tested) —
+getting it wrong is the "nonce" bug below.
 - **Google** — `@react-native-google-signin/google-signin` → `idToken` →
   `AuthProvider.signInWithIdToken('google', idToken)` (a native-free primitive
   that calls `supabase.auth.signInWithIdToken` then the same `GET /api/me`
-  post-auth as email). Google's native flow carries **no nonce**, so the Supabase
-  Google provider must have **"Skip nonce check" ON**.
+  post-auth as email). The installed library (**v16.1.5**) exposes **no nonce API**
+  on any platform and its native flow puts **no nonce** in the id token, so we send
+  **no nonce** to Supabase and the Supabase Google provider **MUST have "Skip nonce
+  check" ON** — on **iOS and Android**. ⚠️ If that setting is OFF (or a nonce is
+  sent), the grant fails with *"Passed nonce and nonce in id_token should either
+  both exist or not"* (surfaced in-app as code `nonce_mismatch`). This is a
+  dashboard setting, not code — keep it ON.
 - **Apple** — `expo-apple-authentication` (iOS only) → `identityToken` +
-  nonce. Nonce handling: a random **raw** nonce is generated, its **SHA-256 hash**
-  is sent to Apple (`signInAsync({ nonce })`), and the **raw** nonce is sent to
-  Supabase (`signInWithIdToken({ nonce })`). Apple's name is only returned on the
-  **first** sign-in → saved to `user_metadata.full_name` (display only) when
-  present; never overwritten with blanks after.
+  nonce. Nonce handling (verified against expo-crypto 57 + the Supabase Expo/Apple
+  docs): a random **raw** nonce is generated, its **SHA-256 hash** is computed with
+  `Crypto.digestStringAsync` whose **default encoding is HEX**, that **hex hash** is
+  sent to Apple (`signInAsync({ nonce: hashed })`) so Apple embeds it in the
+  identity token, and the **raw** nonce is sent to Supabase
+  (`signInWithIdToken({ nonce: raw })`), which re-hashes it and matches. Both the
+  token's nonce and the passed nonce therefore **exist and match**. The
+  `apple.ts` → Supabase wiring is locked by `__tests__/appleNonce.test.ts`. Apple's
+  name is only returned on the **first** sign-in → saved to
+  `user_metadata.full_name` (display only) when present; never overwritten with
+  blanks after. (Supabase's Apple provider "Skip nonce check" may be ON or OFF —
+  the values match either way.)
 
 **Config (all OPTIONAL `EXPO_PUBLIC_*`, never required, never crash):**
 `EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID` (required for Google — hides the button if
@@ -273,9 +287,15 @@ web.
 
 **Errors:** cancellation is silent; Play-services / in-progress / network /
 Supabase errors map to friendly i18n keys (`classifySocialError` +
-`auth.errors.googlePlayServices`). **Sign-out** also signs the Google SDK out
-(before-sign-out hook in `SocialSignOutRegistrar`, mounted at the app root) so the
-next sign-in shows the account picker.
+`auth.errors.googlePlayServices`). Under the friendly message the UI also shows a
+short, **non-sensitive diagnostic code** (`socialErrorCode`, rendered via
+`auth.social.errorCode` = "Code: {{code}}") so a TestFlight/production failure is
+reportable from a screenshot without logs — e.g. `nonce_mismatch`, `audience`,
+`provider_disabled`, `bad_id_token`, `network`, `rate_limited`, `play_services`,
+`auth_failed`. The code is derived only from the error's `code`/`status`/`message`
+shape — **never** from tokens, nonces, ids or payloads. **Sign-out** also signs the
+Google SDK out (before-sign-out hook in `SocialSignOutRegistrar`, mounted at the
+app root) so the next sign-in shows the account picker.
 
 **Account linking:** we rely on **Supabase's default** behaviour (it auto-links a
 provider identity to an existing account when the email is verified) — no custom
