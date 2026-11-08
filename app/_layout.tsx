@@ -23,6 +23,7 @@ import {
 import { applyStoredLanguage } from '@/i18n';
 import { ConfigError } from '@/components/ConfigError';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
+import { LaunchIntro } from '@/components/LaunchIntro';
 import { OfflineBanner } from '@/components/OfflineBanner';
 import { ToastProvider } from '@/components/ui';
 import { AuthProvider, guardDecision, useAuth } from '@/features/auth';
@@ -140,6 +141,9 @@ export default function RootLayout() {
               </Stack>
               {/* Calm, non-blocking offline strip; overlays all routes. */}
               <OfflineBanner />
+              {/* Animated opening overlay — mounted last so it covers the whole
+                  app on cold start, then fades out once auth has resolved. */}
+              <LaunchIntro />
             </ToastProvider>
             </NotificationsProvider>
           </AuthProvider>

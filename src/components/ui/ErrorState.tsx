@@ -49,7 +49,7 @@ export function ErrorState({ title, body, onRetry, retryLabel, style }: ErrorSta
           variant="secondary"
           onPress={onRetry}
           fullWidth={false}
-          style={{ marginTop: theme.spacing.sm }}
+          style={{ alignSelf: 'center', marginTop: theme.spacing.sm }}
         />
       ) : null}
     </View>

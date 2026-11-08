@@ -44,7 +44,12 @@ export function EmptyState({ title, body, icon, actionLabel, onAction, style }: 
         </Text>
       ) : null}
       {actionLabel && onAction ? (
-        <Button label={actionLabel} onPress={onAction} fullWidth={false} style={{ marginTop: theme.spacing.sm }} />
+        <Button
+          label={actionLabel}
+          onPress={onAction}
+          fullWidth={false}
+          style={{ alignSelf: 'center', marginTop: theme.spacing.sm }}
+        />
       ) : null}
     </View>
   );

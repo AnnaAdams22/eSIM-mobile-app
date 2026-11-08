@@ -8,6 +8,8 @@
  * Values are read from the local `.env` file (see `.env.example`).
  */
 
+import { resolveLaunchStyle, type LaunchStyle } from '@/features/launch/style';
+
 type ConfigKey =
   | 'EXPO_PUBLIC_API_URL'
   | 'EXPO_PUBLIC_SUPABASE_URL'
@@ -59,6 +61,22 @@ export const REQUIRE_SIGN_IN_TO_BROWSE =
  * Pay (Android) is unaffected.
  */
 export const APPLE_PAY_ENABLED = process.env.EXPO_PUBLIC_APPLE_PAY_ENABLED?.trim() === 'true';
+
+/**
+ * Launch-intro visual style — the ONE switch for the animated opening sequence:
+ *  - 'ivory' (default): black logo on warm ivory (#F4F1EC).
+ *  - 'navy': white logo on deep navy (#1C2430).
+ *
+ * The JS intro overlay reads this directly. To fully switch styles you must ALSO
+ * update the native splash in app.json (the `splash` + `expo-splash-screen`
+ * `backgroundColor`, and the `image`: `splash-icon.png` for ivory /
+ * `splash-icon-navy.png` for navy) — a native change that needs a new build. See
+ * CLAUDE.md § "Launch intro (animated opening)". Change the fallback literal
+ * below, or override at build time with EXPO_PUBLIC_LAUNCH_STYLE=navy.
+ */
+export const LAUNCH_STYLE: LaunchStyle = resolveLaunchStyle(
+  process.env.EXPO_PUBLIC_LAUNCH_STYLE ?? 'ivory'
+);
 
 /**
  * Typed, validated config. Accessing a value that is missing throws a clear

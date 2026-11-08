@@ -105,6 +105,50 @@ the ivory background. Store copies: `store/assets/icon-1024.png` / `icon-512.png
 > ratios change, update the `ASPECT` map in `Logo.tsx`). Do **not** recolour the
 > logo.
 
+## Launch intro (animated opening)
+A two-step opening so the wordmark can show without being clipped by Android 12+'s
+circular splash mask (which only shows a centred icon):
+
+1. **Native splash** (`app.json`: both the legacy `splash` block and the
+   `expo-splash-screen` plugin) — the **symbol only**, centred on the chosen
+   background, sized (`imageWidth: 160`) to sit comfortably inside the Android 12+
+   safe circle. iOS uses the same image. The symbol images are opaque squares
+   whose background equals the splash `backgroundColor`, so they blend seamlessly.
+2. **Animated intro overlay** (`src/components/LaunchIntro.tsx`, built-in
+   `Animated` — react-native-reanimated is not installed) — mounted last at the
+   app root. It starts **visually identical** to the native splash (same
+   background, the same splash image at the same size/position), waits until the
+   app is ready (fonts are already loaded when it mounts; it then waits for auth
+   to resolve, with a 2 s safety timeout), then over ~860 ms the symbol rises +
+   scales slightly, the "ESIM GLOBAL" wordmark fades in below, and the overlay
+   fades out to reveal the app. It also tints the status/navigation bars to match
+   the background. **Reduced motion:** skips the movement, quick fade only.
+   **Cold start only:** a module-level flag plays it once per JS runtime, never on
+   resume from background. The pure logic (style resolution, reduced-motion and
+   cold-start decisions) is in `src/features/launch/style.ts` and unit-tested.
+
+**Two styles, switched with ONE config value** — `LAUNCH_STYLE` in
+`src/config.ts` (`'ivory' | 'navy'`, default `'ivory'`; also overridable with
+`EXPO_PUBLIC_LAUNCH_STYLE=navy`):
+- `ivory`: background `#F4F1EC`, **black** logo (the current assets).
+- `navy`: background `#1C2430`, **white** logo (generated white variants).
+
+To switch styles you MUST change **both** the JS value **and** the native splash,
+because the native splash is baked into the build:
+1. Set `LAUNCH_STYLE` in `src/config.ts` (the JS overlay reads this).
+2. In `app.json`, set the splash `backgroundColor` in **both** places (the
+   top-level `splash` block and the `expo-splash-screen` plugin) and swap the
+   splash `image`:
+   - ivory → `backgroundColor: "#F4F1EC"`, `image: "./assets/splash-icon.png"`
+   - navy  → `backgroundColor: "#1C2430"`, `image: "./assets/splash-icon-navy.png"`
+3. **Rebuild** — native splash changes only take effect in a new native build
+   (EAS); a JS reload is not enough.
+
+White logo assets were generated from the existing transparent black assets by
+recolouring only the ink to white (alpha edges preserved, shapes unchanged):
+`assets/brand/esim-logo-{symbol,wordmark,full}-white.png` and the native splash
+`assets/splash-icon-navy.png`. See `assets/brand/README.md`.
+
 ## Hero images — TODO (need real licensed photos)
 The Home hero, destination hero and Explore cards currently render tasteful warm
 **brand-gradient placeholders** (no stock photos are shipped — see the copyright
@@ -438,3 +482,17 @@ linking and the Apple-revocation TODO. Native code was added
 `expo-crypto`) → a **new dev build is required** before on-device testing. Pure
 logic (visibility, nonce, error mapping, post-sign-in flow) is unit-tested;
 `tsc`, `expo lint`, `jest` (308 tests) and an Android `expo export` all pass.
+
+**Launch intro + EmptyState fix complete** (branch `main`) — the animated opening
+sequence (native symbol splash → JS overlay that rises the symbol, reveals the
+"ESIM GLOBAL" wordmark and fades out, ~860 ms) with two styles switchable via one
+config value (`LAUNCH_STYLE` ivory/navy). See "## Launch intro (animated
+opening)" above for the full step-by-step, the generated white logo assets and
+exactly how to switch styles (JS value + app.json splash + rebuild). Reduced
+motion → quick fade; cold-start only; status/nav bars tinted to the background.
+Pure logic unit-tested (`src/features/launch/style.ts`). Also fixed the
+left-aligned action button in the shared `EmptyState`/`ErrorState` (now centred,
+natural width) — covers My eSIMs empty/signed-out/error, Explore and Destinations.
+New assets were added → a **new native build is required** for the splash change
+to take effect. `tsc`, `expo lint`, `jest` (405 tests) and iOS + Android
+`expo export` all pass.
