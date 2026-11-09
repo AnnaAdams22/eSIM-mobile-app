@@ -76,3 +76,50 @@ export function introAnimation(reducedMotion: boolean): IntroAnimation {
 export function shouldPlayIntro(params: { coldStart: boolean; alreadyPlayed: boolean }): boolean {
   return params.coldStart && !params.alreadyPlayed;
 }
+
+/**
+ * The HARD upper bound on how long the intro overlay may stay mounted. Whatever
+ * happens — auth never resolving, an image that never loads, an animation
+ * callback that never fires — the overlay unmounts within this many ms of
+ * mounting, so the intro can NEVER trap the user on the opening screen.
+ */
+export const INTRO_HARD_TIMEOUT_MS = 3000;
+
+/**
+ * Master on/off switch for the animated intro, from `LAUNCH_INTRO_ENABLED`
+ * (config / `EXPO_PUBLIC_LAUNCH_INTRO_ENABLED`). Enabled by DEFAULT; only an
+ * explicit 'false' (case- and whitespace-insensitive) turns it off, so a single
+ * config value can disable the intro entirely without touching component code.
+ */
+export function resolveLaunchIntroEnabled(raw: string | undefined | null): boolean {
+  return raw?.trim().toLowerCase() === 'false' ? false : true;
+}
+
+/**
+ * Whether the intro overlay should render at all this launch: it must be enabled
+ * AND a fresh cold start that hasn't already played. Composes the enabled switch
+ * with {@link shouldPlayIntro} so the component has a single source of truth.
+ */
+export function shouldRenderIntro(params: {
+  enabled: boolean;
+  coldStart: boolean;
+  alreadyPlayed: boolean;
+}): boolean {
+  return (
+    params.enabled &&
+    shouldPlayIntro({ coldStart: params.coldStart, alreadyPlayed: params.alreadyPlayed })
+  );
+}
+
+/**
+ * Terminal events that end the intro. ANY of them unmounts the overlay and
+ * reveals the app — the animation completing normally, an intro image failing to
+ * load (`imageError` → skip immediately), or the hard-timeout backstop firing.
+ * Modelled as a pure transition so the "always ends" guarantee is unit-testable.
+ */
+export type IntroEndEvent = 'animationComplete' | 'imageError' | 'timeout';
+
+/** Given any {@link IntroEndEvent}, the intro is done. Once done, stays done. */
+export function introDoneAfter(_done: boolean, _event: IntroEndEvent): true {
+  return true;
+}

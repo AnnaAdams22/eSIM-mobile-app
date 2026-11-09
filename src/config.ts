@@ -8,7 +8,11 @@
  * Values are read from the local `.env` file (see `.env.example`).
  */
 
-import { resolveLaunchStyle, type LaunchStyle } from '@/features/launch/style';
+import {
+  resolveLaunchIntroEnabled,
+  resolveLaunchStyle,
+  type LaunchStyle,
+} from '@/features/launch/style';
 
 type ConfigKey =
   | 'EXPO_PUBLIC_API_URL'
@@ -76,6 +80,17 @@ export const APPLE_PAY_ENABLED = process.env.EXPO_PUBLIC_APPLE_PAY_ENABLED?.trim
  */
 export const LAUNCH_STYLE: LaunchStyle = resolveLaunchStyle(
   process.env.EXPO_PUBLIC_LAUNCH_STYLE ?? 'ivory'
+);
+
+/**
+ * Master on/off switch for the animated launch intro. Enabled by DEFAULT; set
+ * EXPO_PUBLIC_LAUNCH_INTRO_ENABLED=false to turn the overlay off entirely in one
+ * line (the native splash still shows; only the JS reveal is skipped). A safety
+ * valve so the intro can be disabled instantly without a code change if it ever
+ * misbehaves on a device.
+ */
+export const LAUNCH_INTRO_ENABLED = resolveLaunchIntroEnabled(
+  process.env.EXPO_PUBLIC_LAUNCH_INTRO_ENABLED ?? 'true'
 );
 
 /**

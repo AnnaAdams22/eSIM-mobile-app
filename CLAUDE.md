@@ -119,13 +119,32 @@ circular splash mask (which only shows a centred icon):
    app root. It starts **visually identical** to the native splash (same
    background, the same splash image at the same size/position), waits until the
    app is ready (fonts are already loaded when it mounts; it then waits for auth
-   to resolve, with a 2 s safety timeout), then over ~860 ms the symbol rises +
-   scales slightly, the "ESIM GLOBAL" wordmark fades in below, and the overlay
-   fades out to reveal the app. It also tints the status/navigation bars to match
-   the background. **Reduced motion:** skips the movement, quick fade only.
-   **Cold start only:** a module-level flag plays it once per JS runtime, never on
-   resume from background. The pure logic (style resolution, reduced-motion and
-   cold-start decisions) is in `src/features/launch/style.ts` and unit-tested.
+   to resolve, with a 1.5 s safety timeout), then **crossfades the symbol-only
+   splash look into the FULL brand logo** (symbol + "ESIM GLOBAL" wordmark as ONE
+   image, `esim-logo-full{,-white}.png`), which settles with a slight scale before
+   the overlay fades out to reveal the app. It also tints the status/navigation
+   bars to match the background. **Reduced motion:** skips the movement, quick
+   crossfade + fade only. **Cold start only:** a module-level flag plays it once
+   per JS runtime, never on resume from background. The pure logic (style
+   resolution, reduced-motion, cold-start/enabled decisions and the hard-timeout
+   constant) is in `src/features/launch/style.ts` and unit-tested.
+
+   **Why the full logo, not a standalone wordmark image.** The standalone
+   wordmark is an extreme-aspect-ratio bitmap (1802×194, ~9.3:1). On iOS,
+   downscaling such a very wide image to a tiny size while animating its opacity
+   with the native driver drops interior content — the wordmark rendered with
+   only its first/last glyphs (the root cause of the TestFlight build-5 bug). The
+   full logo is a moderate ~1.5:1 image (same shape family as the square symbol,
+   which renders correctly), so it is reliable.
+
+   **The intro can never trap the user on the opening screen.** (a) a HARD
+   timeout `INTRO_HARD_TIMEOUT_MS` (3 s) started at mount always unmounts the
+   overlay whatever happens to auth / images / animation callbacks; (b) any intro
+   image `onError` skips the intro immediately; (c) animation-start errors are
+   caught and the overlay is dismissed; (d) `pointerEvents` flips to `none` the
+   moment the overlay starts fading; (e) `LAUNCH_INTRO_ENABLED` (config /
+   `EXPO_PUBLIC_LAUNCH_INTRO_ENABLED`, default `true`) turns the whole overlay off
+   in one line.
 
 **Two styles, switched with ONE config value** — `LAUNCH_STYLE` in
 `src/config.ts` (`'ivory' | 'navy'`, default `'ivory'`; also overridable with
