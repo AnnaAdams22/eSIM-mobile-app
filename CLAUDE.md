@@ -118,16 +118,29 @@ circular splash mask (which only shows a centred icon):
    `Animated` — react-native-reanimated is not installed) — mounted last at the
    app root. It starts **visually identical** to the native splash (same
    background, the same splash image at the same size/position), waits until the
-   app is ready (fonts are already loaded when it mounts; it then waits for auth
-   to resolve, with a 1.5 s safety timeout), then **crossfades the symbol-only
-   splash look into the FULL brand logo** (symbol + "ESIM GLOBAL" wordmark as ONE
-   image, `esim-logo-full{,-white}.png`), which settles with a slight scale before
-   the overlay fades out to reveal the app. It also tints the status/navigation
-   bars to match the background. **Reduced motion:** skips the movement, quick
-   crossfade + fade only. **Cold start only:** a module-level flag plays it once
-   per JS runtime, never on resume from background. The pure logic (style
-   resolution, reduced-motion, cold-start/enabled decisions and the hard-timeout
-   constant) is in `src/features/launch/style.ts` and unit-tested.
+   app is ready, then **crossfades the symbol-only splash look into the FULL brand
+   logo** (symbol + "ESIM GLOBAL" wordmark as ONE image, `esim-logo-full{,-white}
+   .png`), which settles with a slight scale before the overlay fades out to
+   reveal the app. It also tints the status/navigation bars to match the
+   background. **Reduced motion:** skips the movement, quick crossfade + fade only.
+   **Cold start only:** a module-level flag plays it once per JS runtime, never on
+   resume from background. The pure logic (style resolution, reduced-motion,
+   cold-start/enabled decisions, the hard-timeout constant and the animation
+   `introTimings`) is in `src/features/launch/style.ts` and unit-tested.
+
+   **"Ready" = auth resolved AND the full-logo image decoded.** The reveal starts
+   only once BOTH hold, so the wordmark is actually on screen — critical in a
+   **dev-client** build, where image assets are fetched from Metro on demand and
+   the full logo may not be decoded by the time a reveal would otherwise run
+   (you'd see the symbol fade to nothing, then the app). The full logo loads
+   (opacity 0) from mount and the crossfade waits for its `onLoad`. Two bounded
+   fallbacks keep startup snappy and never trap the splash: auth → `AUTH_FALLBACK_MS`
+   (1.2 s), image → `IMAGE_FALLBACK_MS` (0.6 s), both well under the hard timeout.
+   In a production/standalone build the asset is bundled locally and loads
+   instantly, so the reveal is immediate. In `__DEV__` the overlay `console.warn`s
+   each stage (`intro: mounted / ready / animation start / animation end /
+   unmounted (reason)` plus `enabled=… reducedMotion=… coldStart=…`) so a
+   misbehaving launch is diagnosable from the Metro terminal.
 
    **Why the full logo, not a standalone wordmark image.** The standalone
    wordmark is an extreme-aspect-ratio bitmap (1802×194, ~9.3:1). On iOS,

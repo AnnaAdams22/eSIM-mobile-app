@@ -7,6 +7,7 @@ import {
   resolveLaunchIntroEnabled,
   shouldRenderIntro,
   introDoneAfter,
+  introTimings,
   INTRO_HARD_TIMEOUT_MS,
 } from '../style';
 
@@ -144,5 +145,26 @@ describe('introDoneAfter (every terminal event ends the intro)', () => {
 
   it('stays done once done', () => {
     expect(introDoneAfter(true, 'timeout')).toBe(true);
+  });
+});
+
+describe('introTimings (the intro is visible for its full ~0.9s)', () => {
+  it('the full sequence is on screen for at least ~0.9s', () => {
+    expect(introTimings(false).totalMs).toBeGreaterThanOrEqual(900);
+  });
+
+  it('never outlasts the hard-timeout backstop', () => {
+    expect(introTimings(false).totalMs).toBeLessThan(INTRO_HARD_TIMEOUT_MS);
+    expect(introTimings(true).totalMs).toBeLessThan(INTRO_HARD_TIMEOUT_MS);
+  });
+
+  it('reduced motion is a shorter quick fade', () => {
+    expect(introTimings(true).totalMs).toBeLessThan(introTimings(false).totalMs);
+    expect(introTimings(true).totalMs).toBeGreaterThan(0);
+  });
+
+  it('every leg has a non-negative duration', () => {
+    const t = introTimings(false);
+    Object.values(t).forEach((ms) => expect(ms).toBeGreaterThanOrEqual(0));
   });
 });

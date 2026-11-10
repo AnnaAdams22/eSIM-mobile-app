@@ -123,3 +123,64 @@ export type IntroEndEvent = 'animationComplete' | 'imageError' | 'timeout';
 export function introDoneAfter(_done: boolean, _event: IntroEndEvent): true {
   return true;
 }
+
+/**
+ * The animation timings (ms), the single source of truth shared by the component
+ * so the intro is guaranteed to be on screen for its full duration even when the
+ * app is already ready the moment the overlay mounts. `totalMs` is the wall-clock
+ * from the reveal starting to the overlay being gone; it must comfortably clear
+ * ~0.9s for the full sequence so the brand logo is actually seen, while staying
+ * under {@link INTRO_HARD_TIMEOUT_MS}.
+ */
+export interface IntroTimings {
+  symbolFadeMs: number;
+  fullFadeDelayMs: number;
+  fullFadeMs: number;
+  fullScaleDelayMs: number;
+  fullScaleMs: number;
+  fadeOutDelayMs: number;
+  fadeOutMs: number;
+  totalMs: number;
+}
+
+export function introTimings(reducedMotion: boolean): IntroTimings {
+  if (reducedMotion) {
+    // Reduced motion: snap to the full logo, then a quick fade only.
+    const fadeOutDelayMs = 120;
+    const fadeOutMs = 240;
+    return {
+      symbolFadeMs: 0,
+      fullFadeDelayMs: 0,
+      fullFadeMs: 0,
+      fullScaleDelayMs: 0,
+      fullScaleMs: 0,
+      fadeOutDelayMs,
+      fadeOutMs,
+      totalMs: fadeOutDelayMs + fadeOutMs,
+    };
+  }
+  const symbolFadeMs = 300;
+  const fullFadeDelayMs = 120;
+  const fullFadeMs = 360;
+  const fullScaleDelayMs = 120;
+  const fullScaleMs = 420;
+  const fadeOutDelayMs = 140;
+  const fadeOutMs = 320;
+  // The reveal (crossfade + settle) runs as one parallel block; it ends when its
+  // longest leg finishes, after which the overlay fades out.
+  const revealEndMs = Math.max(
+    symbolFadeMs,
+    fullFadeDelayMs + fullFadeMs,
+    fullScaleDelayMs + fullScaleMs
+  );
+  return {
+    symbolFadeMs,
+    fullFadeDelayMs,
+    fullFadeMs,
+    fullScaleDelayMs,
+    fullScaleMs,
+    fadeOutDelayMs,
+    fadeOutMs,
+    totalMs: revealEndMs + fadeOutDelayMs + fadeOutMs,
+  };
+}
