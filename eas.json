@@ -41,7 +41,7 @@
         "EXPO_PUBLIC_API_URL": "https://refreshing-stillness-production-3b18.up.railway.app",
         "EXPO_PUBLIC_SUPABASE_URL": "https://rfmmpbjohoiqkxanyszk.supabase.co",
         "EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY": "sb_publishable_xyHJaQr_8XEjSPVzlaCvug_jphvya5-",
-        "EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY": "pk_live_REPLACE_AT_LAUNCH",
+        "EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY": "pk_live_51U1pMFCTYUskgRJPajVUGXhq003uBsWXHjd9a0WDtEGZzxXEILdE19L6QnghuXewva69UBMkvyDNYPnpKQdWHSrs00hd9QzAQn",
         "EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID": "53531612788-52e97tj98e6ptuofvsup3s95ui1gkn8g.apps.googleusercontent.com",
         "EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID": "53531612788-apqeg7vmudiganha106k8ts907jdacds.apps.googleusercontent.com",
         "EXPO_PUBLIC_APPLE_SIGN_IN_ENABLED": "true"
